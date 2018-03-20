@@ -1,0 +1,72 @@
+# depslib dependency file v1.0
+1518555003 source:c:\users\jojo\google drive\documentations\borobot\borobot\borobot.ino
+	"borobot.h"
+
+1371029502 c:\program files (x86)\codeblocks-arduino\arduino\hardware\arduino\cores\arduino\arduino.h
+	<stdlib.h>
+	<string.h>
+	<math.h>
+	<avr/pgmspace.h>
+	<avr/io.h>
+	<avr/interrupt.h>
+	"binary.h"
+	"WCharacter.h"
+	"WString.h"
+	"HardwareSerial.h"
+	"pins_arduino.h"
+
+1362986950 c:\program files (x86)\codeblocks-arduino\arduino\hardware\arduino\cores\arduino\binary.h
+
+1362986950 c:\program files (x86)\codeblocks-arduino\arduino\hardware\arduino\cores\arduino\wcharacter.h
+	<ctype.h>
+
+1371029534 c:\program files (x86)\codeblocks-arduino\arduino\hardware\arduino\cores\arduino\wstring.h
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	<avr/pgmspace.h>
+
+1362986950 c:\program files (x86)\codeblocks-arduino\arduino\hardware\arduino\cores\arduino\hardwareserial.h
+	<inttypes.h>
+	"Stream.h"
+	"USBAPI.h"
+
+1371029230 c:\program files (x86)\codeblocks-arduino\arduino\hardware\arduino\cores\arduino\stream.h
+	<inttypes.h>
+	"Print.h"
+
+1362986950 c:\program files (x86)\codeblocks-arduino\arduino\hardware\arduino\cores\arduino\print.h
+	<inttypes.h>
+	<stdio.h>
+	"WString.h"
+	"Printable.h"
+
+1362986950 c:\program files (x86)\codeblocks-arduino\arduino\hardware\arduino\cores\arduino\printable.h
+	<new.h>
+
+1362986950 c:\program files (x86)\codeblocks-arduino\arduino\hardware\arduino\cores\arduino\new.h
+	<stdlib.h>
+
+1362986950 c:\program files (x86)\codeblocks-arduino\arduino\hardware\arduino\cores\arduino\usbapi.h
+
+1362986950 c:\program files (x86)\codeblocks-arduino\arduino\hardware\arduino\variants\standard\pins_arduino.h
+	<avr/pgmspace.h>
+
+1519155932 c:\users\jojo\google drive\documentations\borobot\borobot\borobot.h
+	<Arduino.h>
+	<Servo.h>
+
+1362986950 c:\program files (x86)\codeblocks-arduino\arduino\hardware\arduino\variants\eightanaloginputs\pins_arduino.h
+	"../standard/pins_arduino.h"
+
+1519157155 source:c:\users\jojo\google drive\documentations\borobot\borobot\borobot.cpp
+	"borobot.h"
+	<Servo.h>
+
+1519158995 source:c:\users\jojo\google drive\documentations\borobot\borobot\main.cpp
+	"borobot.h"
+
+1519160956 source:c:\users\jojo\google drive\documentations\borobot\borobot\borobot_class.cpp
+	"borobot.h"
+	<Servo.h>
+
