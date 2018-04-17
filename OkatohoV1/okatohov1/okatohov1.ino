@@ -28,6 +28,15 @@ void setup() {
 	s_state=START;
 }
 
+int detectDojo() {
+	/* This finction should
+		* return 0 if it detects dojo
+		* return 1 othewise
+	This should be called by Timer interruption
+	*/
+	return 0
+}
+
 void loop() {
 	switch (s_state) {
 		case START:
@@ -59,16 +68,26 @@ void loop() {
 				Serial.println("Move FORWARD");
 			#endif
 			/* If Dojo tourne 10)*/
-			s_state_next=TURN;
-			/*else we need to search the other*/
-			s_state_next=SEARCH;
-			
+			if (detect_dojo == 0) {
+				s_state_next=TURN;
+			}
+			else {
+				/*else we need to search the other*/
+				s_state_next=SEARCH;
+			}
 		break;
 		case TURN:
 			#ifdef DEBUG
 				Serial.println("TURN");
 			#endif
 			/* Move the foot in order to turn the robot*/
+			/* if detect_dojo=0 then turn=10° otherwise turn=10°)*/
+			if (detect_dojo == 0) {
+				turn(10);
+			}
+			else {
+				turn(1);
+			}
 		break;
 		case SEARCH:
 			#ifdef DEBUG
@@ -76,13 +95,15 @@ void loop() {
 			#endif
 			detect();
 			/* if find someone forward*/
-			s_state_next=FORWARD;
-			/*else tourne 1°*/
-			s_state_next=TURN;
+			if (detect == 0) {
+				s_state_next=FORWARD;
+			}
+			else {
+				/*else tourne 1°*/
+				s_state_next=TURN;
+			}
 			
 		break;
-
-	
 	}
 	s_state = s_state_next;
 }
