@@ -12,7 +12,8 @@
 #define RECULE 7
 #define TOURNE 8
 
-int s_state, s_state_next, s_state_previous;
+#define VOLETS_LOCKED 45
+#define VOLETS_OPENED 0
 
 // Variable Gestion moteur
 #define in1Pin 11  /* Moteur 1*/
@@ -20,41 +21,40 @@ int s_state, s_state_next, s_state_previous;
 #define in3Pin 9  /* Moteur 2/Gauche*/
 #define in4Pin 10 /* Moteur 2/Gauche*/
 
-int moteur1[3] = {in1Pin, in2Pin},
-    moteur2[3] = {in3Pin, in4Pin};
-
-
 // Variable to calibrate IR capteur
 #define capteurIRAvant A2
 #define capteurIRArriere A3
-int detection = 0; //1 capteur avant ; 2 capteur arriere ; 0 init calue
+
+//atomic print
+#include <util/atomic.h>
+/* Servo
+   ne pas utiliser pin 9 et 10 pwm a cause du timer
+   Import biblio gestion servo-moteur
+*/
+#include <Servo.h>
+
+int moteur1[3] = {in1Pin, in2Pin},
+    moteur2[3] = {in3Pin, in4Pin};
+
+int s_state, s_state_next, s_state_previous;
+int detect = 0; //1 capteur avant ; 2 capteur arriere ; 0 init value
 int status_detection; //flag de detection
 // pointeur sur un entier pour acceder aux valeurs du tableau des valeurs de calibration
 int *cal;
-
+// Attente
+int attente =3000;
+const int servoPin=4;
 
 // LED
 const int led1Pin = 7; //LED rouge
 const int led2Pin = 8; //LED verte
 
-
 // Bouton
 const int buttonStartPin = 3;     // the number of the pushbutton pin à changer
 
-// Attente
-int attente =3000;
-
-// Servo
-// ne pas utiliser pin 9 et 10 pwm a cause du timer
-// Import biblio gestion servo-moteur
-#include <Servo.h>
 //creation de l'objet servo
 Servo servo;
-const int servoPin=4; // VALEUR A VERIFIER
 
-
-#define VOLETS_LOCKED 45
-#define VOLETS_OPENED 0
 
 
 void setup() {  
@@ -84,7 +84,7 @@ void setup() {
   #ifdef DEBUG
   	Serial.println("SETUP : On bloque les volets");
   #endif
-  servo.write(VOLETS_LOCKED);
+  //servo.write(VOLETS_LOCKED);
 
   // On initialise la machine d'etat 
   s_state=START;
@@ -183,7 +183,7 @@ int detecter() {
     int *valeurMoy;
     valeurMoy=valeurMoyCal();
 
-    detection = 0;
+    int detection = 0;
     
     #ifdef DEBUG
       Serial.print("Seuil1: ");
@@ -284,39 +284,43 @@ void wait() {
       delay(1000);
       x+=1;
     } 
+    // INUTILE LES VOLETS SONT DEVANT LES CAPTEURS!!!!!!!
     //cal=calibrationIR();
-// INUTILE LES VOLETS SONT DEVANT LES CAPTEURS!!!!!!!
-    cal=calibrationMaxIR();
-    delay(1000);
+    //cal=calibrationMaxIR();
+    delay(1900);
 }
 
-/* OLD version
-void Robot50HzInterrupt() {   
-    //int valeurLue=5; //debug
-    
-    if (cpt==5){
-      beDetect = detecter();
-      int cpt=0;
-    }
-    cpt+=1;
-    
-    if(beDetect){
-        digitalWrite(ledPin, HIGH);
-    }
-}
-*/
-
-int beDetect=0;
 void Robot50HzInterrupt() {
-/*    #ifdef DEBUG
+    #ifdef DEBUG
       Serial.println("Interruptions");
     #endif
-    beDetect = detecter();
-    if(beDetect){
-        digitalWrite(led1Pin, HIGH);
-    }
-*/
-
+    detect = detecter();
+      #ifdef DEBUG
+        Serial.print("DETECTION - Valeur de detect:");
+        Serial.println(detect);
+      #endif
+      if (detect == 1 ) {
+	// On detect devant , on eteint la led rouge on alume la verte
+        digitalWrite(led1Pin, 0);
+        digitalWrite(led2Pin, 1);
+        //s_state_next=AVANCE;
+	avance();
+      }
+      else if (detect == 2) {
+	// On detect derriere , on eteint la led verte on alume la rouge
+        digitalWrite(led1Pin, 1);
+        digitalWrite(led2Pin, 0);
+        //s_state_next=RECULE;
+	recule();
+        //s_state_next=TOURNE;
+      } 
+      else {
+	// On detect rien , on eteint toutes les led
+        digitalWrite(led1Pin, 0);
+        digitalWrite(led2Pin, 0);
+        //s_state_next=TOURNE;
+	tourneDroite();
+      }
 }
 
 void ouvertureVolet() {
@@ -414,15 +418,18 @@ void loop() {
       break;
 
     case WAIT:
-      #ifdef SLOW
-        delay(attente);
-      #endif
-      #ifdef DEBUG
-        Serial.println("WAIT");
-      #endif
-      wait();
-      s_state_next=FLAPS;
-      break;
+	#ifdef SLOW
+        	delay(attente);
+	#endif
+	#ifdef DEBUG
+		Serial.println("WAIT");
+	#endif
+	wait();
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+        	detect=0;
+	}
+	s_state_next=FLAPS;
+	break;
 
     case FLAPS:
       #ifdef SLOW
@@ -449,7 +456,10 @@ void loop() {
        #endif
 	// On eteint la LED verte
       digitalWrite(led1Pin, 0);
-      s_state_next=DETECTION;
+//      s_state_next=DETECTION;
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+                detect=0;
+        }
       break;
 
     case DETECTION:
@@ -488,6 +498,7 @@ void loop() {
       }
       break;
 
+
      case AVANCE:
       #ifdef SLOW
         delay(attente);
@@ -497,6 +508,9 @@ void loop() {
       //#endif
       avance(); // lecture capteur + moteur
       s_state_next=DETECTION;     
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+                detect=0;
+        }
       break;
 
      case RECULE:
@@ -508,6 +522,9 @@ void loop() {
       //#endif
       recule(); // lecture capteur + moteur
       s_state_next=DETECTION;     
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+                detect=0;
+        }
       break;
 
      case TOURNE:
@@ -519,6 +536,9 @@ void loop() {
       #endif
       tourneDroite();
       s_state_next=DETECTION;  
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+                detect=0;
+        }
       break;
   }
  s_state = s_state_next;
