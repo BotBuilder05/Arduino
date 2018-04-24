@@ -20,6 +20,8 @@
 #define in2Pin 12  /* Moteur 1*/
 #define in3Pin 9  /* Moteur 2/Gauche*/
 #define in4Pin 10 /* Moteur 2/Gauche*/
+#define pwmD 5
+#define pwmG 6
 
 // Variable to calibrate IR capteur
 #define capteurIRAvant A2
@@ -78,6 +80,9 @@ void setup() {
   #endif
   digitalWrite(led1Pin, 1);
 
+	// Init PWM
+	pinMode(pwmD, OUTPUT);
+	pinMode(pwmG, OUTPUT);
   // On initialise la machine d'etat 
   s_state=START;
 }
@@ -166,9 +171,9 @@ int detecter() {
     }
     // TODO To adjust contest's day
     //Seuil avant
-    seuil[0]=220;
+    seuil[0]=70;
     //Seuil arriere
-    seuil[1]=220;
+    seuil[1]=70;
     /*// Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
     int *valeurLu;
     valeurLu=lectureCapteur();*/
@@ -337,9 +342,40 @@ void ouvertureVolet() {
 }
 
 // Gestion Moteur
-void setMotor(int motorG, int motorD) {
+void setMotorPWM(int motorG, int motorD, int speedG, int speedD) {
+  int speed=0;
+speed = map(speed, 0, 100, 0, 255);
 
-  //speed = map(speed, 0, 100, 0, 255);
+if (motorG > 127) {
+      digitalWrite(moteur1[0], LOW);
+      digitalWrite(moteur1[1], HIGH);
+      }
+else if  (motorG < 127) {
+      digitalWrite(moteur1[0], HIGH);
+      digitalWrite(moteur1[1], LOW);
+      }
+else {
+      digitalWrite(moteur1[0], LOW);
+      digitalWrite(moteur1[1], LOW);
+      }
+
+if (motorD > 127) {
+      digitalWrite(moteur2[0], LOW);
+      digitalWrite(moteur2[1], HIGH);
+      }
+else if  (motorD < 127) {
+      digitalWrite(moteur2[0], HIGH);
+      digitalWrite(moteur2[1], LOW);
+      }
+else {
+      digitalWrite(moteur2[0], LOW);
+      digitalWrite(moteur2[1], LOW);
+      }
+}
+
+// Gestion Moteur
+void setMotor(int motorG, int motorD) {
+//speed = map(speed, 0, 100, 0, 255);
 
 if (motorG > 127) {
       digitalWrite(moteur1[0], LOW);
@@ -375,6 +411,13 @@ void tourneDroite() {
     setMotor(0,255);  
 }
 
+void tourneDroiteLent() {
+    #ifdef DEBUG
+      Serial.println("TOURNE A DROITE LENT");
+    #endif
+    setMotor(63,192);  
+}
+
 void avance() {
     #ifdef DEBUG
       Serial.println("AVANCE : on avance");
@@ -403,6 +446,15 @@ void detectionDojo() {
 }
 
 void loop() {
+/*
+for (int i=0;i<10;i++)
+{
+tourneDroite();
+delay(2000);
+tourneDroiteLent();
+delay(2000);
+}
+*/
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
 	}
   switch (s_state){
