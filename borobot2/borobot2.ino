@@ -78,14 +78,6 @@ void setup() {
   #endif
   digitalWrite(led1Pin, 1);
 
-  // Servo
-  // Lien Pin / Servo
-  servo.attach(servoPin);
-  #ifdef DEBUG
-  	Serial.println("SETUP : On bloque les volets");
-  #endif
-  //servo.write(VOLETS_LOCKED);
-
   // On initialise la machine d'etat 
   s_state=START;
 }
@@ -174,9 +166,9 @@ int detecter() {
     }
     // TODO To adjust contest's day
     //Seuil avant
-    seuil[0]=110;
+    seuil[0]=220;
     //Seuil arriere
-    seuil[1]=130;
+    seuil[1]=220;
     /*// Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
     int *valeurLu;
     valeurLu=lectureCapteur();*/
@@ -211,6 +203,10 @@ int detecter() {
     }
 
     status_detection=1;
+	for (int i=0;i<1000;i++){
+	int j=0;
+	j++;
+	 }
     return detection;
 }
 
@@ -327,6 +323,14 @@ void ouvertureVolet() {
     #ifdef DEBUG
       Serial.println("FLAP - Ouverture Volets");
     #endif
+
+  // Servo
+  // Lien Pin / Servo
+  servo.attach(servoPin);
+  #ifdef DEBUG
+  	Serial.println("SETUP : On bloque les volets");
+  #endif
+  servo.write(VOLETS_LOCKED);
     servo.write(VOLETS_OPENED);
     delay(100);
     servo.write(VOLETS_LOCKED);
@@ -399,6 +403,8 @@ void detectionDojo() {
 }
 
 void loop() {
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+	}
   switch (s_state){
   #ifdef DEBUG
     Serial.println("");
@@ -455,8 +461,8 @@ void loop() {
         Serial.println("END - BLINDATTACK");
        #endif
 	// On eteint la LED verte
-      digitalWrite(led1Pin, 0);
-//      s_state_next=DETECTION;
+	digitalWrite(led1Pin, 0);
+	s_state_next=DETECTION;
         ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
                 detect=0;
         }
@@ -470,8 +476,6 @@ void loop() {
         Serial.println("DETECTION");
       #endif
         
-      int detect;
-
       detect=detecter(); // lecture catpteur + tourne sur place droite ou gauche en fonction du catpeur qui detect
       #ifdef DEBUG
         Serial.print("DETECTION - Valeur de detect:");
@@ -482,13 +486,18 @@ void loop() {
         digitalWrite(led1Pin, 0);
         digitalWrite(led2Pin, 1);
         s_state_next=AVANCE;
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+		detect=0;
+        }
       }
       else if (detect == 2) {
 	// On detect derriere , on eteint la led verte on alume la rouge
         digitalWrite(led1Pin, 1);
         digitalWrite(led2Pin, 0);
         s_state_next=RECULE;
-        //s_state_next=TOURNE;
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+		detect=0;
+        }
       } 
       else {
 	// On detect rien , on eteint toutes les led
@@ -506,11 +515,13 @@ void loop() {
       //#ifdef DEBUG
       //  Serial.println("AVANCE");
       //#endif
-      avance(); // lecture capteur + moteur
-      s_state_next=DETECTION;     
-        ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-                detect=0;
-        }
+	if (detect==0) {
+		avance(); // lecture capteur + moteur
+		s_state_next=DETECTION;     
+		ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+                	detect=0;
+        	}
+	}
       break;
 
      case RECULE:
