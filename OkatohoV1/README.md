@@ -5,15 +5,15 @@
 * Attendre 5 secondes
 * Demarrage jupe
 * Attaque Aveugle
-  - avance(droit)
+  - avance(droit) ou gauche
   - apeler la fonction detect -> avance (avec firection de detec)
-  - avance(gauche)
+  - avance(devant) ou arriere
   - apeler la fonction detect
   et on boucle pendant 3 pas de chaque cote sauf si detection (si on a implementer les interruptions) - on commence par droite ou gauche en fonction du bouton apuyer pour le demarrage
 
 * Detection
   - si detection avance
-  - si non Tourne 10°
+  - si non Tourne 10° - on detecte robot en bas
   - Renvoie la DIRECTION aka le numero du capteur qui a detecter
 * Avance
   - Voir programme etat marche 
@@ -27,4 +27,20 @@ On lit la colone qui correcton a la DIRECTION
   - direction gauche  : 3
 
   - Ensuite on effectue le pas
-  
+ 
+
+Etat Detection
+Fonction detection
+ - lit 1 fois chaque capteurs et on boucle 2 fois -> TABLEAUX
+ - Detection si les 2 valeurs pour un meme capteurs sont superieures au seuil
+ - Renvoir si detection ou non (boolean)
+ - Affecte la variable de direction si detection
+
+ 
+Fonction tourne de x°
+  - on met le servo de marche (servoM) dans la position basse
+  - on met le servo de direction (servoD) line 84 de etat marche +10 
+  - on met le servo de marche (servoM) dans la posistion en debut de fonction tourne 10
+  - on remet le pied a l'origine on met le servo de direction (servoD) line 84 de etat marche:w
+
+
