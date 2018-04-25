@@ -114,7 +114,7 @@ void loop() {
 				s_state_next=CHERCHE_ADV;
 			}
 			else {
-				/*Peut etres en trop??*/
+				/*Peut etres en trop??trop trop*/
 				s_state_next=ATTAQUE;
 			}
 		break;
