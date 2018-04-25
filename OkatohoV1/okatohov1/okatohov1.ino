@@ -69,9 +69,11 @@ void wait(){
 void rotationJupe(){
 }
 
-void Avance(int Direction_Souhaite){}
+void avance(int Direction_Souhaite){
+	// a recupere de etat_marche
+}
 
-int attaque_aveugle() {
+int attaqueAveugle() {
 	// retourne 5 ou 6 (Attaque ou recherche_adv
 }
 
@@ -82,7 +84,8 @@ void loop() {
         			Serial.println("DEPART");
 			#endif
 			buttonPressed=identifyButtonPress();
-			s_state_next=ATT_5_SEC;
+			s_state_next=ATT_5_SEC; 
+//xavier
 		break;
 		case ATT_5_SEC:
 			#ifdef SLOW
@@ -100,6 +103,7 @@ void loop() {
 			#endif
 			rotationJupe();
 			s_state_next=ATTAQUE_AVEUGLE;
+//xaveir
 		break;
 		case ATTAQUE_AVEUGLE:
 			#ifdef DEBUG
@@ -113,7 +117,7 @@ void loop() {
   				et on boucle pendant 3 pas de chaque cote sauf si detection (si on a implementer les interruptions)
   				- puis on passe a l'ETAT CHERCHE_ADV
   			*/
-			s_state_next=attaque_aveugle();
+			s_state_next=attaqueAveugle();
 		break;
 		case ATTAQUE:
 			#ifdef DEBUG
@@ -122,18 +126,19 @@ void loop() {
 			/*	- Avance x pas
 				- detect
 			*/
-			Avance(1); // 1 & changer par la valeur de la direcion (variable)
+			avance(1); // 1 & changer par la valeur de la direcion (variable)
 			detect=detection();
 			if (detect == 0) {
 				s_state_next=CHERCHE_ADV;
+//manu
 			}
 		break;
 		case CHERCHE_ADV:
 			#ifdef DEBUG
 				Serial.println("CHERCHE_ADV");
 			#endif
-			tourne(10);
-			detect=detection();
+//manu founion tourne			tourne(10);
+// xavier fonction detection			detect=detection();
 			/* if find someone ATTAQUE*/
 			if (detect == 1) {
 				s_state_next=ATTAQUE;
