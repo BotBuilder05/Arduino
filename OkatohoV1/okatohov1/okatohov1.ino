@@ -23,6 +23,7 @@
 
 int s_state , s_state_next;
 int detect=0;
+int buttonPressed;
 
 void setup() {
 	#ifdef DEBUG
@@ -56,10 +57,13 @@ void tourne(int Angle_Souhaite) {
 	return 0;
 }
 
-void identifyButtonPress() {
+int identifyButtonPress() {
+	// 0 -> bouton droite
+	// 1 -> bouton gauche
 }
-void waitButtonPres(){}
-void wait(){}
+void wait(){
+	delay(4900);
+}
 void skirtStart(){}
 void Avance(int Direction_Souhaite){}
 
@@ -69,8 +73,8 @@ void loop() {
 			#ifdef DEBUG
         			Serial.println("DEPART");
 			#endif
-			identifyButtonPress();
-			waitButtonPres();
+			buttonPressed=identifyButtonPress();
+			s_state_next=ATT_5_SEC;
 		break;
 		case ATT_5_SEC:
 			#ifdef SLOW
