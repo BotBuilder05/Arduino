@@ -2,7 +2,7 @@
 # Strategie
 * Mise sous tension -> initialisation servo moteur (pied en particulier pour avoir la position de depart)
 * Appuie sur bouton cote adversaire (bouton droit ou bouton gauche)
-* Attendre 5 secondes
+ Attendre 5 secondes
 * Demarrage jupe
 * Avance
   - si dojo Tourne de 10°
@@ -22,7 +22,7 @@
 #define ATTAQUE 6
 
 int s_state , s_state_next;
-
+int detect=0;
 
 void setup() {
 	#ifdef DEBUG
@@ -43,7 +43,7 @@ int detection() {
 	- Renvoir si detection ou non (boolean)
 	- Affecte la variable de direction si detection
 	*/
-	return 0
+	return 0;
 }
 
 void tourne(int Angle_Souhaite) {
@@ -53,7 +53,7 @@ void tourne(int Angle_Souhaite) {
   	- on met le servo de marche (servoM) dans la posistion en debut de fonction tourne 10
   	- on remet le pied a l'origine on met le servo de direction (servoD) line 84 de etat marche:w
   	*/
-	return 0
+	return 0;
 }
 
 void identifyButtonPress() {
@@ -109,34 +109,17 @@ void loop() {
 			/*	- Avance x pas
 				- detect
 			*/
-			Avance(int Direction_Souhaite);
-
-			if (detection == 0) {
+			Avance(1);
+			detect=detection();
+			if (detect == 0) {
 				s_state_next=CHERCHE_ADV;
 			}
-			else {
-				/*Peut etres en trop??*/
-				s_state_next=ATTAQUE;
-			}
 		break;
 		case CHERCHE_ADV:
 			#ifdef DEBUG
 				Serial.println("CHERCHE_ADV");
 			#endif
-			/* Move the foot in order to turn the robot*/
-			/* if detect_dojo=0 then turn=10° otherwise turn=10°)*/
-			if (detect_dojo == 0) {
-				turn(10);
-			}
-			else {
-				turn(1);
-			}
-		break;
-		case CHERCHE_ADV:
-			#ifdef DEBUG
-				Serial.println("CHERCHE_ADV");
-			#endif
-			detect();
+			detect=detection();
 			/* if find someone ATTAQUE*/
 			if (detect == 0) {
 				s_state_next=ATTAQUE;
