@@ -56,11 +56,12 @@ void tourne(int Angle_Souhaite) {
 	return 0
 }
 
-identifyButtonPress();
-waitButtonPres();
-wait();
-skirtStart();
-void Avance(int Direction_Souhaite){};
+void identifyButtonPress() {
+}
+void waitButtonPres(){}
+void wait(){}
+void skirtStart(){}
+void Avance(int Direction_Souhaite){}
 
 void loop() {
 	switch (s_state) {
