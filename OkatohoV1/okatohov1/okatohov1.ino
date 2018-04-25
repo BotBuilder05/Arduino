@@ -44,6 +44,7 @@ int detection() {
 	- Renvoir si detection ou non (boolean)
 	- Affecte la variable de direction si detection
 	*/
+	// retourner le capteur qui a detecter  via une variable global ou iun pointeur
 	return 0;
 }
 
@@ -60,12 +61,19 @@ void tourne(int Angle_Souhaite) {
 int identifyButtonPress() {
 	// 0 -> bouton droite
 	// 1 -> bouton gauche
+	// Tant que vrai, lecture bouton 1 lecture bouton 2
 }
 void wait(){
 	delay(4900);
 }
-void skirtStart(){}
+void rotationJupe(){
+}
+
 void Avance(int Direction_Souhaite){}
+
+int attaque_aveugle() {
+	// retourne 5 ou 6 (Attaque ou recherche_adv
+}
 
 void loop() {
 	switch (s_state) {
@@ -90,7 +98,7 @@ void loop() {
 			#ifdef DEBUG
 				Serial.println("JUPE DEPART");
 			#endif
-			skirtStart();
+			rotationJupe();
 			s_state_next=ATTAQUE_AVEUGLE;
 		break;
 		case ATTAQUE_AVEUGLE:
@@ -105,6 +113,7 @@ void loop() {
   				et on boucle pendant 3 pas de chaque cote sauf si detection (si on a implementer les interruptions)
   				- puis on passe a l'ETAT CHERCHE_ADV
   			*/
+			s_state_next=attaque_aveugle();
 		break;
 		case ATTAQUE:
 			#ifdef DEBUG
@@ -113,7 +122,7 @@ void loop() {
 			/*	- Avance x pas
 				- detect
 			*/
-			Avance(1);
+			Avance(1); // 1 & changer par la valeur de la direcion (variable)
 			detect=detection();
 			if (detect == 0) {
 				s_state_next=CHERCHE_ADV;
@@ -123,14 +132,11 @@ void loop() {
 			#ifdef DEBUG
 				Serial.println("CHERCHE_ADV");
 			#endif
+			tourne(10);
 			detect=detection();
 			/* if find someone ATTAQUE*/
-			if (detect == 0) {
+			if (detect == 1) {
 				s_state_next=ATTAQUE;
-			}
-			else {
-				/*else tourne 1°*/
-				s_state_next=CHERCHE_ADV;
 			}
 			
 		break;
