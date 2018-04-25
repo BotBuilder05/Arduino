@@ -5,17 +5,19 @@
 * Attendre 5 secondes
 * Demarrage jupe
 * Attaque Aveugle
-  - avance(droit) ou gauche
-  - apeler la fonction detect -> avance (avec firection de detec)
+	- on commence par devant ou gauche en fonction du bouton apuyer pour le demarrage
+  - avance(devant) ou gauche
+  - apeler la fonction detect -> si Vrai : passe a l'ETAT Attaque (avec direction de detec)
   - avance(devant) ou arriere
-  - apeler la fonction detect
-  et on boucle pendant 3 pas de chaque cote sauf si detection (si on a implementer les interruptions) - on commence par droite ou gauche en fonction du bouton apuyer pour le demarrage
+  - apeler la fonction detect -> si vrai : idem
+  et on boucle pendant 3 pas de chaque cote sauf si detection (si on a implementer les interruptions) 
 
 * Detection
   - si detection avance
   - si non Tourne 10° - on detecte robot en bas
   - Renvoie la DIRECTION aka le numero du capteur qui a detecter
-* Avance
+  
+* Attaque
   - Voir programme etat marche 
   - Avec DIRECTION on lit la matrice TabDirPied
 Si pied en position avant -> on lit la ligne 0
