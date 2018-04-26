@@ -98,7 +98,7 @@ int identifyButtonPress() {
 		digitalWrite(ledCorp2Pin, 0);
 		digitalWrite(ledChapeauPin, 0);
 		digitalWrite(ledOeilPin, 1);
-		buttonPressed=0
+		buttonPressed=0;
 		s_state_next=ATT_5_SEC;
 	}
 	else if (buttonChapeauGStartState == 1) {
@@ -109,7 +109,7 @@ int identifyButtonPress() {
 		digitalWrite(ledCorp2Pin, 0);
 		digitalWrite(ledChapeauPin, 1);
 		digitalWrite(ledOeilPin, 0);
-		buttonPressed=1
+		buttonPressed=1;
 		s_state_next=ATT_5_SEC;
 	}
 	else {
