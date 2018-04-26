@@ -81,10 +81,10 @@ int identifyButtonPress() {
 	// 0 -> bouton droite
 	// 1 -> bouton gauche // oeil -> led oeil 
 	// Tant que vrai, lecture bouton 1 lecture bouton 2
-	int buttonOeilGStartState=0;
+	int buttonOeilGStartState=1;
 	int buttonChapeauDStartState=0;
 
-	while (buttonOeilGStartState == 0 || buttonChapeauDStartState == 0) {
+	while (buttonOeilGStartState == 1 || buttonChapeauDStartState == 0) {
 		buttonOeilGStartState = digitalRead(buttonOeilGStartPin);
 		buttonChapeauDStartState = digitalRead(buttonChapeauDStartPin);
     		//filtrée ici le rebond...
