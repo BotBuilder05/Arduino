@@ -78,16 +78,16 @@ int identifyButtonPress() {
 	// 1 -> bouton gauche // oeil -> led oeil 
 	// Tant que vrai, lecture bouton 1 lecture bouton 2
 	int buttonOeilDStartState;
-	int buttonChapeauDStartState;
+	int buttonChapeauGStartState;
 
-	while (buttonOeilDStartState == 1 || buttonChapeauDStartState == 1) {
+	while (buttonOeilDStartState == 1 || buttonChapeauGStartState == 1) {
 		buttonOeilDStartState = digitalRead(buttonOeilDStartPin);
-		buttonChapeauDStartState = digitalRead(buttonChapeauGStartPin);
+		buttonChapeauGStartState = digitalRead(buttonChapeauGStartPin);
     		//filtrée ici le rebond...
     		#ifdef DEBUG
       			Serial.print("START - Etat bouton:  ");
       			Serial.println(buttonOeilDStartState);
-      			Serial.println(buttonChapeauDStartState);
+      			Serial.println(buttonChapeauGStartState);
     		#endif
 	}
 	if (buttonOeilDStartState == 1){
@@ -100,7 +100,7 @@ int identifyButtonPress() {
 		digitalWrite(ledOeilPin, 1);
 		s_state_next=ATT_5_SEC;
 	}
-	else if (buttonChapeauDStartState == 1) {
+	else if (buttonChapeauGStartState == 1) {
 		#ifdef DEBUG
 			Serial.println("START - Le bouton CHAPEAU  start a ete appuye - La Led du chapeau s'allume - Les autres s'eteignent");
 		#endif
