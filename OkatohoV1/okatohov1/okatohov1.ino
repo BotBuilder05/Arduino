@@ -20,8 +20,11 @@
 #define ATTAQUE_AVEUGLE 4
 #define CHERCHE_ADV 5
 #define ATTAQUE 6
+
+// Pin definition
 #define buttonOeilGStartPin 14
 #define buttonChapeauDStartPin 12
+#define moteurJupe 5
 
 const int ledOeilPin=11;
 const int ledChapeauPin=4;
@@ -130,7 +133,13 @@ void wait(){
 	delay(4900);
 }
 void rotationJupe(){
+	#ifdef DEBUG
+		Serial.println("JUPE - Mise en route de la jupe");
+	#endif
+	digitalWrite(moteurJupe, 1);
+
 }
+
 
 void avance(int Direction_Souhaite){
 	// a recupere de etat_marche
