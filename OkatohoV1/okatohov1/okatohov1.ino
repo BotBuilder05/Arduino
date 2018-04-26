@@ -120,7 +120,7 @@ int identifyButtonPress() {
 		digitalWrite(ledCorp2Pin, 1);
 		s_state_next=DEPART; //notneeded ?
 	}
-	return buttonPressed
+	return buttonPressed;
 }
 void wait(){
 	delay(4900);
