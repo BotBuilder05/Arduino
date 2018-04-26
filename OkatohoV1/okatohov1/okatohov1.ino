@@ -20,6 +20,13 @@
 #define ATTAQUE_AVEUGLE 4
 #define CHERCHE_ADV 5
 #define ATTAQUE 6
+#define buttonOeilDStartPin 14
+#define buttonChapeauGStartPin 12
+
+const int ledOeilPin=11;
+const int ledChapeauPin=4;
+const int ledCorp1Pin=7;
+const int ledCorp2Pin=10;
 
 int s_state , s_state_next;
 int detect=0;
@@ -29,6 +36,14 @@ void setup() {
 	#ifdef DEBUG
 		Serial.begin(9600 );
 	#endif
+	// On initialise les leds
+	digitalWrite(ledOeilPin, 0);
+	digitalWrite(ledChapeauPin, 0);
+	digitalWrite(ledCorp1Pin, 0);
+	digitalWrite(ledCorp2Pin, 0);
+	// On initialise la pin du bouton
+	pinMode(buttonOeilDStartPin, INPUT_PULLUP);
+	digitalWrite(buttonOeilDStartPin,HIGH );
 	// On initialise la machine d'etat 
 	s_state=DEPART;
 }
@@ -60,8 +75,50 @@ void tourne(int Angle_Souhaite) {
 
 int identifyButtonPress() {
 	// 0 -> bouton droite
-	// 1 -> bouton gauche
+	// 1 -> bouton gauche // oeil -> led oeil 
 	// Tant que vrai, lecture bouton 1 lecture bouton 2
+int buttonOeilDStartState;;
+int buttonChapeauDStartState;;
+
+	while (buttonOeilDStartState == 1 || buttonChapeauDStartState == 1) {
+		buttonOeilDStartState = digitalRead(buttonOeilDStartPin);
+		buttonChapeauDStartState = digitalRead(buttonChapeauGStartPin);
+    		//filtrée ici le rebond...
+    		#ifdef DEBUG
+      			Serial.print("START - Etat bouton:  ");
+      			Serial.println(buttonOeilDStartState);
+      			Serial.println(buttonChapeauDStartState);
+    		#endif
+	}
+	if (buttonOeilDStartState == 1){
+		#ifdef DEBUG
+			Serial.println("START - Le bouton OEIL  start a ete appuye - La Led de l'oeil s'allume - Les autres s'eteignent");
+		#endif
+		digitalWrite(ledCorp1Pin, 0);
+		digitalWrite(ledCorp2Pin, 0);
+		digitalWrite(ledChapeauPin, 0);
+		digitalWrite(ledOeilPin, 1);
+		s_state_next=ATT_5_SEC;
+	}
+	else if (buttonChapeauDStartState == 1) {
+		#ifdef DEBUG
+			Serial.println("START - Le bouton CHAPEAU  start a ete appuye - La Led du chapeau s'allume - Les autres s'eteignent");
+		#endif
+		digitalWrite(ledCorp1Pin, 0);
+		digitalWrite(ledCorp2Pin, 0);
+		digitalWrite(ledChapeauPin, 1);
+		digitalWrite(ledOeilPin, 0);
+		s_state_next=ATT_5_SEC;
+	}
+	else {
+		#ifdef DEBUG
+			Serial.println("START - Waiting for Start button to be pressed - Red led is on");
+		#endif
+		digitalWrite(ledCorp1Pin, 1);
+		digitalWrite(ledCorp2Pin, 1);
+		s_state_next=DEPART; //notneeded ?
+    }
+
 }
 void wait(){
 	delay(4900);
