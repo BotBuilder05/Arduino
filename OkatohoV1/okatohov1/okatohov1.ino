@@ -77,8 +77,8 @@ int identifyButtonPress() {
 	// 0 -> bouton droite
 	// 1 -> bouton gauche // oeil -> led oeil 
 	// Tant que vrai, lecture bouton 1 lecture bouton 2
-int buttonOeilDStartState;;
-int buttonChapeauDStartState;;
+	int buttonOeilDStartState;
+	int buttonChapeauDStartState;
 
 	while (buttonOeilDStartState == 1 || buttonChapeauDStartState == 1) {
 		buttonOeilDStartState = digitalRead(buttonOeilDStartPin);
@@ -142,7 +142,6 @@ void loop() {
 			#endif
 			buttonPressed=identifyButtonPress();
 			s_state_next=ATT_5_SEC; 
-//xavier
 		break;
 		case ATT_5_SEC:
 			#ifdef SLOW
