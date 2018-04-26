@@ -1,3 +1,37 @@
+# Okatoho V3 - Pin list
+
+* Capteurs IR
+  * Avant   : A6
+  * Droite  : A3
+  * Gauche  : A2
+  * Arriere : A1
+* Valeurs deuils des capteur IR
+  * Obstacle à  4  cm -> Valeur : 
+  * Obstacle à  40 cm -> Valeur : 
+
+* Moteur commande de la jupe
+  * Marche HIGH (+5v)   : 5
+  * Marche LOW (Gnd) : 6
+
+* Leds
+  * Led oeil : 11
+  * Led haut de chapeau : 4
+  * Coté du corp 1 : 7 
+  * Coté du corp 2 : 10
+
+* Servo
+  * Servo Mouvement : 9
+  * Servo Direction : 3
+
+* Boutons 
+  * Bouton droite : 12
+  * Bouton gauche oeil : 14 (A0)
+  * Bouton sur la tete : On/Off non connecter a l’arduino (coupe-circuit)
+  
+* voltmetre
+  * mesure 1/2 tention de la batterie
+
+
 # Strategie
 * Mise sous tension -> initialisation servo moteur (pied en particulier pour avoir la position de depart)
 * Appuie sur boutojn cote adversaire (bouton droit ou bouton gauche)
