@@ -35,6 +35,32 @@ int s_state , s_state_next;
 int detect=0;
 int buttonPressed;
 
+//variable pour les servos et la fonction avance
+#define SERVO_D 3		//pin du servoD
+#define SERVO_M 9		//pin du servoM
+
+#include <Servo.h>
+Servo servoD;  // creation d'un objet servo pour controler un servo
+Servo servoM;
+
+const int DIR_AVANT = 2;   // direction souhaité
+const int DIR_DROITE = 1;
+const int DIR_ARRIERE = 0;
+const int DIR_GAUCHE = 3;
+
+int Tab_Dir_Pied[2][4]={
+  {67,112,157,22},
+  {157,22,67,112}
+};
+
+const int HAUTE_AVANT = 0;
+const int HAUTE_ARRIERE = 1;
+boolean Pos_Actuel_pied = HAUTE_AVANT ; // memorise la position HAUTE_AVANT ou HAUTE_ARRIERE du pied
+
+int Tab_Pos_Pied[2] = {10,170};
+int Tempo_Servo_D = 700;
+int Tempo_Servo_M = 700;
+
 void setup() {
 	#ifdef DEBUG
 		Serial.begin(9600 );
@@ -51,6 +77,11 @@ void setup() {
 	// On initialise la pin du bouton
 	pinMode(buttonOeilGStartPin, INPUT_PULLUP);
 	digitalWrite(buttonOeilGStartPin,HIGH );
+	// On initialise les servos
+	servoM.attach(SERVO_M,850,2220);  // attaches l'objet servo a la pin 9
+ 	servoD.attach(SERVO_D,700,2700);
+ 	servoM.write(Tab_Pos_Pied[Pos_Actuel_pied]);
+	servoD.write(Tab_Dir_Pied[Pos_Actuel_pied][DIR_AVANT]);
 	// On initialise la machine d'etat 
 	s_state=DEPART;
 }
@@ -142,7 +173,32 @@ void rotationJupe(){
 
 
 void avance(int Direction_Souhaite){
-	// a recupere de etat_marche
+  servoD.write(Tab_Dir_Pied[Pos_Actuel_pied][Direction_Souhaite]);
+  #ifdef DEBUG
+    Serial.print("dir pied ");
+    Serial.print(Direction_Souhaite);
+     Serial.print(" POs ");
+    Serial.println(Pos_Actuel_pied);
+  #endif
+  delay(Tempo_Servo_D); // delais si position pas bonne court si 90 ou -90 long si 180 a faire!!
+  servoM.write(Tab_Pos_Pied[Pos_Actuel_pied]);
+  #ifdef DEBUG
+    Serial.print("position pied ");
+    Serial.println(Pos_Actuel_pied);
+  #endif
+  Pos_Actuel_pied =! Pos_Actuel_pied;
+  #ifdef DEBUG
+    Serial.print("position OPO pied ");
+    Serial.println(Pos_Actuel_pied);
+  #endif
+  delay(Tempo_Servo_M);
+  
+  #ifdef DEBUG
+    Serial.print("position pied ");
+    Serial.print(Tab_Dir_Pied[Pos_Actuel_pied][Direction_Souhaite]);
+     Serial.print(" ");
+    Serial.println(Pos_Actuel_pied);
+  #endif
 }
 
 int attaqueAveugle() {
