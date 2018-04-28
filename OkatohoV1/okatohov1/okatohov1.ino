@@ -77,8 +77,7 @@ void setup() {
 	// On initialise la pin du bouton
 	pinMode(buttonOeilGStartPin, INPUT_PULLUP);
 	digitalWrite(buttonOeilGStartPin,HIGH );
-	pinMode(buttonChapeauDStartPin, INPUT_PULLUP);
-	digitalWrite(buttonChapeauDStartPin,HIGH );
+	pinMode(buttonChapeauDStartPin, INPUT);
 	// On initialise les servos
 	servoM.attach(SERVO_M,850,2220);  // attaches l'objet servo a la pin 9
  	servoD.attach(SERVO_D,700,2700);
