@@ -51,11 +51,14 @@ void setup() {
 	// On initialise la pin du bouton
 	pinMode(buttonOeilGStartPin, INPUT_PULLUP);
 	digitalWrite(buttonOeilGStartPin,HIGH );
+	pinMode(buttonChapeauDStartPin, INPUT_PULLUP);
+	digitalWrite(buttonChapeauDStartPin,HIGH );
 	// On initialise la machine d'etat 
 	s_state=DEPART;
 }
 
 int detection() {
+	int detectStatus;
 	/* This finction should
 		* return 0 if it detects 
 		* return 1 othewise
@@ -67,7 +70,7 @@ int detection() {
 	- Affecte la variable de direction si detection
 	*/
 	// retourner le capteur qui a detecter  via une variable global ou iun pointeur
-	return 0;
+	return detectStatus;
 }
 
 void tourne(int Angle_Souhaite) {
@@ -129,15 +132,16 @@ int identifyButtonPress() {
 	}
 	return buttonPressed;
 }
+
 void wait(){
 	delay(4900);
 }
+
 void rotationJupe(){
 	#ifdef DEBUG
 		Serial.println("JUPE - Mise en route de la jupe");
 	#endif
 	digitalWrite(moteurJupe, 1);
-
 }
 
 
@@ -174,7 +178,6 @@ void loop() {
 			#endif
 			rotationJupe();
 			s_state_next=ATTAQUE_AVEUGLE;
-//xaveir
 		break;
 		case ATTAQUE_AVEUGLE:
 			#ifdef DEBUG
