@@ -22,8 +22,8 @@
 #define ATTAQUE 6
 
 // Pin definition
-#define buttonOeilGStartPin 14
-#define buttonChapeauDStartPin 12
+const int buttonOeilGStartPin=14;
+const int buttonChapeauDStartPin=12;
 #define moteurJupe 5
 
 const int ledOeilPin=11;
@@ -34,6 +34,9 @@ const int ledCorp2Pin=10;
 int s_state , s_state_next;
 int detect=0;
 int buttonPressed;
+//variable pour les LED
+#define OnLed 0
+#define OffLed 1
 
 //variable pour les servos et la fonction avance
 #define SERVO_D 3		//pin du servoD
@@ -70,10 +73,10 @@ void setup() {
 	pinMode(ledChapeauPin, OUTPUT);
 	pinMode(ledCorp1Pin, OUTPUT);
 	pinMode(ledCorp2Pin, OUTPUT);
-	digitalWrite(ledOeilPin, 0);
-	digitalWrite(ledChapeauPin, 0);
-	digitalWrite(ledCorp1Pin, 0);
-	digitalWrite(ledCorp2Pin, 0);
+	digitalWrite(ledOeilPin, OffLed);
+	digitalWrite(ledChapeauPin, OffLed);
+	digitalWrite(ledCorp1Pin, OffLed);
+	digitalWrite(ledCorp2Pin, OffLed);
 	// On initialise la pin du bouton
 	pinMode(buttonOeilGStartPin, INPUT_PULLUP);
 	digitalWrite(buttonOeilGStartPin,HIGH );
@@ -120,24 +123,24 @@ int identifyButtonPress() {
 	int buttonOeilGStartState=1;
 	int buttonChapeauDStartState=0;
 
-	while (buttonOeilGStartState == 1 || buttonChapeauDStartState == 0) {
+	while (buttonOeilGStartState == 1 || buttonChapeauDStartState == 1) {
 		buttonOeilGStartState = digitalRead(buttonOeilGStartPin);
 		buttonChapeauDStartState = digitalRead(buttonChapeauDStartPin);
     		//filtrée ici le rebond...
     		#ifdef DEBUG
       			Serial.print("START - Etat bouton:  ");
-      			Serial.println(buttonOeilGStartState);
+      			Serial.print(buttonOeilGStartState);
       			Serial.println(buttonChapeauDStartState);
     		#endif
 	}
-	if (buttonOeilGStartState == 1){
+	if (buttonOeilGStartState == 0){
 		#ifdef DEBUG
 			Serial.println("START - Le bouton OEIL  start a ete appuye - La Led de l'oeil s'allume - Les autres s'eteignent");
 		#endif
-		digitalWrite(ledCorp1Pin, 0);
-		digitalWrite(ledCorp2Pin, 0);
-		digitalWrite(ledChapeauPin, 0);
-		digitalWrite(ledOeilPin, 1);
+		digitalWrite(ledCorp1Pin, OffLed);
+		digitalWrite(ledCorp2Pin, OffLed);
+		digitalWrite(ledChapeauPin, OffLed);
+		digitalWrite(ledOeilPin, OnLed);
 		buttonPressed=0;
 		s_state_next=ATT_5_SEC;
 	}
@@ -145,10 +148,10 @@ int identifyButtonPress() {
 		#ifdef DEBUG
 			Serial.println("START - Le bouton CHAPEAU  start a ete appuye - La Led du chapeau s'allume - Les autres s'eteignent");
 		#endif
-		digitalWrite(ledCorp1Pin, 0);
-		digitalWrite(ledCorp2Pin, 0);
-		digitalWrite(ledChapeauPin, 1);
-		digitalWrite(ledOeilPin, 0);
+		digitalWrite(ledCorp1Pin, OffLed);
+		digitalWrite(ledCorp2Pin, OffLed);
+		digitalWrite(ledChapeauPin, OffLed);
+		digitalWrite(ledOeilPin, OnLed);
 		buttonPressed=1;
 		s_state_next=ATT_5_SEC;
 	}
@@ -156,8 +159,8 @@ int identifyButtonPress() {
 		#ifdef DEBUG
 			Serial.println("START - Waiting for Start button to be pressed - Corp led on");
 		#endif
-		digitalWrite(ledCorp1Pin, 1);
-		digitalWrite(ledCorp2Pin, 1);
+		digitalWrite(ledCorp1Pin, OnLed);
+		digitalWrite(ledCorp2Pin, OnLed);
 		s_state_next=DEPART; //notneeded ?
 	}
 	return buttonPressed;
