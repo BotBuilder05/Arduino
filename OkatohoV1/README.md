@@ -14,6 +14,7 @@
   * Marche LOW (Gnd) : 6
 
 * Leds
+  * 0 => éteint   1 => allumé
   * Led oeil : 11
   * Led haut de chapeau : 4
   * Coté du corp 1 : 7 
