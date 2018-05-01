@@ -249,7 +249,8 @@ void loop() {
   				et on boucle pendant 3 pas de chaque cote sauf si detection (si on a implementer les interruptions)
   				- puis on passe a l'ETAT CHERCHE_ADV
   			*/
-			s_state_next=attaqueAveugle();
+			attaqueAveugle();
+			s_state_next=CHERCHE_ADV();
 		break;
 		case ATTAQUE:
 			#ifdef DEBUG
