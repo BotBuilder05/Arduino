@@ -208,7 +208,19 @@ void avance(int Direction_Souhaite){
 }
 
 int attaqueAveugle() {
-	// retourne 5 ou 6 (Attaque ou recherche_adv
+	// retourne 5 ou 6 (Attaque ou recherche_adv)
+		/* 	- on commence par devant ou gauche en fonction du bouton apuyer pour le demarrage
+  			- avance(devant) ou gauche
+ 			- apeler la fonction detect -> si Vrai : passe a l'ETAT Attaque (avec direction de detec)
+  			- avance(devant) ou arriere
+  			- apeler la fonction detect -> si vrai : idem
+  			et on boucle pendant 3 pas de chaque cote sauf si detection (si on a implementer les interruptions)
+  			- puis on passe a l'ETAT CHERCHE_ADV
+  		*/
+	avance();
+	detect();
+	avance();
+	detect();
 }
 
 void loop() {
@@ -241,14 +253,6 @@ void loop() {
 			#ifdef DEBUG
 				Serial.println("ATTAQUE_AVEUGLE");
 			#endif
-			/* 	- on commence par devant ou gauche en fonction du bouton apuyer pour le demarrage
-  				- avance(devant) ou gauche
- 				- apeler la fonction detect -> si Vrai : passe a l'ETAT Attaque (avec direction de detec)
-  				- avance(devant) ou arriere
-  				- apeler la fonction detect -> si vrai : idem
-  				et on boucle pendant 3 pas de chaque cote sauf si detection (si on a implementer les interruptions)
-  				- puis on passe a l'ETAT CHERCHE_ADV
-  			*/
 			attaqueAveugle();
 			s_state_next=CHERCHE_ADV;
 		break;
