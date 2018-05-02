@@ -67,6 +67,8 @@ int Tab_Dir_Pied[2][4]={
   {67,112,157,22},
   {157,22,67,112}
 };
+int Dir_Actuel_Pied ;
+int Dir_Souhaite_pied ;
 
 const int HAUTE_AVANT = 0;
 const int HAUTE_ARRIERE = 1;
@@ -77,16 +79,31 @@ int Tempo_Servo_M = 700;
 int tab_sensor0[180];
 int val_max;
 int degree_adv = 0;
+//fonction tempo servo Direction
+void tempoD (int tempo_base){
+  int tempo_dir = (((Dir_Souhaite_pied - Dir_Actuel_Pied)*tempo_base)/90);
+  if(tempo_dir <=0){tempo_dir=tempo_dir*-1;}
+  #ifdef DEBUG
+    Serial.print("Direction actuel du pied ");
+    Serial.println(Dir_Actuel_Pied);
+    Serial.print(" Direction souhaite du pied ");
+    Serial.println(Dir_Souhaite_pied);
+    Serial.print(" Tempo Direction ");
+    Serial.println(tempo_dir);
+  #endif
+  delay(tempo_dir);
+}
 
 void Avance(int Direction_Souhaite){
-  servoD.write(Tab_Dir_Pied[Pos_Actuel_pied][Direction_Souhaite]);
+  Dir_Souhaite_pied = Tab_Dir_Pied[Pos_Actuel_pied][Direction_Souhaite];
+  servoD.write(Dir_Souhaite_pied);
   #ifdef DEBUG
     Serial.print("dir pied ");
     Serial.print(Direction_Souhaite);
-     Serial.print(" POs ");
+    Serial.print(" POs ");
     Serial.println(Pos_Actuel_pied);
   #endif
-  delay(Tempo_Servo_D); // delais si position pas bonne court si 90 ou -90 long si 180
+  tempoD(Tempo_Servo_D); // delais si position pas bonne court si 90 ou -90 long si 180
   servoM.write(Tab_Pos_Pied[Pos_Actuel_pied]);
   #ifdef DEBUG
     Serial.print("position pied ");
@@ -97,8 +114,8 @@ void Avance(int Direction_Souhaite){
     Serial.print("position OPO pied ");
     Serial.println(Pos_Actuel_pied);
   #endif
-  delay(Tempo_Servo_D);
-  
+  delay(Tempo_Servo_M);
+  Dir_Actuel_Pied = Tab_Dir_Pied[Pos_Actuel_pied][Direction_Souhaite];
   #ifdef DEBUG
     Serial.print("position pied ");
     Serial.print(Tab_Dir_Pied[Pos_Actuel_pied][Direction_Souhaite]);
@@ -116,6 +133,7 @@ void init_robot() {
     servoM.write(POS_BASSE);
     delay(400);
     servoD.write(Tab_Dir_Pied[0][DIR_AVANT]);
+    Dir_Actuel_Pied = Tab_Dir_Pied[0][DIR_AVANT];
      #ifdef DEBUG
       Serial.println("Fin init");
     #endif
@@ -177,8 +195,10 @@ void loop() {
     break;
     case AVANCE:
       while (true){
-        delay(300);
-        Avance(0);
+        delay(3000);
+        Avance(DIR_GAUCHE);
+         delay(3000);
+        Avance(DIR_ARRIERE);
       }
     break;
 /*    case TEST_SERVO:
