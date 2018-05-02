@@ -250,7 +250,7 @@ void loop() {
   				- puis on passe a l'ETAT CHERCHE_ADV
   			*/
 			attaqueAveugle();
-			s_state_next=CHERCHE_ADV();
+			s_state_next=CHERCHE_ADV;
 		break;
 		case ATTAQUE:
 			#ifdef DEBUG
