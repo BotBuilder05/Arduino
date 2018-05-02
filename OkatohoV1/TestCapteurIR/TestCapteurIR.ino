@@ -12,42 +12,35 @@ const int capteurIRgauche = A2;
   
 
 void setup() {
-  // put your setup code here, to run once:
-    Serial.begin(115200);
+	Serial.begin(115200);
     
-  pinMode(capteurIRavant, INPUT);
-  pinMode(capteurIRdroit, INPUT);
-  pinMode(capteurIRarriere, INPUT);
-  pinMode(capteurIRgauche, INPUT);
+	pinMode(capteurIRavant, INPUT);
+	pinMode(capteurIRdroit, INPUT);
+	pinMode(capteurIRarriere, INPUT);
+	pinMode(capteurIRgauche, INPUT);
   
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-      int valeurLue=0;
+	int valeurLue=0;
 
-    valeurLue = analogRead(capteurIRavant);
-     
+	valeurLue = analogRead(capteurIRavant);
+	Serial.print("Avant: ");
+	Serial.println(valeurLue);
+	delay(500);
 
-    Serial.print("Avant: ");
-    Serial.println(valeurLue);
-    delay(500);
+	valeurLue = analogRead(capteurIRarriere);
+	Serial.print("Arriere: ");
+	Serial.println(valeurLue);
+	delay(500);
 
-    valeurLue = analogRead(capteurIRarriere);
-
-    Serial.print("Arriere: ");
-    Serial.println(valeurLue);
-    delay(500);
-
-    valeurLue = analogRead(capteurIRdroit);
-   
-    Serial.print("Droit: ");
-    Serial.println(valeurLue);
-    delay(500);
+	valeurLue = analogRead(capteurIRdroit);
+	Serial.print("Droit: ");
+	Serial.println(valeurLue);
+	delay(500);
     
-    valeurLue = analogRead(capteurIRgauche);
-      
-    Serial.print("Gauche: ");
-    Serial.println(valeurLue);
-    delay(500);
+	valeurLue = analogRead(capteurIRgauche);
+	Serial.print("Gauche: ");
+	Serial.println(valeurLue);
+	delay(500);
 }
