@@ -31,7 +31,7 @@ const int ledChapeauPin=4;
 const int ledCorp1Pin=7;
 const int ledCorp2Pin=10;
 
-int s_state , s_state_next;
+int sState , sStateNext;
 int detect=0;
 int buttonPressed;
 //variable pour les LED
@@ -42,27 +42,30 @@ int buttonPressed;
 #define SERVO_D 3		//pin du servoD
 #define SERVO_M 9		//pin du servoM
 
+//#include <stdlib.h> 
 #include <Servo.h>
 Servo servoD;  // creation d'un objet servo pour controler un servo
 Servo servoM;
 
-const int DIR_AVANT = 2;   // direction souhaité
-const int DIR_DROITE = 1;
-const int DIR_ARRIERE = 0;
-const int DIR_GAUCHE = 3;
+const int DIR_AVANT = 0;   // direction souhaité
+const int DIR_GAUCHE = 1;
+const int DIR_ARRIERE = 2;
+const int DIR_DROITE = 3;
+int dirActuelPied = DIR_AVANT;
+int dirSouhaitePied = DIR_AVANT;
 
-int Tab_Dir_Pied[2][4]={
-  {67,112,157,22},
-  {157,22,67,112}
+int tabDirPied[2][4]={
+  {50,95,140,5},
+  {140,5,50,95}
 };
 
 const int HAUTE_AVANT = 0;
 const int HAUTE_ARRIERE = 1;
-boolean Pos_Actuel_pied = HAUTE_AVANT ; // memorise la position HAUTE_AVANT ou HAUTE_ARRIERE du pied
+boolean posActuelPied = HAUTE_AVANT ; // memorise la position HAUTE_AVANT ou HAUTE_ARRIERE du pied
 
-int Tab_Pos_Pied[2] = {10,170};
-int Tempo_Servo_D = 700;
-int Tempo_Servo_M = 700;
+int TabPosPied[2] = {10,170};
+int tempoServoD = 700;
+int tempoServoM = 700;
 
 void setup() {
 	#ifdef DEBUG
@@ -84,10 +87,10 @@ void setup() {
 	// On initialise les servos
 	servoM.attach(SERVO_M,850,2220);  // attaches l'objet servo a la pin 9
  	servoD.attach(SERVO_D,700,2700);
- 	servoM.write(Tab_Pos_Pied[Pos_Actuel_pied]);
-	servoD.write(Tab_Dir_Pied[Pos_Actuel_pied][DIR_AVANT]);
+ 	servoM.write(TabPosPied[posActuelPied]);
+	servoD.write(tabDirPied[posActuelPied][dirActuelPied]);
 	// On initialise la machine d'etat 
-	s_state=DEPART;
+	sState=DEPART;
 }
 
 int detection() {
@@ -143,7 +146,7 @@ int identifyButtonPress() {
 		digitalWrite(ledChapeauPin, ledOff);
 		digitalWrite(ledOeilPin, ledOn);
 		buttonPressed=0;
-		s_state_next=ATT_5_SEC;
+		sStateNext=ATT_5_SEC;
 	}
 	else if (buttonChapeauDStartState == 0) {
 		#ifdef DEBUG
@@ -154,7 +157,7 @@ int identifyButtonPress() {
 		digitalWrite(ledChapeauPin, ledOn);
 		digitalWrite(ledOeilPin, ledOff);
 		buttonPressed=1;
-		s_state_next=ATT_5_SEC;
+		sStateNext=ATT_5_SEC;
 	}
 	else {
 		#ifdef DEBUG
@@ -162,7 +165,7 @@ int identifyButtonPress() {
 		#endif
 		digitalWrite(ledCorp1Pin, ledOn);
 		digitalWrite(ledCorp2Pin, ledOn);
-		s_state_next=DEPART; //notneeded ?
+		sStateNext=DEPART; //notneeded ?
 	}
 	return buttonPressed;
 }
@@ -178,34 +181,56 @@ void rotationJupe(){
 	digitalWrite(moteurJupe, 1);
 }
 
+// valeur absolu
+int absolu(int valeur){
+  if(valeur <= 0){
+    valeur = (valeur * (-1));
+    return valeur;
+  }
+}
 
-void avance(int Direction_Souhaite){
-  servoD.write(Tab_Dir_Pied[Pos_Actuel_pied][Direction_Souhaite]);
-  #ifdef DEBUG
-    Serial.print("dir pied ");
-    Serial.print(Direction_Souhaite);
-     Serial.print(" POs ");
-    Serial.println(Pos_Actuel_pied);
-  #endif
-  delay(Tempo_Servo_D); // delais si position pas bonne court si 90 ou -90 long si 180 a faire!!
-  servoM.write(Tab_Pos_Pied[Pos_Actuel_pied]);
-  #ifdef DEBUG
-    Serial.print("position pied ");
-    Serial.println(Pos_Actuel_pied);
-  #endif
-  Pos_Actuel_pied =! Pos_Actuel_pied;
-  #ifdef DEBUG
-    Serial.print("position OPO pied ");
-    Serial.println(Pos_Actuel_pied);
-  #endif
-  delay(Tempo_Servo_M);
+//fonction tempo servo Direction
+void tempoD (int tempoBase){
+	int difAngleDir = (tabDirPied[posActuelPied][dirSouhaitePied] ) - (tabDirPied[posActuelPied][dirActuelPied]);
+	difAngleDir = absolu(difAngleDir);
+  	int tempoDir = ((difAngleDir * tempoBase) / 90);
+  	#ifdef DEBUG
+    	Serial.print("Direction actuel du pied ");
+    	Serial.println(dirActuelPied);
+    	Serial.print(" Direction souhaite du pied ");
+    	Serial.println(dirSouhaitePied);
+    	Serial.print(" Tempo Direction ");
+    	Serial.println(tempoDir);
+  	#endif
+  	delay(tempoDir);
+}
+
+void avance(int directionSouhaite){
+	dirSouhaitePied = directionSouhaite;
+  	servoD.write(tabDirPied[posActuelPied][directionSouhaite]);
+  	#ifdef DEBUG
+    	Serial.print("dir pied ");
+   		Serial.print(directionSouhaite);
+    	Serial.print("position pied ");
+    	Serial.println(posActuelPied);
+  	#endif
+  	tempoD(tempoServoD);
+  	//delay(tempoServoD); // delais si position pas bonne court si 90 ou -90 long si 180 a faire!! abs()
+  	dirActuelPied = dirSouhaitePied;
+  	servoM.write(TabPosPied[!posActuelPied]);
+  	posActuelPied =! posActuelPied;
+  	#ifdef DEBUG
+   		Serial.print("position pied ");
+    	Serial.println(posActuelPied);
+  	#endif
+  	delay(tempoServoM);
   
-  #ifdef DEBUG
-    Serial.print("position pied ");
-    Serial.print(Tab_Dir_Pied[Pos_Actuel_pied][Direction_Souhaite]);
-     Serial.print(" ");
-    Serial.println(Pos_Actuel_pied);
-  #endif
+  	#ifdef DEBUG
+    	Serial.print("dir pied ");
+    	Serial.print(tabDirPied[posActuelPied][directionSouhaite]);
+     	Serial.print(" ");
+    	Serial.println(dirActuelPied);
+  	#endif
 }
 
 int attaqueAveugle() {
@@ -218,20 +243,27 @@ int attaqueAveugle() {
   			et on boucle pendant 3 pas de chaque cote sauf si detection (si on a implementer les interruptions)
   			- puis on passe a l'ETAT CHERCHE_ADV
   		*/
-	avance(1);
+	avance(DIR_AVANT);
+	Serial.println("dir DIR_AVANT");
+	delay(2000);
 	detection();
-	avance(0);
+	avance(DIR_DROITE);
+	Serial.println("dir DIR_DROITE");
 	detection();
+	avance(DIR_AVANT);
+	Serial.println("dir DIR_AVANT");
+	avance(DIR_ARRIERE);
+	Serial.println("dir DIR_ARRIERE");
 }
 
 void loop() {
-	switch (s_state) {
+	switch (sState) {
 		case DEPART:
 			#ifdef DEBUG
         			Serial.println("DEPART");
 			#endif
 			buttonPressed=identifyButtonPress();
-			s_state_next=ATT_5_SEC; 
+			sStateNext=ATT_5_SEC; 
 		break;
 		case ATT_5_SEC:
 			#ifdef SLOW
@@ -241,21 +273,21 @@ void loop() {
 				Serial.println("ATT_5_SEC");
 			#endif
 			wait();
-			s_state_next=JUPE;
+			sStateNext=JUPE;
 		break;
 		case JUPE:
 			#ifdef DEBUG
 				Serial.println("JUPE DEPART");
 			#endif
 			// rotationJupe();
-			s_state_next=ATTAQUE_AVEUGLE;
+			sStateNext=ATTAQUE_AVEUGLE;
 		break;
 		case ATTAQUE_AVEUGLE:
 			#ifdef DEBUG
 				Serial.println("ATTAQUE_AVEUGLE");
 			#endif
 			attaqueAveugle();
-			s_state_next=CHERCHE_ADV;
+			sStateNext=CHERCHE_ADV;
 		break;
 		case ATTAQUE:
 			#ifdef DEBUG
@@ -267,7 +299,7 @@ void loop() {
 			avance(1); // 1 & changer par la valeur de la direcion (variable)
 			detect=detection();
 			if (detect == 0) {
-				s_state_next=CHERCHE_ADV;
+				sStateNext=CHERCHE_ADV;
 //manu
 			}
 		break;
@@ -279,10 +311,10 @@ void loop() {
 // xavier fonction detection			detect=detection();
 			/* if find someone ATTAQUE*/
 			if (detect == 1) {
-				s_state_next=ATTAQUE;
+				sStateNext=ATTAQUE;
 			}
 			
 		break;
 	}
-	s_state = s_state_next;
+	sState = sStateNext;
 }
