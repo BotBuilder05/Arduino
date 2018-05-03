@@ -81,13 +81,14 @@ void monter() {
     */
     servo.write(POSITION_POSEE);
 }
+      int cpt=0;
 
 void Robot50HzInterrupt() {   
     //int valeurLue=5; //debug
     
     if (cpt==5){
       beDetect = detecter();
-      int cpt=0;
+      cpt=0;
     }
     cpt+=1;
     
@@ -99,7 +100,7 @@ void Robot50HzInterrupt() {
 void setup() {
 
   int CalibrationIR;
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   servo.attach(servoPin);
   digitalWrite(ledPin, LOW);

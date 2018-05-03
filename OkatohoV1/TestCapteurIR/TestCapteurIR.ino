@@ -14,7 +14,7 @@ int capteurList[4] = {capteurIRavant, capteurIRdroit, capteurIRarriere, capteurI
 int maxarray=sizeof(capteurList)/sizeof(*capteurList);
 
 void setup() {
-	Serial.begin(115200);
+	Serial.begin(9600);
     
 	pinMode(capteurIRavant, INPUT);
 	pinMode(capteurIRdroit, INPUT);
