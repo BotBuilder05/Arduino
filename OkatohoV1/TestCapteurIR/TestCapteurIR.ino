@@ -27,7 +27,7 @@ void lectureCapteur(int capteur) {
 	int valeurLue=0;
 
 	valeurLue = analogRead(capteur);
-	Serial.print("Avant: ");
+	Serial.print(capteur, " : ");
 	Serial.println(valeurLue);
 	delay(500);
 }
