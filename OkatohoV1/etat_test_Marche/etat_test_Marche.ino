@@ -1,3 +1,4 @@
+
 #define DEBUG
 
 #define DEPART 0
@@ -15,7 +16,7 @@
 #define SERVO_M 9
 
 #include <Servo.h>
-
+//#include <arduino.h>
 Servo servoD;  // create servo object to control a servo
 // twelve servo objects can be created on most boards
 Servo servoM;
@@ -58,10 +59,10 @@ const int POS_ARRIERE = 1;
 
 int Tab_Pos_Pied[2] = {10,170};
 
-const int DIR_AVANT = 2;
-const int DIR_DROITE = 1;
-const int DIR_ARRIERE = 0;
-const int DIR_GAUCHE = 3;
+const int DIR_AVANT = 0;
+const int DIR_GAUCHE = 1;
+const int DIR_ARRIERE = 2;
+const int DIR_DROITE = 3;
 
 int Tab_Dir_Pied[2][4]={
   {67,112,157,22},
@@ -73,16 +74,26 @@ int Dir_Souhaite_pied ;
 const int HAUTE_AVANT = 0;
 const int HAUTE_ARRIERE = 1;
 boolean Pos_Actuel_pied = 0 ;
-int Tempo_Servo_D = 700;
-int Tempo_Servo_M = 700;
+int tempoServoD = 700;
+int tempoServoM = 800;
 
 int tab_sensor0[180];
 int val_max;
 int degree_adv = 0;
+
+// valeur absolu
+int absolu(int valeur){
+  if(valeur <= 0){
+    valeur = (valeur * (-1));
+    return valeur;
+  }
+}
+
 //fonction tempo servo Direction
 void tempoD (int tempo_base){
-  int tempo_dir = (((Dir_Souhaite_pied - Dir_Actuel_Pied)*tempo_base)/90);
-  if(tempo_dir <=0){tempo_dir=tempo_dir*-1;}
+  int tempo_dir = (((Dir_Souhaite_pied - Dir_Actuel_Pied)/90*tempo_base));
+  //if(tempo_dir <=0){tempo_dir=tempo_dir*-1;}
+  tempo_dir = absolu(tempo_dir);
   #ifdef DEBUG
     Serial.print("Direction actuel du pied ");
     Serial.println(Dir_Actuel_Pied);
@@ -103,19 +114,20 @@ void Avance(int Direction_Souhaite){
     Serial.print(" POs ");
     Serial.println(Pos_Actuel_pied);
   #endif
-  tempoD(Tempo_Servo_D); // delais si position pas bonne court si 90 ou -90 long si 180
+  tempoD(tempoServoD); // delais si position pas bonne court si 90 ou -90 long si 180
   servoM.write(Tab_Pos_Pied[Pos_Actuel_pied]);
   #ifdef DEBUG
     Serial.print("position pied ");
     Serial.println(Pos_Actuel_pied);
   #endif
+  Dir_Actuel_Pied = Tab_Dir_Pied[Pos_Actuel_pied][Direction_Souhaite];
   Pos_Actuel_pied =! Pos_Actuel_pied;
   #ifdef DEBUG
     Serial.print("position OPO pied ");
     Serial.println(Pos_Actuel_pied);
   #endif
-  delay(Tempo_Servo_M);
-  Dir_Actuel_Pied = Tab_Dir_Pied[Pos_Actuel_pied][Direction_Souhaite];
+  delay(tempoServoM);
+  //Dir_Actuel_Pied = Tab_Dir_Pied[Pos_Actuel_pied][Direction_Souhaite];
   #ifdef DEBUG
     Serial.print("position pied ");
     Serial.print(Tab_Dir_Pied[Pos_Actuel_pied][Direction_Souhaite]);
@@ -195,10 +207,16 @@ void loop() {
     break;
     case AVANCE:
       while (true){
-        delay(3000);
-        Avance(DIR_GAUCHE);
-         delay(3000);
-        Avance(DIR_ARRIERE);
+        delay(1000);
+        //Avance(DIR_GAUCHE);
+        // delay(3000);
+       // Avance(DIR_ARRIERE);
+       servoM.write(Tab_Pos_Pied[POS_AVANT]);
+       delay(1000);
+      // servoD.write(Tab_Dir_Pied[Pos_Actuel_pied][DIR_AVANT]);
+       servoD.write(50);
+       delay(1000);
+       servoD.write(5);
       }
     break;
 /*    case TEST_SERVO:
