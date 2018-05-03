@@ -64,7 +64,7 @@ const int HAUTE_ARRIERE = 1;
 boolean posActuelPied = HAUTE_AVANT ; // memorise la position HAUTE_AVANT ou HAUTE_ARRIERE du pied
 
 int TabPosPied[2] = {10,170};
-int tempoServoD = 700;
+int tempoServoD = 500;
 int tempoServoM = 700;
 
 void setup() {
@@ -184,19 +184,16 @@ void rotationJupe(){
 
 
 //fonction tempo servo Direction
-void tempoD (int tempoBase){
-	int difAngleDir;
-	difAngleDir = (tabDirPied[posActuelPied][dirSouhaitePied] ) - (tabDirPied[posActuelPied][dirActuelPied]);
-	#ifdef DEBUG
-		Serial.print("difAngleDir");
-		Serial.println(difAngleDir);
-	#endif
+void tempoD (long tempoBase){
+	long difAngleDir;
+  long tempoDir; 
+	difAngleDir = (tabDirPied[posActuelPied][dirSouhaitePied] ) - (tabDirPied[!posActuelPied][dirActuelPied]);
   difAngleDir = abs(difAngleDir);
 	#ifdef DEBUG
 		Serial.print("difAngleDir");
 		Serial.println(difAngleDir);
-	#endif
-  	int tempoDir = ((difAngleDir * tempoBase) / 90);
+ 	#endif
+  tempoDir = ((difAngleDir * tempoBase)/ 90);
   	#ifdef DEBUG
     	Serial.print("Direction actuel du pied ");
     	Serial.println(dirActuelPied);
@@ -246,17 +243,25 @@ int attaqueAveugle() {
   			et on boucle pendant 3 pas de chaque cote sauf si detection (si on a implementer les interruptions)
   			- puis on passe a l'ETAT CHERCHE_ADV
   		*/
+
+	for(int compteur = 0; compteur < 2; compteur++)
+{
+  avance(DIR_AVANT);
+  Serial.println("dir DIR_AVANT");
+}
+	detection();
+  
+  for(int compteur = 0; compteur < 5; compteur++)
+{
+  avance(DIR_GAUCHE);
+  Serial.println("dir DIR_GAUCHE");
+  detection();
+  avance(DIR_ARRIERE);
+  Serial.println("dir DIR_ARRIERE");
+  detection();
+}
 	avance(DIR_AVANT);
 	Serial.println("dir DIR_AVANT");
-	delay(2000);
-	detection();
-	avance(DIR_DROITE);
-	Serial.println("dir DIR_DROITE");
-	detection();
-	avance(DIR_AVANT);
-	Serial.println("dir DIR_AVANT");
-	avance(DIR_ARRIERE);
-	Serial.println("dir DIR_ARRIERE");
 }
 
 void loop() {
