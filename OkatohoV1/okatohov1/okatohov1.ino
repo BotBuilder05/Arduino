@@ -181,18 +181,21 @@ void rotationJupe(){
 	digitalWrite(moteurJupe, 1);
 }
 
-// valeur absolu
-int absolu(int valeur){
-  if(valeur <= 0){
-    valeur = (valeur * (-1));
-    return valeur;
-  }
-}
+
 
 //fonction tempo servo Direction
 void tempoD (int tempoBase){
-	int difAngleDir = (tabDirPied[posActuelPied][dirSouhaitePied] ) - (tabDirPied[posActuelPied][dirActuelPied]);
-	difAngleDir = absolu(difAngleDir);
+	int difAngleDir;
+	difAngleDir = (tabDirPied[posActuelPied][dirSouhaitePied] ) - (tabDirPied[posActuelPied][dirActuelPied]);
+	#ifdef DEBUG
+		Serial.print("difAngleDir");
+		Serial.println(difAngleDir);
+	#endif
+  difAngleDir = abs(difAngleDir);
+	#ifdef DEBUG
+		Serial.print("difAngleDir");
+		Serial.println(difAngleDir);
+	#endif
   	int tempoDir = ((difAngleDir * tempoBase) / 90);
   	#ifdef DEBUG
     	Serial.print("Direction actuel du pied ");
