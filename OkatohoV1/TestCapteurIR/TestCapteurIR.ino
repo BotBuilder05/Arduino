@@ -9,7 +9,9 @@ const int capteurIRavant = A6;
 const int capteurIRdroit = A3; 
 const int capteurIRarriere = A1; 
 const int capteurIRgauche = A2; 
-  
+
+int capteurList[4] = {capteurIRavant, capteurIRdroit, capteurIRarriere, capteurIRgauche};
+int maxarray=sizeof(capteurList)/sizeof(*capteurList);
 
 void setup() {
 	Serial.begin(115200);
@@ -21,26 +23,17 @@ void setup() {
   
 }
 
-void loop() {
+void lectureCapteur(int capteur) {
 	int valeurLue=0;
 
-	valeurLue = analogRead(capteurIRavant);
+	valeurLue = analogRead(capteur);
 	Serial.print("Avant: ");
 	Serial.println(valeurLue);
 	delay(500);
+}
 
-	valeurLue = analogRead(capteurIRarriere);
-	Serial.print("Arriere: ");
-	Serial.println(valeurLue);
-	delay(500);
-
-	valeurLue = analogRead(capteurIRdroit);
-	Serial.print("Droit: ");
-	Serial.println(valeurLue);
-	delay(500);
-    
-	valeurLue = analogRead(capteurIRgauche);
-	Serial.print("Gauche: ");
-	Serial.println(valeurLue);
-	delay(500);
+void loop() {
+	for (int i=0;i<maxarray ;i++) {
+		lectureCapteur(i);
+	}
 }
