@@ -63,7 +63,8 @@ const int HAUTE_AVANT = 0;
 const int HAUTE_ARRIERE = 1;
 boolean posActuelPied = HAUTE_AVANT ; // memorise la position HAUTE_AVANT ou HAUTE_ARRIERE du pied
 
-int TabPosPied[2] = {10,170};
+int tabPosPied[2] = {10,170};
+int posCentrePied = 90;
 int tempoServoD = 500;
 int tempoServoM = 700;
 
@@ -87,7 +88,7 @@ void setup() {
 	// On initialise les servos
 	servoM.attach(SERVO_M,850,2220);  // attaches l'objet servo a la pin 9
  	servoD.attach(SERVO_D,700,2700);
- 	servoM.write(TabPosPied[posActuelPied]);
+ 	servoM.write(tabPosPied[posActuelPied]);
 	servoD.write(tabDirPied[posActuelPied][dirActuelPied]);
 	// On initialise la machine d'etat 
 	sState=DEPART;
@@ -107,16 +108,6 @@ int detection() {
 	*/
 	// retourner le capteur qui a detecter  via une variable global ou iun pointeur
 	return detectStatus;
-}
-
-void tourne(int Angle_Souhaite) {
-	/*
-  	- on met le servo de marche (servoM) dans la position basse
-  	- on met le servo de direction (servoD) line 84 de etat marche +10 
-  	- on met le servo de marche (servoM) dans la posistion en debut de fonction tourne 10
-  	- on remet le pied a l'origine on met le servo de direction (servoD) line 84 de etat marche:w
-  	*/
-	return 0;
 }
 
 int identifyButtonPress() {
@@ -214,10 +205,9 @@ void avance(int directionSouhaite){
     	Serial.print("position pied ");
     	Serial.println(posActuelPied);
   	#endif
-  	tempoD(tempoServoD);
-  	//delay(tempoServoD); // delais si position pas bonne court si 90 ou -90 long si 180 a faire!! abs()
+  	tempoD(tempoServoD);    // delais si changement de direction de court si 90° à long si 270° 
   	dirActuelPied = dirSouhaitePied;
-  	servoM.write(TabPosPied[!posActuelPied]);
+  	servoM.write(tabPosPied[!posActuelPied]);
   	posActuelPied =! posActuelPied;
   	#ifdef DEBUG
    		Serial.print("position pied ");
@@ -233,6 +223,33 @@ void avance(int directionSouhaite){
   	#endif
 }
 
+void tourne(int angleSouhaite) {		// max 35° ideal entre 5° et 25° (10)
+  	int angleInitial;
+  	int anglePlusX;
+  	int tempoTourne;
+  	angleInitial = tabDirPied[posActuelPied][dirActuelPied];
+  	anglePlusX = angleInitial + angleSouhaite;
+  	tempoTourne = ((tempoServoD / 90) * angleSouhaite);
+	#ifdef DEBUG
+      Serial.print("angleInitial");
+      Serial.println(angleInitial);
+      Serial.print("angleSouhaite");
+      Serial.println(angleSouhaite);
+      Serial.print("anglePlusX");
+      Serial.println(anglePlusX);
+      Serial.print("tempoTourne");
+      Serial.println(tempoTourne);
+    #endif
+    servoM.write(posCentrePied); 	// on met le servo de marche (servoM) dans la position basse
+    delay(tempoServoM / 2);
+    servoD.write(anglePlusX);		// on met le servo de direction (servoD)  + X° de sa position actuel
+    delay(tempoTourne);
+    servoM.write(tabPosPied[posActuelPied]);	// on remet le servo de marche (servoM) dans la posistion en debut de fonction tourne
+    delay(tempoServoM / 2);
+	servoD.write(angleInitial);		//on remet le pied a l'origine : on remet le servo de direction (servoD) dans sa position initial
+	delay(tempoTourne);
+}
+
 int attaqueAveugle() {
 	// retourne 5 ou 6 (Attaque ou recherche_adv)
 		/* 	- on commence par devant ou gauche en fonction du bouton apuyer pour le demarrage
@@ -246,11 +263,19 @@ int attaqueAveugle() {
 
 	for(int compteur = 0; compteur < 2; compteur++)
 {
-  avance(DIR_AVANT);
+  //avance(DIR_AVANT);
   Serial.println("dir DIR_AVANT");
 }
+	avance(DIR_AVANT);
+	Serial.println("tourne");
 	detection();
-  
+	  delay(2000);
+   tourne(10);
+   delay(2000);
+   tourne(40);
+     delay(2000);
+   tourne(10);
+     delay(2000);
   for(int compteur = 0; compteur < 5; compteur++)
 {
   avance(DIR_GAUCHE);
