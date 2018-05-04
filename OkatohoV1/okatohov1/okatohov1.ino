@@ -177,21 +177,21 @@ void rotationJupe(){
 //fonction tempo servo Direction
 void tempoD (long tempoBase){
 	long difAngleDir;
-  long tempoDir; 
+	long tempoDir; 
 	difAngleDir = (tabDirPied[posActuelPied][dirSouhaitePied] ) - (tabDirPied[!posActuelPied][dirActuelPied]);
-  difAngleDir = abs(difAngleDir);
+	difAngleDir = abs(difAngleDir);
 	#ifdef DEBUG
 		Serial.print("difAngleDir");
 		Serial.println(difAngleDir);
  	#endif
-  tempoDir = ((difAngleDir * tempoBase)/ 90);
+	tempoDir = ((difAngleDir * tempoBase)/ 90);
   	#ifdef DEBUG
-    	Serial.print("Direction actuel du pied ");
-    	Serial.println(dirActuelPied);
-    	Serial.print(" Direction souhaite du pied ");
-    	Serial.println(dirSouhaitePied);
-    	Serial.print(" Tempo Direction ");
-    	Serial.println(tempoDir);
+	    	Serial.print("Direction actuel du pied ");
+	    	Serial.println(dirActuelPied);
+	    	Serial.print(" Direction souhaite du pied ");
+	    	Serial.println(dirSouhaitePied);
+	    	Serial.print(" Tempo Direction ");
+		Serial.println(tempoDir);
   	#endif
   	delay(tempoDir);
 }
@@ -200,10 +200,10 @@ void avance(int directionSouhaite){
 	dirSouhaitePied = directionSouhaite;
   	servoD.write(tabDirPied[posActuelPied][directionSouhaite]);
   	#ifdef DEBUG
-    	Serial.print("dir pied ");
+ 	   	Serial.print("dir pied ");
    		Serial.print(directionSouhaite);
-    	Serial.print("position pied ");
-    	Serial.println(posActuelPied);
+    		Serial.print("position pied ");
+    		Serial.println(posActuelPied);
   	#endif
   	tempoD(tempoServoD);    // delais si changement de direction de court si 90° à long si 270° 
   	dirActuelPied = dirSouhaitePied;
@@ -211,80 +211,78 @@ void avance(int directionSouhaite){
   	posActuelPied =! posActuelPied;
   	#ifdef DEBUG
    		Serial.print("position pied ");
-    	Serial.println(posActuelPied);
+	    	Serial.println(posActuelPied);
   	#endif
   	delay(tempoServoM);
   
   	#ifdef DEBUG
-    	Serial.print("dir pied ");
-    	Serial.print(tabDirPied[posActuelPied][directionSouhaite]);
-     	Serial.print(" ");
-    	Serial.println(dirActuelPied);
+	    	Serial.print("dir pied ");
+	    	Serial.print(tabDirPied[posActuelPied][directionSouhaite]);
+	     	Serial.print(" ");
+	    	Serial.println(dirActuelPied);
   	#endif
 }
 
 void tourne(int angleSouhaite) {		// max 35° ideal entre 5° et 25° (10)
-  	int angleInitial;
-  	int anglePlusX;
-  	int tempoTourne;
-  	angleInitial = tabDirPied[posActuelPied][dirActuelPied];
-  	anglePlusX = angleInitial + angleSouhaite;
-  	tempoTourne = ((tempoServoD / 90) * angleSouhaite);
+	int angleInitial;
+	int anglePlusX;
+	int tempoTourne;
+	angleInitial = tabDirPied[posActuelPied][dirActuelPied];
+	anglePlusX = angleInitial + angleSouhaite;
+	tempoTourne = ((tempoServoD / 90) * angleSouhaite);
 	#ifdef DEBUG
-      Serial.print("angleInitial");
-      Serial.println(angleInitial);
-      Serial.print("angleSouhaite");
-      Serial.println(angleSouhaite);
-      Serial.print("anglePlusX");
-      Serial.println(anglePlusX);
-      Serial.print("tempoTourne");
-      Serial.println(tempoTourne);
-    #endif
-    servoM.write(posCentrePied); 	// on met le servo de marche (servoM) dans la position basse
-    delay(tempoServoM / 2);
-    servoD.write(anglePlusX);		// on met le servo de direction (servoD)  + X° de sa position actuel
-    delay(tempoTourne);
-    servoM.write(tabPosPied[posActuelPied]);	// on remet le servo de marche (servoM) dans la posistion en debut de fonction tourne
-    delay(tempoServoM / 2);
+		Serial.print("angleInitial");
+		Serial.println(angleInitial);
+		Serial.print("angleSouhaite");
+		Serial.println(angleSouhaite);
+		Serial.print("anglePlusX");
+		Serial.println(anglePlusX);
+		Serial.print("tempoTourne");
+		Serial.println(tempoTourne);
+	#endif
+	servoM.write(posCentrePied); 	// on met le servo de marche (servoM) dans la position basse
+	delay(tempoServoM / 2);
+	servoD.write(anglePlusX);		// on met le servo de direction (servoD)  + X° de sa position actuel
+	delay(tempoTourne);
+	servoM.write(tabPosPied[posActuelPied]);	// on remet le servo de marche (servoM) dans la posistion en debut de fonction tourne
+	delay(tempoServoM / 2);
 	servoD.write(angleInitial);		//on remet le pied a l'origine : on remet le servo de direction (servoD) dans sa position initial
 	delay(tempoTourne);
 }
 
 int attaqueAveugle() {
 	// retourne 5 ou 6 (Attaque ou recherche_adv)
-		/* 	- on commence par devant ou gauche en fonction du bouton apuyer pour le demarrage
-  			- avance(devant) ou gauche
- 			- apeler la fonction detect -> si Vrai : passe a l'ETAT Attaque (avec direction de detec)
-  			- avance(devant) ou arriere
-  			- apeler la fonction detect -> si vrai : idem
-  			et on boucle pendant 3 pas de chaque cote sauf si detection (si on a implementer les interruptions)
-  			- puis on passe a l'ETAT CHERCHE_ADV
-  		*/
+	/* 	- on commence par devant ou gauche en fonction du bouton apuyer pour le demarrage
+  		- avance(devant) ou gauche
+ 		- apeler la fonction detect -> si Vrai : passe a l'ETAT Attaque (avec direction de detec)
+  		- avance(devant) ou arriere
+  		- apeler la fonction detect -> si vrai : idem
+  		et on boucle pendant 3 pas de chaque cote sauf si detection (si on a implementer les interruptions)
+  		- puis on passe a l'ETAT CHERCHE_ADV
+  	*/
 
-	for(int compteur = 0; compteur < 2; compteur++)
-{
-  //avance(DIR_AVANT);
-  Serial.println("dir DIR_AVANT");
-}
+	for(int compteur = 0; compteur < 2; compteur++) {
+		//avance(DIR_AVANT);
+		Serial.println("dir DIR_AVANT");
+	}
 	avance(DIR_AVANT);
 	Serial.println("tourne");
 	detection();
-	  delay(2000);
-   tourne(10);
-   delay(2000);
-   tourne(40);
-     delay(2000);
-   tourne(10);
-     delay(2000);
-  for(int compteur = 0; compteur < 5; compteur++)
-{
-  avance(DIR_GAUCHE);
-  Serial.println("dir DIR_GAUCHE");
-  detection();
-  avance(DIR_ARRIERE);
-  Serial.println("dir DIR_ARRIERE");
-  detection();
-}
+	delay(2000);
+	tourne(10);
+	delay(2000);
+	tourne(40);
+	delay(2000);
+	tourne(10);
+	delay(2000);
+	for(int compteur = 0; compteur < 5; compteur++){
+		avance(DIR_GAUCHE);
+		Serial.println("dir DIR_GAUCHE");
+		detection();
+		avance(DIR_ARRIERE);
+		Serial.println("dir DIR_ARRIERE");
+		detection();
+	}
 	avance(DIR_AVANT);
 	Serial.println("dir DIR_AVANT");
 }
