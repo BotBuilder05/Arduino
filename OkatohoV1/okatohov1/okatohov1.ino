@@ -126,6 +126,8 @@ int lectureCapteur(int capteur) {
 int detection() {
 	int detectStatus;
 	int seuil=100;
+	int capteur;
+	int valueCapteur[4];
 	/* This finction should
 		* return 0 if it detects 
 		* return 1 othewise
@@ -137,10 +139,10 @@ int detection() {
 	- Affecte la variable de direction si detection
 	*/
 	// retourner le capteur qui a detecter  via une variable global ou iun pointeur
-        for (int i=0;i<maxarray ;i++) {
+        for (int i=0;i<maxarray;i++) {
                 valueCapteur[i]=lectureCapteur(i);
         }
-	for (int i=0; i<maxarray; i++) {
+	for (int i=0; i<maxarray;i++) {
 		if (valueCapteur[i] > seuil) {  // On assume pour le moment qu'une seule valeur peut etre superieure au seuil
 		capteur=i;
 		Serial.print("capteur : ");
