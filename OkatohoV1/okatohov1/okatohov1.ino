@@ -106,7 +106,7 @@ void setup() {
         pinMode(capteurIRarriere, INPUT);
         pinMode(capteurIRgauche, INPUT);
 	// On initialise la machine d'etat 
-	sState=DEPART;
+	sState=CHERCHE_ADV;
 }
 
 
@@ -115,6 +115,9 @@ int lectureCapteur(int capteur) {
         int valeurLue=0;
 
         valeurLue = analogRead(capteur);
+        if(valeurLue>900){
+             valeurLue = analogRead(capteur);
+        }
         Serial.print(capteur);
         Serial.print(" : ");
         Serial.println(valeurLue);
@@ -125,7 +128,7 @@ int lectureCapteur(int capteur) {
 
 int detection() {
 	int detectStatus;
-	int seuil=100;
+	int seuil=500;
 	int capteur;
 	int valueCapteur[4];
 	/* This finction should
@@ -140,15 +143,19 @@ int detection() {
 	*/
 	// retourner le capteur qui a detecter  via une variable global ou iun pointeur
         for (int i=0;i<maxarray;i++) {
-                valueCapteur[i]=lectureCapteur(i);
+                valueCapteur[i]=lectureCapteur(capteurList[i]);
         }
 	for (int i=0; i<maxarray;i++) {
 		if (valueCapteur[i] > seuil) {  // On assume pour le moment qu'une seule valeur peut etre superieure au seuil
-		capteur=i;
-		Serial.print("capteur : ");
-		Serial.print(capteur);
-		Serial.print("  ");
-		Serial.println(capteurList[capteur]);
+			capteur=i;
+			Serial.print("capteur : ");
+			Serial.print(capteur);
+			Serial.print("  ");
+			Serial.println(capteurList[capteur]);
+			detectStatus = 1;
+		}
+		else{
+			detectStatus = 0;
 		}
 	}
 	return detectStatus;
@@ -388,7 +395,7 @@ void loop() {
 				Serial.println("CHERCHE_ADV");
 			#endif
 //manu founion tourne			tourne(10);
-// xavier fonction detection			detect=detection();
+			detect=detection();
 			/* if find someone ATTAQUE*/
 			if (detect == 1) {
 				sStateNext=ATTAQUE;
