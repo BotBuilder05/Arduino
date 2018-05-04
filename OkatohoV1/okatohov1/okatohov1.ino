@@ -145,7 +145,7 @@ int detection() {
 		capteur=i;
 		Serial.print("capteur : ");
 		Serial.print(capteur);
-		Serial.print(" ");
+		Serial.print("  ");
 		Serial.println(capteurList[capteur]);
 		}
 	}
