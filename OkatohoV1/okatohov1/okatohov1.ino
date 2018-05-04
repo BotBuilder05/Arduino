@@ -11,6 +11,7 @@
   - si non Tourne 10°
 */
 #define DEBUG
+#define DEBUG_Detection
 //#define SLOW 
 
 //Variable Machine d'etat
@@ -74,9 +75,9 @@ const int capteurIRdroit = A3;
 const int capteurIRarriere = A1;
 const int capteurIRgauche = A2;
 
-int capteurList[4] = {capteurIRavant, capteurIRdroit, capteurIRarriere, capteurIRgauche};
+int capteurList[4] = {capteurIRavant, capteurIRgauche, capteurIRarriere, capteurIRdroit};
 int maxarray=sizeof(capteurList)/sizeof(*capteurList);
-
+int capteur;
 
 void setup() {
 	#ifdef DEBUG
@@ -118,9 +119,11 @@ int lectureCapteur(int capteur) {
         if(valeurLue>900){
              valeurLue = analogRead(capteur);
         }
-        Serial.print(capteur);
-        Serial.print(" : ");
-        Serial.println(valeurLue);
+			#ifdef DEBUG_Detection
+        		Serial.print(capteur);
+        		Serial.print(" : ");
+        		Serial.println(valeurLue);
+        	#endif
         delay(15); // En theorie on peut encore descendrejusqu'a 5ms vu que chaque capteur est lisible toutes les 20ms(datasheet)
 	return valeurLue;
 }
@@ -128,8 +131,7 @@ int lectureCapteur(int capteur) {
 
 int detection() {
 	int detectStatus;
-	int seuil=500;
-	int capteur;
+	int seuil=300;
 	int valueCapteur[4];
 	/* This finction should
 		* return 0 if it detects 
@@ -148,13 +150,17 @@ int detection() {
 	for (int i=0; i<maxarray;i++) {
 		if (valueCapteur[i] > seuil) {  // On assume pour le moment qu'une seule valeur peut etre superieure au seuil
 			capteur=i;
-			Serial.print("capteur : ");
-			Serial.print(capteur);
-			Serial.print("  ");
-			Serial.println(capteurList[capteur]);
+			#ifdef DEBUG_Detection
+				Serial.print("capteur : ");
+				Serial.print(capteur);
+				Serial.print("  ");
+				Serial.println(capteurList[capteur]);
+			#endif
 			detectStatus = 1;
+			break;
 		}
 		else{
+			Serial.print("rien ");
 			detectStatus = 0;
 		}
 	}
@@ -383,7 +389,7 @@ void loop() {
 			/*	- Avance x pas
 				- detect
 			*/
-			avance(1); // 1 & changer par la valeur de la direcion (variable)
+			avance(capteur); // 1 & changer par la valeur de la direcion (variable)
 			detect=detection();
 			if (detect == 0) {
 				sStateNext=CHERCHE_ADV;
@@ -399,6 +405,9 @@ void loop() {
 			/* if find someone ATTAQUE*/
 			if (detect == 1) {
 				sStateNext=ATTAQUE;
+			}
+			else{
+				sStateNext=CHERCHE_ADV;
 			}
 			
 		break;
