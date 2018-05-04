@@ -154,6 +154,11 @@ int detection() {
 	return detectStatus;
 }
 
+void Robot50HzInterrupt() {
+	Serial.print("  ");
+}
+
+
 int identifyButtonPress() {
 	// 0 -> bouton droite
 	// 1 -> bouton gauche // oeil -> led oeil 
