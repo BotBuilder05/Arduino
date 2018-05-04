@@ -68,6 +68,16 @@ int posCentrePied = 90;
 int tempoServoD = 500;
 int tempoServoM = 700;
 
+// Capteurs
+const int capteurIRavant = A6;
+const int capteurIRdroit = A3;
+const int capteurIRarriere = A1;
+const int capteurIRgauche = A2;
+
+int capteurList[4] = {capteurIRavant, capteurIRdroit, capteurIRarriere, capteurIRgauche};
+int maxarray=sizeof(capteurList)/sizeof(*capteurList);
+
+
 void setup() {
 	#ifdef DEBUG
 		Serial.begin(9600 );
@@ -90,12 +100,32 @@ void setup() {
  	servoD.attach(SERVO_D,700,2700);
  	servoM.write(tabPosPied[posActuelPied]);
 	servoD.write(tabDirPied[posActuelPied][dirActuelPied]);
+	// On initialise les capteurs
+        pinMode(capteurIRavant, INPUT);
+        pinMode(capteurIRdroit, INPUT);
+        pinMode(capteurIRarriere, INPUT);
+        pinMode(capteurIRgauche, INPUT);
 	// On initialise la machine d'etat 
 	sState=DEPART;
 }
 
+
+
+int lectureCapteur(int capteur) {
+        int valeurLue=0;
+
+        valeurLue = analogRead(capteur);
+        Serial.print(capteur);
+        Serial.print(" : ");
+        Serial.println(valeurLue);
+        delay(15); // En theorie on peut encore descendrejusqu'a 5ms vu que chaque capteur est lisible toutes les 20ms(datasheet)
+	return valeurLue;
+}
+
+
 int detection() {
 	int detectStatus;
+	int seuil=100;
 	/* This finction should
 		* return 0 if it detects 
 		* return 1 othewise
@@ -107,6 +137,18 @@ int detection() {
 	- Affecte la variable de direction si detection
 	*/
 	// retourner le capteur qui a detecter  via une variable global ou iun pointeur
+        for (int i=0;i<maxarray ;i++) {
+                valueCapteur[i]=lectureCapteur(i);
+        }
+	for (int i=0; i<maxarray; i++) {
+		if (valueCapteur[i] > seuil) {  // On assume pour le moment qu'une seule valeur peut etre superieure au seuil
+		capteur=i;
+		Serial.print("capteur : ");
+		Serial.print(capteur);
+		Serial.print(" ");
+		Serial.println(capteurList[capteur]);
+		}
+	}
 	return detectStatus;
 }
 
