@@ -106,7 +106,7 @@ void setup() {
         pinMode(capteurIRarriere, INPUT);
         pinMode(capteurIRgauche, INPUT);
 	// On initialise la machine d'etat 
-	sState=DEPART;
+	sState=CHERCHE_ADV;
 }
 
 
@@ -149,6 +149,7 @@ int detection() {
 		Serial.print(capteur);
 		Serial.print("  ");
 		Serial.println(capteurList[capteur]);
+		detectStatus=1;
 		}
 	}
 	return detectStatus;
@@ -388,7 +389,7 @@ void loop() {
 				Serial.println("CHERCHE_ADV");
 			#endif
 //manu founion tourne			tourne(10);
-// xavier fonction detection			detect=detection();
+			detect=detection();
 			/* if find someone ATTAQUE*/
 			if (detect == 1) {
 				sStateNext=ATTAQUE;
