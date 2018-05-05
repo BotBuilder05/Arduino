@@ -206,7 +206,7 @@ int identifyButtonPress() {
 		digitalWrite(ledChapeauPin, ledOff);
 		digitalWrite(ledOeilPin, ledOn);
 		buttonPressed=0;
-		sStateNext=ATT_5_SEC;
+		//sStateNext=ATT_5_SEC;
 	}
 	else if (buttonChapeauDStartState == 0) {
 		#ifdef DEBUG
@@ -217,9 +217,9 @@ int identifyButtonPress() {
 		digitalWrite(ledChapeauPin, ledOn);
 		digitalWrite(ledOeilPin, ledOff);
 		buttonPressed=1;
-		sStateNext=ATT_5_SEC;
+		//sStateNext=ATT_5_SEC;
 	}
-	else {
+	/*else {
 		#ifdef DEBUG
 			Serial.println("START - Waiting for Start button to be pressed - Corp led on");
 		#endif
@@ -227,11 +227,29 @@ int identifyButtonPress() {
 		digitalWrite(ledCorp2Pin, ledOn);
 		sStateNext=DEPART; //notneeded ?
 	}
+	*/
 	return buttonPressed;
 }
 
 void wait(int tmp){
-	delay(tmp);
+	if(buttonPressed == 0){
+		digitalWrite(ledChapeauPin, ledOff);
+		for(int i=0; i<5; i++){
+		    digitalWrite(ledOeilPin, ledOn);
+			delay(tmp/10);
+			digitalWrite(ledOeilPin, ledOff);
+			delay(tmp/10);
+		}
+	}
+	else if(buttonPressed == 1){
+	    digitalWrite(ledOeilPin, ledOff);
+		for(int i=0; i<5; i++){
+		    digitalWrite(ledChapeauPin, ledOn);
+			delay(tmp/10);
+			digitalWrite(ledChapeauPin, ledOff);
+			delay(tmp/10);
+		}
+	}
 }
 
 void rotationJupe(){
@@ -359,6 +377,8 @@ void loop() {
 			#ifdef DEBUG
         			Serial.println("DEPART");
 			#endif
+        	digitalWrite(ledChapeauPin, ledOn);
+			digitalWrite(ledOeilPin, ledOn);
 			buttonPressed=identifyButtonPress();
 			sStateNext=ATT_5_SEC; 
 		break;
@@ -374,12 +394,14 @@ void loop() {
 				Serial.println("JUPE DEPART");
 			#endif
 			rotationJupe();
+			digitalWrite(ledCorp1Pin, ledOn);
 			sStateNext=ATTAQUE_AVEUGLE;
 		break;
 		case ATTAQUE_AVEUGLE:
 			#ifdef DEBUG
 				Serial.println("ATTAQUE_AVEUGLE");
 			#endif
+			digitalWrite(ledOeilPin, ledOn);
 			sStateNext=attaqueAveugle();
 		break;
 		case ATTAQUE:
@@ -389,9 +411,13 @@ void loop() {
 			/*	- Avance x pas
 				- detect
 			*/
+			digitalWrite(ledOeilPin, ledOn);	
+			digitalWrite(ledChapeauPin, ledOff);
 			for(int i=0; i<4; i++){
 				avance(capteurQuiDetect); 
 			}
+			digitalWrite(ledOeilPin, ledOff);	
+			digitalWrite(ledChapeauPin, ledOn);
 			detect=detection();
 			if (detect == 0) {
 				sStateNext=CHERCHE_ADV;
@@ -401,6 +427,8 @@ void loop() {
 			#ifdef DEBUG
 				Serial.println("CHERCHE_ADV");
 			#endif
+			digitalWrite(ledOeilPin, ledOff);	
+			digitalWrite(ledChapeauPin, ledOn);
 			tourne(10);
 			detect=detection();
 			/* if find someone ATTAQUE*/
