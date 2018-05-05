@@ -25,7 +25,8 @@
 // Pin definition
 const int buttonOeilGStartPin=14;
 const int buttonChapeauDStartPin=12;
-const int moteurJupe = 5;
+const int moteurJupe5V = 5;
+const int moteurJupeGND = 6;
 
 const int ledOeilPin=11;
 const int ledChapeauPin=4;
@@ -77,7 +78,7 @@ const int capteurIRgauche = A2;
 
 int capteurList[4] = {capteurIRavant, capteurIRgauche, capteurIRarriere, capteurIRdroit};
 int maxarray=sizeof(capteurList)/sizeof(*capteurList);
-int capteur;
+int capteurQuiDetect;
 
 void setup() {
 	#ifdef DEBUG
@@ -106,8 +107,14 @@ void setup() {
         pinMode(capteurIRdroit, INPUT);
         pinMode(capteurIRarriere, INPUT);
         pinMode(capteurIRgauche, INPUT);
+  // On initialise la jupe
+        pinMode(moteurJupe5V, OUTPUT);
+        pinMode(moteurJupeGND, OUTPUT);
+        digitalWrite(moteurJupe5V, 0);
+        digitalWrite(moteurJupeGND, 0);
+        
 	// On initialise la machine d'etat 
-	sState=CHERCHE_ADV;
+	sState=DEPART;
 }
 
 
@@ -131,7 +138,7 @@ int lectureCapteur(int capteur) {
 
 int detection() {
 	int detectStatus;
-	int seuil=300;
+	int seuil=340;
 	int valueCapteur[4];
 	/* This finction should
 		* return 0 if it detects 
@@ -144,23 +151,23 @@ int detection() {
 	- Affecte la variable de direction si detection
 	*/
 	// retourner le capteur qui a detecter  via une variable global ou iun pointeur
-        for (int i=0;i<maxarray;i++) {
-                valueCapteur[i]=lectureCapteur(capteurList[i]);
-        }
+    for (int i=0;i<maxarray;i++) {
+        valueCapteur[i]=lectureCapteur(capteurList[i]);
+    }
 	for (int i=0; i<maxarray;i++) {
 		if (valueCapteur[i] > seuil) {  // On assume pour le moment qu'une seule valeur peut etre superieure au seuil
-			capteur=i;
+			capteurQuiDetect=i;
 			#ifdef DEBUG_Detection
-				Serial.print("capteur : ");
-				Serial.print(capteur);
+				Serial.print("capteurQuiDetect : ");
+				Serial.print(capteurQuiDetect);
 				Serial.print("  ");
-				Serial.println(capteurList[capteur]);
+				Serial.println(capteurList[capteurQuiDetect]);
 			#endif
 			detectStatus = 1;
 			break;
 		}
 		else{
-			Serial.print("rien ");
+			Serial.println("rien ");
 			detectStatus = 0;
 		}
 	}
@@ -223,15 +230,15 @@ int identifyButtonPress() {
 	return buttonPressed;
 }
 
-void wait(){
-	delay(4900);
+void wait(int tmp){
+	delay(tmp);
 }
 
 void rotationJupe(){
 	#ifdef DEBUG
 		Serial.println("JUPE - Mise en route de la jupe");
 	#endif
-	digitalWrite(moteurJupe, 1);
+	digitalWrite(moteurJupe5V, 1);
 }
 
 
@@ -322,31 +329,28 @@ int attaqueAveugle() {
   		et on boucle pendant 3 pas de chaque cote sauf si detection (si on a implementer les interruptions)
   		- puis on passe a l'ETAT CHERCHE_ADV
   	*/
-
-	for(int compteur = 0; compteur < 2; compteur++) {
-		//avance(DIR_AVANT);
-		Serial.println("dir DIR_AVANT");
+  	int etatSuivant = CHERCHE_ADV;
+	if(buttonPressed == 0){
+		for(int i=0; i<5; i++){
+		    avance(DIR_GAUCHE);
+			avance(DIR_ARRIERE);
+		    if(detection()){
+				etatSuivant=ATTAQUE;
+				break;
+		    }
+		}
 	}
-	avance(DIR_AVANT);
-	Serial.println("tourne");
-	detection();
-	delay(2000);
-	tourne(10);
-	delay(2000);
-	tourne(40);
-	delay(2000);
-	tourne(10);
-	delay(2000);
-	for(int compteur = 0; compteur < 5; compteur++){
-		avance(DIR_GAUCHE);
-		Serial.println("dir DIR_GAUCHE");
-		detection();
-		avance(DIR_ARRIERE);
-		Serial.println("dir DIR_ARRIERE");
-		detection();
+	else{
+		for(int i=0; i<5; i++){
+		    avance(DIR_AVANT);
+			avance(DIR_DROITE);
+		    if(detection()){
+				etatSuivant=ATTAQUE;
+				break;
+		    }
+		}
 	}
-	avance(DIR_AVANT);
-	Serial.println("dir DIR_AVANT");
+	return etatSuivant;
 }
 
 void loop() {
@@ -359,28 +363,24 @@ void loop() {
 			sStateNext=ATT_5_SEC; 
 		break;
 		case ATT_5_SEC:
-			#ifdef SLOW
-				delay(attente);
-			#endif
 			#ifdef DEBUG
 				Serial.println("ATT_5_SEC");
 			#endif
-			wait();
+			wait(4900);
 			sStateNext=JUPE;
 		break;
 		case JUPE:
 			#ifdef DEBUG
 				Serial.println("JUPE DEPART");
 			#endif
-			// rotationJupe();
+			rotationJupe();
 			sStateNext=ATTAQUE_AVEUGLE;
 		break;
 		case ATTAQUE_AVEUGLE:
 			#ifdef DEBUG
 				Serial.println("ATTAQUE_AVEUGLE");
 			#endif
-			attaqueAveugle();
-			sStateNext=CHERCHE_ADV;
+			sStateNext=attaqueAveugle();
 		break;
 		case ATTAQUE:
 			#ifdef DEBUG
@@ -389,18 +389,19 @@ void loop() {
 			/*	- Avance x pas
 				- detect
 			*/
-			avance(capteur); // 1 & changer par la valeur de la direcion (variable)
+			for(int i=0; i<4; i++){
+				avance(capteurQuiDetect); 
+			}
 			detect=detection();
 			if (detect == 0) {
 				sStateNext=CHERCHE_ADV;
-//manu
 			}
 		break;
 		case CHERCHE_ADV:
 			#ifdef DEBUG
 				Serial.println("CHERCHE_ADV");
 			#endif
-//manu founion tourne			tourne(10);
+			tourne(10);
 			detect=detection();
 			/* if find someone ATTAQUE*/
 			if (detect == 1) {
