@@ -22,7 +22,8 @@ int s_state, s_state_next, s_state_previous;
 
 int moteur1[3] = {in1Pin, in2Pin},
     moteur2[3] = {in3Pin, in4Pin};
-
+int speedPinMoteur1 = 5;
+int speedPinMoteur2 = 6;
 
 // Variable to calibrate IR capteur
 #define capteurIRAvant A2
@@ -58,36 +59,44 @@ const int servoPin=4; // VALEUR A VERIFIER
 
 
 void setup() {  
-  #ifdef DEBUG
-    Serial.begin(9600 );
-  #endif
-  #ifdef DEBUG_SEUIL
-    Serial.begin(9600 );
-  #endif
+	#ifdef DEBUG
+		Serial.begin(9600 );
+	#endif
+	#ifdef DEBUG_SEUIL
+		Serial.begin(9600 );
+	#endif
 
-  //Inititalise les LED a OFF
-  #ifdef DEBUG
-  	Serial.println("SETUP : On eteint les leds");
-  #endif
-  digitalWrite(led1Pin, 0);
-  digitalWrite(led2Pin, 0);
+	//Inititalise les LED a OFF
+	#ifdef DEBUG
+  		Serial.println("SETUP : On eteint les leds");
+	#endif
+	digitalWrite(led1Pin, 0);
+	digitalWrite(led2Pin, 0);
 
-  // Met la LED rouge a ON
-  #ifdef DEBUG
-  	Serial.println("SETUP : On allume la led ROUGE");
-  #endif
-  digitalWrite(led1Pin, 1);
+	// Met la LED rouge a ON
+	#ifdef DEBUG
+		Serial.println("SETUP : On allume la led ROUGE");
+	#endif
+	digitalWrite(led1Pin, 1);
 
-  // Servo
-  // Lien Pin / Servo
-  servo.attach(servoPin);
-  #ifdef DEBUG
-  	Serial.println("SETUP : On bloque les volets");
-  #endif
-  servo.write(VOLETS_LOCKED);
+	// Servo
+	// Lien Pin / Servo
+	servo.attach(servoPin);
+	#ifdef DEBUG
+  		Serial.println("SETUP : On bloque les volets");
+	#endif
+	servo.write(VOLETS_LOCKED);
 
-  // On initialise la machine d'etat 
-  s_state=START;
+	// On initialise les moteurs
+	pinMode(speedPinMoteur1, OUTPUT);
+	pinMode(speedPinMoteur2, OUTPUT);
+	pinMode(in1, OUTPUT);
+	pinMode(in2, OUTPUT);
+	pinMode(in3, OUTPUT);
+	pinMode(in4, OUTPUT);
+
+	// On initialise la machine d'etat 
+	s_state=START;
 }
 
 void attenteAppuieBouton() {
@@ -220,22 +229,28 @@ int * calibrationIR(){
     static int CalibrationIR[2];
 
     #ifdef DEBUG
-      Serial.print("WAIT - Valeur Capteur Avant");
+      Serial.print("WAIT1 - Valeur Capteur Avant");
       Serial.println("  Valeur Capteur Arriere");
     #endif
     for(int z=0;z<10;z++){
       valeurLu=lectureCapteur();
       CalibrationIR[0] += *(valeurLu);
       CalibrationIR[1] += *(valeurLu + 1);
+	#ifdef DEBUG
+		Serial.print(*(valeurLu));
+		Serial.print(" ");
+		Serial.println(*(valeurLu + 1));
+	#endif
       delay(100);
-      }
+    }
     CalibrationIR[0] = CalibrationIR[0] / 10;
     CalibrationIR[1] = CalibrationIR[1] / 10;
-    CalibrationIR[0] = CalibrationIR[0] + 20;
-    CalibrationIR[1] = CalibrationIR[1] + 30;
+	// suppresion, les valeurs sont plus stables depuis l'ajout condo
+	//CalibrationIR[0] = CalibrationIR[0] + 20;
+	//CalibrationIR[1] = CalibrationIR[1] + 30;
 
     #ifdef DEBUG
-      Serial.print("WAIT - Calibration capteur Avant  : ");
+      Serial.print("WAIT2 - Calibration capteur Avant  : ");
       Serial.println(CalibrationIR[0]);
       Serial.print("Calibration capteur Arriere: ");
       Serial.println(CalibrationIR[1]);
@@ -284,9 +299,9 @@ void wait() {
       delay(1000);
       x+=1;
     } 
-    //cal=calibrationIR();
+    cal=calibrationIR();
 // INUTILE LES VOLETS SONT DEVANT LES CAPTEURS!!!!!!!
-    cal=calibrationMaxIR();
+    //cal=calibrationMaxIR();
     delay(1000);
 }
 
@@ -328,6 +343,7 @@ void ouvertureVolet() {
     servo.write(VOLETS_LOCKED);
 }
 
+/*
 // Gestion Moteur
 void setMotor(int motorG, int motorD) {
 
@@ -366,23 +382,42 @@ void tourneDroite() {
     #endif
     setMotor(0,255);  
 }
-
+*/
 void avance() {
-    #ifdef DEBUG
-      Serial.println("AVANCE : on avance");
-    #endif
-    setMotor(126,126); 
+	#ifdef DEBUG
+		Serial.println("AVANCE : on avance");
+	#endif
+	digitalWrite(moteur1[0], HIGH);
+	digitalWrite(moteur1[1], LOW);
+	digitalWrite(moteur2[0], HIGH);
+	digitalWrite(moteur2[1], LOW);
+	analogWrite(speedPinMoteur1, 255);
+	analogWrite(speedPinMoteur2, 255);
 }
 
-
-// A TESTER
 void recule() {
-    #ifdef DEBUG
-      Serial.println("RECULE : on recule");
-    #endif
-    setMotor(0,0); 
+	#ifdef DEBUG
+		Serial.println("RECULE : on recule");
+	#endif
+	digitalWrite(moteur1[0], LOW);
+	digitalWrite(moteur1[1], HIGH);
+	digitalWrite(moteur2[0], LOW);
+	digitalWrite(moteur2[1], HIGH);
+	analogWrite(speedPinMoteur1, 255);
+	analogWrite(speedPinMoteur2, 255);
 }
 
+void tourneDroite(){
+	#ifdef DEBUG
+		Serial.println("TOURNE A DROITE ");
+	#endif
+	digitalWrite(moteur1[0], HIGH);
+	digitalWrite(moteur1[1], LOW);
+	digitalWrite(moteur2[0], LOW);
+	digitalWrite(moteur2[1], HIGH);
+	analogWrite(speedPinMoteur1, 127);
+	analogWrite(speedPinMoteur2, 127);
+}
 
 void detectionDojo() {
     //bord_circuit_analog_front = analogRead(capteurLF);// Black > 600 White < 180
@@ -523,18 +558,3 @@ void loop() {
   }
  s_state = s_state_next;
 }
-
-/*
-
-Appuie boutton
-Attends 5s
-volet ouvert
-attaque aveugle (tourne 90 avance 300ms)
-  => detection on avance
-  => pas detection on tourne
-on tourne jusqua detection max 180° (capteur avant capteur arriere)
-tant que detection 
-=> on avance
-Plus detection on tourne
-
-*/
