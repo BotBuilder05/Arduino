@@ -90,10 +90,10 @@ void setup() {
 	// On initialise les moteurs
 	pinMode(speedPinMoteur1, OUTPUT);
 	pinMode(speedPinMoteur2, OUTPUT);
-	pinMode(in1, OUTPUT);
-	pinMode(in2, OUTPUT);
-	pinMode(in3, OUTPUT);
-	pinMode(in4, OUTPUT);
+	pinMode(moteur1[0], OUTPUT);
+	pinMode(moteur1[1], OUTPUT);
+	pinMode(moteur2[0], OUTPUT);
+	pinMode(moteur2[1], OUTPUT);
 
 	// On initialise la machine d'etat 
 	s_state=START;
