@@ -408,7 +408,7 @@ void tourneDroite(){
 	analogWrite(speedPinMoteur2, 80);
 }
 
-void tourneDroite(){
+void tourneGauche(){
 	#ifdef DEBUG
 		Serial.println("TOURNE A GAUCHE ");
 	#endif
