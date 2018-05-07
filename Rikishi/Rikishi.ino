@@ -2,12 +2,7 @@
 #include <MsTimer2.h>
 #include "Rikishi.h"
 
-/*  Fonction appelé par les interruptions
- *  de la lib Servo
- *  Return : void
- */
-
-int counter = 0; //compteur d'interruption
+int move_speed = 100, rotate_speed = 90, started = 0, was_detected = 0;
 
 /* Fonction qui attend 5 seconde
  * avec blink de la led
@@ -22,7 +17,7 @@ void wait5()
         delay(1000);
     }
     digitalWrite(ledPin, HIGH);
-    delay(1000);
+    delay(500);
     return;
 }
 
@@ -31,38 +26,46 @@ void wait5()
  * en % et un sens
  * return: void
  */
-void move_(uint8_t speed_per_cent, uint8_t sens)
+void move_(int speed_per_cent, uint8_t sens)
 {
-    int speed = speed_per_cent * 255 / 100;
+    int speed = map(speed_per_cent, 0, 100, 0, 255);
 
     //Active les 2 moteurs
     analogWrite(mot_1_activ, speed);
     analogWrite(mot_2_activ, speed);
 
-    digitalWrite(mot_1_droit, !sens);
-    digitalWrite(mot_1_gauche, sens);
+    digitalWrite(mot_1_droit, sens);
+    digitalWrite(mot_1_gauche, !sens);
 
-    digitalWrite(mot_2_droit, !sens);
-    digitalWrite(mot_2_gauche, sens);
+    digitalWrite(mot_2_droit, sens);
+    digitalWrite(mot_2_gauche, !sens);
 }
 
 /* Fonction qui fait tourner le robot
  * dans un sens et avec une vitesse
  * return: void
  */
-void tourne(uint8_t speed_per_cent, uint8_t sens) {
+void tourne(int speed_per_cent, uint8_t sens) {
 
-    int speed = speed_per_cent * 255 / 100;
+    int speed = map(speed_per_cent, 0, 100, 0, 255);
+
+    if(sens == LEFT) {
+        digitalWrite(mot_1_droit, 1);
+        digitalWrite(mot_1_gauche, 0);
+
+        digitalWrite(mot_2_droit, 0);
+        digitalWrite(mot_2_gauche, 1);
+    } else {
+        digitalWrite(mot_1_droit, 0);
+        digitalWrite(mot_1_gauche, 1);
+
+        digitalWrite(mot_2_droit, 1);
+        digitalWrite(mot_2_gauche, 0);
+    }
 
     //Active les 2 moteurs
     analogWrite(mot_1_activ, speed);
     analogWrite(mot_2_activ, speed);
-
-    digitalWrite(mot_1_droit, !sens);
-    digitalWrite(mot_1_gauche, sens);
-
-    digitalWrite(mot_2_droit, sens);
-    digitalWrite(mot_2_gauche, !sens);
 }
 
 /* Fonction qui stoppe le robot
@@ -77,25 +80,32 @@ void stop(){
  * return: void
  */
 void read_capts(){
-    if(digitalRead(END_LIM) == HIGH) {
-        detected = 0;
-        end_detected = 1;
-    } else if (analogRead(NEAR_CAPT) > 300) {
-        detected = 1;
-        end_detected = 0;
-    } else {
-        digitalWrite(SEND_PIN, LOW);
-        read_echo = pulseIn(READ_PIN, HIGH);
-        if(read_echo / 58 < detect_min) {
+    if(started) {
+        if (analogRead(NEAR_CAPT) < 430) {
             detected = 1;
             end_detected = 0;
+        } else if(digitalRead(END_LIM) == HIGH) {
+            detected = 0;
+            end_detected = 1;
+        } else {
+            digitalWrite(SEND_PIN, LOW);
+            read_echo = pulseIn(READ_PIN, HIGH);
+            if(read_echo / 58 < detect_min) {
+                detected = 1;
+                Serial.println(read_echo / 58);
+            } else
+                detected = 0;
+            digitalWrite(SEND_PIN, HIGH);
+            end_detected = 0;
         }
-        digitalWrite(SEND_PIN, HIGH);
     }
 }
 
 /*setup des pins */
 void setup() {
+
+    MsTimer2::set(500, read_capts);
+    MsTimer2::start();
 
     Serial.begin(9600);
 
@@ -114,10 +124,8 @@ void setup() {
 
     pinMode(SEND_PIN, OUTPUT);
 
-    MsTimer2::set(1000, read_capts);
-    MsTimer2::start();
-
     digitalWrite(SEND_PIN, HIGH);
+
 }
 
 /* boucle sur une machine d'état */
@@ -132,31 +140,47 @@ void loop() {
         case START:
             wait5();
             next_state = SEARCH;
+            started = 1;
             break;
 
         case SEARCH:
             if(end_detected)
-                end_detected = END_OF_LIMIT;
+                next_state = END_OF_LIMIT;
             else if(detected)
                 next_state = ATTACK;
             else {
-               tourne(100, RIGHT);
-               digitalWrite(ledPin, LOW);
+                if(was_detected) {
+                    tourne(rotate_speed, LEFT);
+                    delay(100);
+                } else {
+                    tourne(rotate_speed, RIGHT);
+                    delay(100);
+                }
+                digitalWrite(ledPin, LOW);
             }
             break;
 
         case ATTACK:
-            if(detected && !end_detected) {
-                move_(100, AVANCE);
+            if(detected) {
+                move_(move_speed, AVANCE);
                 digitalWrite(ledPin, HIGH);
-            }
-            else
+                delay(500);
+            } else if (end_detected)
+                next_state = END_OF_LIMIT;
+            else {
                 next_state = SEARCH;
+                if(was_detected)
+                    was_detected = 0;
+                else
+                    was_detected = 1;
+            }
             break;
 
         case END_OF_LIMIT:
-            if(end_detected)
-                move_(100, RECULE);
+            if(end_detected) {
+                move_(move_speed, RECULE);
+                delay(1000);
+            }
             else
                 next_state = SEARCH;
             break;
