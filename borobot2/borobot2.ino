@@ -1,6 +1,13 @@
 // Variable Machine d'etat
 #define DEBUG
+#define DEBUG_DETECTER
+#define DEBUG_CALIBRATION_IR
+#define DEBUG_WAIT
+//#define DEBUG_VOLET
+//#define DEBUG_LECTURE_CAPTEUR
+//#define DEBUG_DETECTER_SEUIL
 //#define SLOW 
+//#define DEBUG_CALIBRATION_MAX
 
 #define START 1
 #define WAIT 2
@@ -21,7 +28,8 @@ int s_state, s_state_next, s_state_previous;
 
 int moteur1[3] = {in1Pin, in2Pin},
     moteur2[3] = {in3Pin, in4Pin};
-
+int speedPinMoteur1 = 5;
+int speedPinMoteur2 = 6;
 
 // Variable to calibrate IR capteur
 #define capteurIRAvant A2
@@ -33,8 +41,8 @@ int *cal;
 
 
 // LED
-const int led1Pin = 7; //LED verte
-const int led2Pin = 8; //LED rouge
+const int led1Pin = 7; //LED rouge
+const int led2Pin = 8; //LED verte
 
 
 // Bouton
@@ -53,254 +61,278 @@ const int servoPin=4; // VALEUR A VERIFIER
 
 
 #define VOLETS_LOCKED 45
-#define VOLET_OPENED 0
+#define VOLETS_OPENED 0
 
 
 void setup() {  
-  #ifdef DEBUG
-    Serial.begin(9600 );
-  #endif
-  // On initialise la machine d'etat 
-  s_state=START;
+	#ifdef DEBUG
+		Serial.begin(9600 );
+	#endif
+	#ifdef DEBUG_SEUIL
+		Serial.begin(9600 );
+	#endif
 
-  //Inititalise les LED a OFF
-  blinkled();
-  delay(1000);
-  digitalWrite(led1Pin, 0);
-  digitalWrite(led2Pin, 0);
+	//Inititalise les LED a OFF
+	#ifdef DEBUG
+  		Serial.println("SETUP : On eteint les leds");
+	#endif
+	digitalWrite(led1Pin, 0);
+	digitalWrite(led2Pin, 0);
 
-  // Met la LED de detection rouge a ON
-  digitalWrite(led2Pin, 1);
+	// Met la LED rouge a ON
+	#ifdef DEBUG
+		Serial.println("SETUP : On allume la led ROUGE");
+	#endif
+	digitalWrite(led1Pin, 1);
 
-  // Servo
-  // Lien Pin / Servo
-  servo.attach(servoPin);
-  // On bloque les volets
-  #ifdef DEBUG
-  	Serial.println("SETUP : On bloque les volets");
-  #endif
-  servo.write(VOLETS_LOCKED);
+	// Servo
+	// Lien Pin / Servo
+	servo.attach(servoPin);
+	#ifdef DEBUG
+  		Serial.println("SETUP : On bloque les volets");
+	#endif
+	servo.write(VOLETS_LOCKED);
 
-}
+	// On initialise les moteurs
+	pinMode(speedPinMoteur1, OUTPUT);
+	pinMode(speedPinMoteur2, OUTPUT);
+	pinMode(moteur1[0], OUTPUT);
+	pinMode(moteur1[1], OUTPUT);
+	pinMode(moteur2[0], OUTPUT);
+	pinMode(moteur2[1], OUTPUT);
 
-
-void blinkled() {
-  digitalWrite(led1Pin, 0);
-  digitalWrite(led2Pin, 0);
-  delay(1000);
-  digitalWrite(led1Pin, 1);
-  digitalWrite(led2Pin, 1);
+	// On initialise la machine d'etat 
+	s_state=START;
 }
 
 void attenteAppuieBouton() {
+	int buttonStartState=0;
 
-    int buttonStartState=0;
-    #ifdef DEBUG
-      Serial.print("START - initialisation:  ");
-      Serial.println(buttonStartState);
-    #endif
+	#ifdef DEBUG
+		Serial.print("START - initialisation:  ");
+		Serial.println(buttonStartState);
+	#endif
     
-    // detection pression bouton Start
-    buttonStartState = digitalRead(buttonStartPin);
-    //filtrée ici le rebond...
-    #ifdef DEBUG
-      Serial.print("START - Etat bouton:  ");
-      Serial.println(buttonStartState);
-    #endif
+	// detection pression bouton Start
+	buttonStartState = digitalRead(buttonStartPin);
+	//filtrée ici le rebond...
+	#ifdef DEBUG
+		Serial.print("START - Etat bouton:  ");
+		Serial.println(buttonStartState);
+	#endif
 
 
-    if (buttonStartState == 1){
-        #ifdef DEBUG
-          Serial.println("START - Le bouton start a ete appuye");
-        #endif
-        s_state_next=WAIT;
-    }
-    else {
-        #ifdef DEBUG
-          Serial.println("START - Waiting for Start button to be pressed");
-        #endif
-        blinkled();
-        s_state_next=START;
-    }
-  
-  
+	if (buttonStartState == 1){
+		#ifdef DEBUG
+	        	Serial.println("START - Le bouton start a ete appuye - La Led verte s'allume - La rouge s'eteint");
+	        #endif
+	  	digitalWrite(led1Pin, 0);
+	  	digitalWrite(led2Pin, 1);
+	        s_state_next=WAIT;
+	} 
+	else {
+		#ifdef DEBUG
+	        	Serial.println("START - Waiting for Start button to be pressed - Red led is on");
+	        #endif
+	  	digitalWrite(led1Pin, 1);
+	        s_state_next=START;
+	}
 }
 
 int * lectureCapteur(){
 
-    //tableau retournant les valeurs lues pour avant et arriere
-    static int valeursLu[2];
+	//tableau retournant les valeurs lues pour avant et arriere
+	static int valeursLu[2];
 
-    // Lecture capteur
-    valeursLu[0] = analogRead(capteurIRAvant);
-    valeursLu[1] = analogRead(capteurIRArriere);
+	// Lecture capteur
+	valeursLu[0] = analogRead(capteurIRAvant);
+	valeursLu[1] = analogRead(capteurIRArriere);
 
-    #ifdef DEBUG
-      //Serial.print("Valeur Capteur Avant");
-      //Serial.println("  Valeur Capteur Arriere");
-      Serial.print("       ");
-      Serial.print(valeursLu[0]);
-      Serial.print("       ");
-      Serial.println(valeursLu[1]);
-    #endif
+	#ifdef DEBUG_LECTURE_CAPTEUR
+		Serial.print("Valeur Capteur Avant");
+		Serial.println("  Valeur Capteur Arriere");
+		Serial.print("       ");
+		Serial.print(valeursLu[0]);
+		Serial.print("       ");
+		Serial.println(valeursLu[1]);
+	#endif
   
-    return valeursLu;
+	return valeursLu;
 }
 
 int * valeurMoyCal() {
    
-    int *valeurLu;
-    static int valeurMoy[2];
+	int *valeurLu;
+	static int valeurMoy[2];
     
-    for(int z=0;z<10;z++){
-      valeurLu=lectureCapteur();
-      valeurMoy[0] += *(valeurLu);
-      valeurMoy[1] += *(valeurLu + 1);
-      delay(50);
-      }
-    valeurMoy[0] = valeurMoy[0] / 10;
-    valeurMoy[1] = valeurMoy[1] / 10;
+	for(int z=0;z<10;z++){
+		valeurLu=lectureCapteur();
+		valeurMoy[0] += *(valeurLu);
+		valeurMoy[1] += *(valeurLu + 1);
+		delay(50);
+	}
+	valeurMoy[0] = valeurMoy[0] / 10;
+	valeurMoy[1] = valeurMoy[1] / 10;
 
-    return valeurMoy;
+	return valeurMoy;
 }
 
 int detecter() {
-    // On lit les valeurs sur les capteurs Avant et arriere
-    //int seuil = 60; //Valeur a 40cm : 60
-    int seuil[2];
-    int maxarray=sizeof(seuil)/sizeof(*seuil); //pour avoir le nb elment ds le tableau
-    for (int i=0;i<maxarray ;i++) {
-      seuil[i]=cal[i];
-    }
-    /*// Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
-    int *valeurLu;
-    valeurLu=lectureCapteur();*/
-    int *valeurMoy;
-    valeurMoy=valeurMoyCal();
+	// On lit les valeurs sur les capteurs Avant et arriere
+	//int seuil = 60; //Valeur a 40cm : 60
+	int seuil[2];
+	int maxarray=sizeof(seuil)/sizeof(*seuil); //pour avoir le nb elment ds le tableau
+	for (int i=0;i<maxarray ;i++) {
+		seuil[i]=cal[i];
+	}
 
-    detection = 0;
+	// TODO To adjust contest's day
+	//Seuil avant
+	seuil[0]=110;
+	//Seuil arriere
+	seuil[1]=130;
+
+	/*// Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
+	int *valeurLu;
+	valeurLu=lectureCapteur();*/
+	int *valeurMoy;
+	valeurMoy=valeurMoyCal();
+
+	detection = 0;
     
-    #ifdef DEBUG
-      Serial.print("Seuil1: ");
-      Serial.print(*(seuil));
-      Serial.print("       ");
-      Serial.println(*(seuil+1));
-      Serial.print("valeurMoy: ");
-      Serial.print(*(valeurMoy));
-      Serial.print("       ");
-      Serial.println(*(valeurMoy+1));
-    #endif
-    if ( *(valeurMoy) > *(seuil)) {
-        detection = 1;
-        //Allume LED verte quand detection sinon allume led rouge
-        digitalWrite(led1Pin, 1);
-        // On etein la LED rouge
-        digitalWrite(led1Pin, 0);
-     }
-     
-     if ( *(valeurMoy + 1) > *(seuil+1)) {
-        detection = 2;
-        //Allume LED verte quand detection sinon allume led rouge
-        digitalWrite(led1Pin, 1);
-        // On etein la LED rouge
-        digitalWrite(led1Pin, 0);
-     }
+	#ifdef DEBUG_DETECTER
+		Serial.print("Seuil1   : ");
+		Serial.print(*(seuil));
+		Serial.print("       ");
+		Serial.println(*(seuil+1));
+		Serial.print("valeurMoy: ");
+		Serial.print(*(valeurMoy));
+		Serial.print("       ");
+		Serial.println(*(valeurMoy+1));
+	#endif
+	#ifdef DEBUG_DETECTER_SEUIL
+		Serial.print("valeurMoy: ");
+		Serial.print(*(valeurMoy));
+		Serial.print("       ");
+		Serial.println(*(valeurMoy+1));
+	#endif
+	// si la valeur(moyenne) capteur avant superieure au seuil avant et si la valeur(moyenne) capteur avant est supperieurie a la valeur du capteur arriere
+	if (( *(valeurMoy) > *(seuil)) && (*(valeurMoy) > *(valeurMoy + 1))) {
+		detection = 1;
+	}
+	// si la valeur(moyenne) capteur avant superieure au seuil avant et si la valeur(moyenne) capteur arriere est supperieure a la valeur du capteur avant
+	else if (( *(valeurMoy + 1) > *(seuil+1)) && (*(valeurMoy + 1) > *(valeurMoy))) {
+		detection = 2;
+	}
 
-    status_detection=1;
-    return detection;
+	status_detection=1;
+	return detection;
 }
 
 int * calibrationIR(){
-    // Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
-    int *valeurLu;
-    static int CalibrationIR[2];
+	// Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
+	int *valeurLu;
+	static int CalibrationIR[2];
 
-    #ifdef DEBUG
-      Serial.print("WAIT - Valeur Capteur Avant");
-      Serial.println("  Valeur Capteur Arriere");
-    #endif
-    for(int z=0;z<10;z++){
-      valeurLu=lectureCapteur();
-      CalibrationIR[0] += *(valeurLu);
-      CalibrationIR[1] += *(valeurLu + 1);
-      delay(100);
-      }
-    CalibrationIR[0] = CalibrationIR[0] / 10;
-    CalibrationIR[1] = CalibrationIR[1] / 10;
-    CalibrationIR[0] = CalibrationIR[0] + 20;
-    CalibrationIR[1] = CalibrationIR[1] + 30;
+	#ifdef DEBUG_CALIBRATION_IR
+		Serial.print("WAIT1 - Valeur Capteur Avant");
+		Serial.println("  Valeur Capteur Arriere");
+	#endif
+	for(int z=0;z<10;z++){
+		valeurLu=lectureCapteur();
+		CalibrationIR[0] += *(valeurLu);
+		CalibrationIR[1] += *(valeurLu + 1);
+		#ifdef DEBUG_CALIBRATION_IR
+			Serial.print(*(valeurLu));
+			Serial.print(" ");
+			Serial.println(*(valeurLu + 1));
+		#endif
+		delay(100);
+	}
+	CalibrationIR[0] = CalibrationIR[0] / 10;
+	CalibrationIR[1] = CalibrationIR[1] / 10;
+	// suppresion, les valeurs sont plus stables depuis l'ajout condo
+	//CalibrationIR[0] = CalibrationIR[0] + 20;
+	//CalibrationIR[1] = CalibrationIR[1] + 30;
 
-    #ifdef DEBUG
-      Serial.print("WAIT - Calibration capteur Avant  : ");
-      Serial.println(CalibrationIR[0]);
-      Serial.print("Calibration capteur Arriere: ");
-      Serial.println(CalibrationIR[1]);
-    #endif
+	#ifdef DEBUG_CALIBRATION_IR
+		Serial.print("WAIT2 - Calibration capteur Avant  : ");
+		Serial.println(CalibrationIR[0]);
+		Serial.print("Calibration capteur Arriere: ");
+		Serial.println(CalibrationIR[1]);
+	#endif
 
-    return CalibrationIR;
+	return CalibrationIR;
 }
 
 int * calibrationMaxIR(){
-    // Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
-    int *valeurLu;
-    static int CalibrationIR[2];
+	// Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
+	int *valeurLu;
+	static int CalibrationIR[2];
 
-    #ifdef DEBUG
-      Serial.print("WAIT - Valeur Capteur Avant");
-      Serial.println("  Valeur Capteur Arriere");
-    #endif
-    for(int z=0;z<10;z++){
-      valeurLu=lectureCapteur();
-      if (*(valeurLu) > CalibrationIR[0]){
-        CalibrationIR[0] = *(valeurLu);
-      }
-      if (*(valeurLu + 1) > CalibrationIR[1]){
-        CalibrationIR[1] = *(valeurLu + 1);
-      }
-      delay(100);
-    }
+	#ifdef DEBUG_CALIBRATION_MAX
+		Serial.print("WAIT - Valeur Capteur Avant");
+		Serial.println("  Valeur Capteur Arriere");
+	#endif
+	for(int z=0;z<10;z++){
+		valeurLu=lectureCapteur();
+		if (*(valeurLu) > CalibrationIR[0]){
+			CalibrationIR[0] = *(valeurLu);
+		}
+		if (*(valeurLu + 1) > CalibrationIR[1]){
+			CalibrationIR[1] = *(valeurLu + 1);
+		}
+		delay(100);
+	}
 
-    #ifdef DEBUG
-      Serial.print("WAIT - Calibration capteur Avant  : ");
-      Serial.println(CalibrationIR[0]);
-      Serial.print("Calibration capteur Arriere: ");
-      Serial.println(CalibrationIR[1]);
-    #endif
+	#ifdef DEBUG_CALIBRATION_MAX
+		Serial.print("WAIT - Calibration capteur Avant  : ");
+		Serial.println(CalibrationIR[0]);
+		Serial.print("Calibration capteur Arriere: ");
+		Serial.println(CalibrationIR[1]);
+	#endif
 
-    return CalibrationIR;
+	return CalibrationIR;
 }
 
 
 void wait() {
-    #ifdef DEBUG
-      Serial.println("WAIT - J'attends... et je calibre mes capteurs");
-    #endif
-    delay(3000);
-    //cal=calibrationIR();
-    cal=calibrationMaxIR();
-    delay(1000);
+	#ifdef DEBUG_WAIT
+		Serial.println("WAIT - J'attends... et je calibre mes capteurs");
+	#endif
+	int x=0;
+	while (x<=3) {
+		delay(1000);
+		x+=1;
+	} 
+	// INUTILE LES VOLETS SONT DEVANT LES CAPTEURS!!!!!!!
+	cal=calibrationIR();
+	//cal=calibrationMaxIR();
+	delay(1000);
 }
 
-int beDetect=0;
 void Robot50HzInterrupt() {
-    #ifdef DEBUG
-      Serial.println("Interruptions");
-    #endif
-    beDetect = detecter();
-    if(beDetect){
-        digitalWrite(led1Pin, HIGH);
-    }
-
+/*
+	#ifdef DEBUG
+		Serial.println("Interruptions");
+	#endif
+	beDetect = detecter();
+	if(beDetect){
+		digitalWrite(led1Pin, HIGH);
+	}
+*/
 }
-
 
 void ouvertureVolet() {
-    #ifdef DEBUG
-      Serial.println("FLAP - Ouverture Volets");
-    #endif
-    servo.write(VOLET_OPENED);
+	#ifdef DEBUG_VOLET
+		Serial.println("FLAP - Ouverture Volets");
+	#endif
+	servo.write(VOLETS_OPENED);
+	delay(100);
+	servo.write(VOLETS_LOCKED);
 }
 
+/*
 // Gestion Moteur
 void setMotor(int motorG, int motorD) {
 
@@ -339,166 +371,198 @@ void tourneDroite() {
     #endif
     setMotor(0,255);  
 }
-
+*/
 void avance() {
-    #ifdef DEBUG
-      Serial.println("AVANCE : on avance");
-    #endif
-    setMotor(126,126); 
+	#ifdef DEBUG
+		Serial.println("AVANCE : on avance");
+	#endif
+	digitalWrite(moteur1[0], HIGH);
+	digitalWrite(moteur1[1], LOW);
+	digitalWrite(moteur2[0], HIGH);
+	digitalWrite(moteur2[1], LOW);
+	analogWrite(speedPinMoteur1, 255);
+	analogWrite(speedPinMoteur2, 255);
 }
 
-
-// A TESTER
 void recule() {
-    #ifdef DEBUG
-      Serial.println("RECULE : on recule");
-    #endif
-    setMotor(0,0); 
+	#ifdef DEBUG
+		Serial.println("RECULE : on recule");
+	#endif
+	digitalWrite(moteur1[0], LOW);
+	digitalWrite(moteur1[1], HIGH);
+	digitalWrite(moteur2[0], LOW);
+	digitalWrite(moteur2[1], HIGH);
+	analogWrite(speedPinMoteur1, 255);
+	analogWrite(speedPinMoteur2, 255);
 }
 
+void tourneDroite(){
+	#ifdef DEBUG
+		Serial.println("TOURNE A DROITE ");
+	#endif
+	digitalWrite(moteur1[0], HIGH);
+	digitalWrite(moteur1[1], LOW);
+	digitalWrite(moteur2[0], LOW);
+	digitalWrite(moteur2[1], HIGH);
+	analogWrite(speedPinMoteur1, 80);
+	analogWrite(speedPinMoteur2, 80);
+}
+
+void tourneGauche(){
+	#ifdef DEBUG
+		Serial.println("TOURNE A GAUCHE ");
+	#endif
+	digitalWrite(moteur1[0], LOW);
+	digitalWrite(moteur1[1], HIGH);
+	digitalWrite(moteur2[0], HIGH);
+	digitalWrite(moteur2[1], LOW);
+	analogWrite(speedPinMoteur1, 80);
+	analogWrite(speedPinMoteur2, 80);
+}
 
 void detectionDojo() {
-    //bord_circuit_analog_front = analogRead(capteurLF);// Black > 600 White < 180
-    //bord_circuit_analog_rear = analogRead(capteurLR); // Black > 600 White < 180
+	//bord_circuit_analog_front = analogRead(capteurLF);// Black > 600 White < 180
+	//bord_circuit_analog_rear = analogRead(capteurLR); // Black > 600 White < 180
 
-    //int const white_limit=180;
-    //if (bord_circuit_analog_front < white_limit || bord_circuit_analog_rear < white_limit) {
-    //  dojo_limit=1;
-    //}
+	//int const white_limit=180;
+	//if (bord_circuit_analog_front < white_limit || bord_circuit_analog_rear < white_limit) {
+	//  dojo_limit=1;
+	//}
 }
 
 void loop() {
   switch (s_state){
-  #ifdef DEBUG
-    Serial.println("");
-    Serial.print("State:");
-    Serial.println(s_state);
-    Serial.print("Next State:");
-    Serial.println(s_state_next);
-  #endif
+	#ifdef DEBUG
+		Serial.println("");
+		Serial.print("State:");
+		Serial.println(s_state);
+		Serial.print("Next State:");
+		Serial.println(s_state_next);
+	#endif
 
     case START:
-      #ifdef DEBUG
-        Serial.println("DEPART");
-      #endif
-      attenteAppuieBouton();
-      //s_state_next is set in the function
-      break;
+	#ifdef DEBUG
+	 	Serial.println("DEPART");
+	#endif
+
+	attenteAppuieBouton();
+	//s_state_next is set in the function
+	break;
 
     case WAIT:
-      #ifdef SLOW
-        delay(attente);
-      #endif
-      #ifdef DEBUG
-        Serial.println("WAIT");
-      #endif
-      wait();
-      s_state_next=FLAPS;
-      break;
+	#ifdef SLOW
+		delay(attente);
+	#endif
+	#ifdef DEBUG
+		Serial.println("WAIT");
+	#endif
+	wait();
+	s_state_next=FLAPS;
+	break;
 
     case FLAPS:
-      #ifdef SLOW
-        delay(attente);
-      #endif
-       #ifdef DEBUG
-        Serial.println("FLAPS");
-      #endif
-      ouvertureVolet();
-      s_state_next=BLINDATTACK;
-      break;
+	#ifdef SLOW
+		delay(attente);
+	#endif
+	#ifdef DEBUG
+		Serial.println("FLAPS");
+	#endif
+	ouvertureVolet();
+	s_state_next=BLINDATTACK;
+	break;
 
     case BLINDATTACK:
-      #ifdef SLOW
-        delay(attente);
-      #endif
-       #ifdef DEBUG
-        Serial.println("BEGIN - BLINDATTACK");
-       #endif
-      tourneDroite();
-      avance();  // pendant 300ms a coder
-       #ifdef DEBUG
-        Serial.println("END - BLINDATTACK");
-       #endif
-      s_state_next=DETECTION;
-      break;
+	#ifdef SLOW
+		delay(attente);
+	#endif
+	#ifdef DEBUG
+		Serial.println("BEGIN - BLINDATTACK");
+	#endif
+	tourneDroite(); // A coder pour faire que 90°
+	avance();  // pendant 300ms a coder
+	#ifdef DEBUG
+		Serial.println("END - BLINDATTACK");
+	#endif
+	// On eteint la LED verte
+	digitalWrite(led1Pin, 0);
+	s_state_next=DETECTION;
+	break;
 
     case DETECTION:
-      #ifdef SLOW
-        delay(attente);
-      #endif
-      #ifdef DEBUG
-        Serial.println("DETECTION");
-      #endif
-      // On eteint LED verte et on alume LED rouge
-      digitalWrite(led1Pin, 0);
-      digitalWrite(led1Pin, 1);
+	#ifdef SLOW
+		delay(attente);
+	#endif
+	#ifdef SLOW
+		Serial.println("DETECTION");
+	#endif
         
-      int detect;
-
-      detect=detecter(); // lecture catpteur + tourne sur place droite ou gauche en fonction du catpeur qui detect
-      #ifdef DEBUG
-        Serial.print("DETECTION - Valeur de detect:");
-        Serial.println(detect);
-      #endif
-      if (detect == 2 ) {
-        s_state_next=AVANCE;
-      }
-      else if (detect == 1) {
-        s_state_next=RECULE;
-        //s_state_next=TOURNE;
-      } 
-      else {
-        s_state_next=TOURNE;
-      }
-      break;
+	int detect;
+	detect=detecter(); // lecture catpteur + tourne sur place droite ou gauche en fonction du catpeur qui detect
+	#ifdef DEBUG
+		Serial.print("DETECTION - Valeur de detect:");
+		Serial.println(detect);
+	#endif
+	if (detect == 1 ) {
+		// On detect devant , on eteint la led rouge on alume la verte
+		digitalWrite(led1Pin, 0);
+		digitalWrite(led2Pin, 1);
+//DEBUG DETECTION
+		tourneGauche(); // Pour contracarer la trop grande vitesse de rotation
+		delay(50ms);
+// END DEBUG DETECTION 
+		s_state_next=AVANCE;
+	}
+	else if (detect == 2) {
+		// On detect derriere , on eteint la led verte on alume la rouge
+		digitalWrite(led1Pin, 1);
+		digitalWrite(led2Pin, 0);
+//DEBUG
+		tourneGauche(); // Pour contracarer la trop grande vitesse de rotation
+		delay(50ms);
+// END DEBUG DETECTION 
+		s_state_next=RECULE;
+		//s_state_next=TOURNE;
+	} 
+	else {
+		// On detect rien , on eteint toutes les led
+		digitalWrite(led1Pin, 0);
+		digitalWrite(led2Pin, 0);
+		s_state_next=TOURNE;
+	}
+	break;
 
      case AVANCE:
-      #ifdef SLOW
-        delay(attente);
-      #endif
-      #ifdef DEBUG
-        Serial.println("AVANCE");
-      #endif
-      avance(); // lecture capteur + moteur
-      s_state_next=DETECTION;     
-      break;
+	#ifdef SLOW
+		delay(attente);
+	#endif
+	//#ifdef DEBUG
+	//  Serial.println("AVANCE");
+	//#endif
+	avance(); // lecture capteur + moteur
+	s_state_next=DETECTION;     
+	break;
 
      case RECULE:
-      #ifdef SLOW
-        delay(attente);
-      #endif
-      #ifdef DEBUG
-        Serial.println("RECULE");
-      #endif
-      recule(); // lecture capteur + moteur
-      s_state_next=DETECTION;     
-      break;
+	#ifdef SLOW
+		delay(attente);
+	#endif
+	//#ifdef DEBUG
+	//  Serial.println("RECULE");
+	//#endif
+	recule(); // lecture capteur + moteur
+	s_state_next=DETECTION;     
+	break;
 
      case TOURNE:
       #ifdef SLOW
         delay(attente);
       #endif
-      #ifdef DEBUG
+      #ifdef SLOW
         Serial.println("TOURNE");
       #endif
       tourneDroite();
       s_state_next=DETECTION;  
       break;
   }
- s_state = s_state_next;
+  s_state = s_state_next;
 }
-
-/*
-
-Appuie boutton
-Attends 5s
-volet ouvert
-attaque aveugle (tourne 90 avance 300ms)
-  => detection on avance
-  => pas detection on tourne
-on tourne jusqua detection max 180° (capteur avant capteur arriere)
-tant que detection 
-=> on avance
-Plus detection on tourne
-
-*/
