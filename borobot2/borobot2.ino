@@ -31,6 +31,8 @@ int moteur1[3] = {in1Pin, in2Pin},
 int speedPinMoteur1 = 5;
 int speedPinMoteur2 = 6;
 
+int buttonPressed;
+
 // Variable to calibrate IR capteur
 #define capteurIRAvant A2
 #define capteurIRArriere A3
@@ -46,7 +48,8 @@ const int led2Pin = 8; //LED verte
 
 
 // Bouton
-const int buttonStartPin = 3;     // the number of the pushbutton pin à changer
+const int buttonRedStartPin = 3;
+const int buttonJauneStartPin = 2;
 
 // Attente
 int attente =3000;
@@ -105,6 +108,58 @@ void setup() {
 	s_state=START;
 }
 
+int identifyButtonPress() {
+	// 0 -> bouton droite
+	// 1 -> bouton gauche // oeil -> led oeil 
+	// Tant que vrai, lecture bouton 1 lecture bouton 2
+	int buttonRouge=0;
+	int buttonJaune=0;
+
+	while ((buttonRouge == 0) && (buttonJaune == 0)) {
+		buttonRouge = digitalRead(buttonRedStartPin);
+		buttonJaune = digitalRead(buttonJauneStartPin);
+    		//filtrée ici le rebond...
+    		#ifdef DEBUG
+      			Serial.print("START - Etat bouton Rouge: ");
+      			Serial.println(buttonRouge);
+      			Serial.print("START - Etat bouton Jaune: ");
+      			Serial.println(buttonJaune);
+    		#endif
+	}
+	if (buttonRouge == 1){
+		#ifdef DEBUG
+			Serial.println("START - Le bouton Rouge  start a ete appuye - La Led verte s'allume - La rouge s'eteint");
+		#endif
+	  	digitalWrite(led1Pin, 0);
+	  	digitalWrite(led2Pin, 1);
+		buttonPressed=0;
+		s_state_next=WAIT;
+	}
+	else if (buttonJaune == 1) {
+		#ifdef DEBUG
+			Serial.println("START - Le bouton Jaune  start a ete appuye - La Led rouge s'allume - La verte s'eteint");
+		#endif
+	  	digitalWrite(led1Pin, 0);
+	  	digitalWrite(led2Pin, 1);
+		delay(10);
+	  	digitalWrite(led1Pin, 1);
+	  	digitalWrite(led2Pin, 0);
+		buttonPressed=1;
+		s_state_next=WAIT;
+	}
+	/*else {
+		#ifdef DEBUG
+			Serial.println("START - Waiting for Start button to be pressed - Corp led on");
+		#endif
+		digitalWrite(ledCorp1Pin, ledOn);
+		digitalWrite(ledCorp2Pin, ledOn);
+		s_state_next=DEPART; //notneeded ?
+	}
+	*/
+	return buttonPressed;
+}
+
+
 void attenteAppuieBouton() {
 	int buttonStartState=0;
 
@@ -114,7 +169,7 @@ void attenteAppuieBouton() {
 	#endif
     
 	// detection pression bouton Start
-	buttonStartState = digitalRead(buttonStartPin);
+	buttonStartState = digitalRead(buttonRedStartPin);
 	//filtrée ici le rebond...
 	#ifdef DEBUG
 		Serial.print("START - Etat bouton:  ");
@@ -124,7 +179,7 @@ void attenteAppuieBouton() {
 
 	if (buttonStartState == 1){
 		#ifdef DEBUG
-	        	Serial.println("START - Le bouton start a ete appuye - La Led verte s'allume - La rouge s'eteint");
+	        	Serial.println("START - Le bouton ROUGE start a ete appuye - La Led verte s'allume - La rouge s'eteint");
 	        #endif
 	  	digitalWrite(led1Pin, 0);
 	  	digitalWrite(led2Pin, 1);
@@ -188,9 +243,15 @@ int detecter() {
 
 	// TODO To adjust contest's day
 	//Seuil avant
-	seuil[0]=110;
+	//seuil[0]=110;
+	if (cal[0] < 100) {
+		seuil[0]=100;
+	}
 	//Seuil arriere
-	seuil[1]=130;
+	//seuil[1]=130;
+	if (cal[1] < 100) {
+		seuil[1]=100;
+	}
 
 	/*// Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
 	int *valeurLu;
@@ -218,11 +279,11 @@ int detecter() {
 	#endif
 	// si la valeur(moyenne) capteur avant superieure au seuil avant et si la valeur(moyenne) capteur avant est supperieurie a la valeur du capteur arriere
 	if (( *(valeurMoy) > *(seuil)) && (*(valeurMoy) > *(valeurMoy + 1))) {
-		detection = 1;
+		detection = 2;
 	}
 	// si la valeur(moyenne) capteur avant superieure au seuil avant et si la valeur(moyenne) capteur arriere est supperieure a la valeur du capteur avant
 	else if (( *(valeurMoy + 1) > *(seuil+1)) && (*(valeurMoy + 1) > *(valeurMoy))) {
-		detection = 2;
+		detection = 1;
 	}
 
 	status_detection=1;
@@ -238,6 +299,9 @@ int * calibrationIR(){
 		Serial.print("WAIT1 - Valeur Capteur Avant");
 		Serial.println("  Valeur Capteur Arriere");
 	#endif
+	// Lecture a blanc pour virer eventuelle valeur aberente
+	analogRead(capteurIRAvant);
+	analogRead(capteurIRArriere);
 	for(int z=0;z<10;z++){
 		valeurLu=lectureCapteur();
 		CalibrationIR[0] += *(valeurLu);
@@ -308,7 +372,7 @@ void wait() {
 	// INUTILE LES VOLETS SONT DEVANT LES CAPTEURS!!!!!!!
 	cal=calibrationIR();
 	//cal=calibrationMaxIR();
-	delay(1000);
+	delay(100);
 }
 
 void Robot50HzInterrupt() {
@@ -396,21 +460,25 @@ void recule() {
 	analogWrite(speedPinMoteur2, 255);
 }
 
-void tourneDroite(){
+void tourneGauche(){
 	#ifdef DEBUG
-		Serial.println("TOURNE A DROITE ");
+		Serial.println("TOURNE A GAUCHE ");
 	#endif
 	digitalWrite(moteur1[0], HIGH);
 	digitalWrite(moteur1[1], LOW);
 	digitalWrite(moteur2[0], LOW);
 	digitalWrite(moteur2[1], HIGH);
-	analogWrite(speedPinMoteur1, 80);
-	analogWrite(speedPinMoteur2, 80);
+	//for (int i; i<50; i++) { faire accelerer graduellement mettre un param a la fonction, appele lafonction tourneGauhe dans la bouble depuis la machine d'etat
+		//analogWrite(speedPinMoteur1, 80+i);
+		//analogWrite(speedPinMoteur2, 80+i);
+		analogWrite(speedPinMoteur1, 70);
+		analogWrite(speedPinMoteur2, 70);
+	//}
 }
 
-void tourneGauche(){
+void tourneDroite(){
 	#ifdef DEBUG
-		Serial.println("TOURNE A GAUCHE ");
+		Serial.println("TOURNE A DROITE ");
 	#endif
 	digitalWrite(moteur1[0], LOW);
 	digitalWrite(moteur1[1], HIGH);
@@ -445,7 +513,8 @@ void loop() {
 	 	Serial.println("DEPART");
 	#endif
 
-	attenteAppuieBouton();
+	//attenteAppuieBouton();
+	identifyButtonPress();
 	//s_state_next is set in the function
 	break;
 
@@ -478,8 +547,15 @@ void loop() {
 	#ifdef DEBUG
 		Serial.println("BEGIN - BLINDATTACK");
 	#endif
-	tourneDroite(); // A coder pour faire que 90°
+	if (buttonPressed==0) {
+		tourneDroite();
+	}
+	else {
+		tourneGauche();
+	}
+	delay (500);
 	avance();  // pendant 300ms a coder
+	delay (75);
 	#ifdef DEBUG
 		Serial.println("END - BLINDATTACK");
 	#endif
@@ -508,7 +584,7 @@ void loop() {
 		digitalWrite(led2Pin, 1);
 //DEBUG DETECTION
 		tourneGauche(); // Pour contracarer la trop grande vitesse de rotation
-		delay(50ms);
+		delay(50);
 // END DEBUG DETECTION 
 		s_state_next=AVANCE;
 	}
@@ -518,7 +594,7 @@ void loop() {
 		digitalWrite(led2Pin, 0);
 //DEBUG
 		tourneGauche(); // Pour contracarer la trop grande vitesse de rotation
-		delay(50ms);
+		delay(150);
 // END DEBUG DETECTION 
 		s_state_next=RECULE;
 		//s_state_next=TOURNE;
