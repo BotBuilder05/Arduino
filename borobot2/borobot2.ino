@@ -404,8 +404,20 @@ void tourneDroite(){
 	digitalWrite(moteur1[1], LOW);
 	digitalWrite(moteur2[0], LOW);
 	digitalWrite(moteur2[1], HIGH);
-	analogWrite(speedPinMoteur1, 127);
-	analogWrite(speedPinMoteur2, 127);
+	analogWrite(speedPinMoteur1, 80);
+	analogWrite(speedPinMoteur2, 80);
+}
+
+void tourneDroite(){
+	#ifdef DEBUG
+		Serial.println("TOURNE A GAUCHE ");
+	#endif
+	digitalWrite(moteur1[0], LOW);
+	digitalWrite(moteur1[1], HIGH);
+	digitalWrite(moteur2[0], HIGH);
+	digitalWrite(moteur2[1], LOW);
+	analogWrite(speedPinMoteur1, 80);
+	analogWrite(speedPinMoteur2, 80);
 }
 
 void detectionDojo() {
