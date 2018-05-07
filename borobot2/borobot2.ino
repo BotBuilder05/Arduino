@@ -34,8 +34,8 @@ int speedPinMoteur2 = 6;
 int buttonPressed;
 
 // Variable to calibrate IR capteur
-#define capteurIRAvant A2
-#define capteurIRArriere A3
+#define capteurIRAvant A3
+#define capteurIRArriere A2
 int detection = 0; //1 capteur avant ; 2 capteur arriere ; 0 init calue
 int status_detection; //flag de detection
 // pointeur sur un entier pour acceder aux valeurs du tableau des valeurs de calibration
@@ -279,11 +279,11 @@ int detecter() {
 	#endif
 	// si la valeur(moyenne) capteur avant superieure au seuil avant et si la valeur(moyenne) capteur avant est supperieurie a la valeur du capteur arriere
 	if (( *(valeurMoy) > *(seuil)) && (*(valeurMoy) > *(valeurMoy + 1))) {
-		detection = 2;
-	}
-	// si la valeur(moyenne) capteur avant superieure au seuil avant et si la valeur(moyenne) capteur arriere est supperieure a la valeur du capteur avant
-	else if (( *(valeurMoy + 1) > *(seuil+1)) && (*(valeurMoy + 1) > *(valeurMoy))) {
 		detection = 1;
+	}
+	// si la valeur(moyenne) capteur arriere superieure au seuil arriere et si la valeur(moyenne) capteur arriere est supperieure a la valeur du capteur avant
+	else if (( *(valeurMoy + 1) > *(seuil+1)) && (*(valeurMoy + 1) > *(valeurMoy))) {
+		detection = 2;
 	}
 
 	status_detection=1;
@@ -444,8 +444,8 @@ void avance() {
 	digitalWrite(moteur1[1], LOW);
 	digitalWrite(moteur2[0], HIGH);
 	digitalWrite(moteur2[1], LOW);
-	analogWrite(speedPinMoteur1, 255);
-	analogWrite(speedPinMoteur2, 255);
+	analogWrite(speedPinMoteur1, 70);
+	analogWrite(speedPinMoteur2, 70);
 }
 
 void recule() {
@@ -456,8 +456,8 @@ void recule() {
 	digitalWrite(moteur1[1], HIGH);
 	digitalWrite(moteur2[0], LOW);
 	digitalWrite(moteur2[1], HIGH);
-	analogWrite(speedPinMoteur1, 255);
-	analogWrite(speedPinMoteur2, 255);
+	analogWrite(speedPinMoteur1, 70);
+	analogWrite(speedPinMoteur2, 70);
 }
 
 void tourneGauche(){
@@ -555,7 +555,7 @@ void loop() {
 	}
 	delay (500);
 	avance();  // pendant 300ms a coder
-	delay (75);
+	delay (30);
 	#ifdef DEBUG
 		Serial.println("END - BLINDATTACK");
 	#endif
@@ -582,20 +582,20 @@ void loop() {
 		// On detect devant , on eteint la led rouge on alume la verte
 		digitalWrite(led1Pin, 0);
 		digitalWrite(led2Pin, 1);
-//DEBUG DETECTION
+		//DEBUG DETECTION
 		tourneGauche(); // Pour contracarer la trop grande vitesse de rotation
 		delay(50);
-// END DEBUG DETECTION 
+		// END DEBUG DETECTION 
 		s_state_next=AVANCE;
 	}
 	else if (detect == 2) {
 		// On detect derriere , on eteint la led verte on alume la rouge
 		digitalWrite(led1Pin, 1);
 		digitalWrite(led2Pin, 0);
-//DEBUG
+		//DEBUG
 		tourneGauche(); // Pour contracarer la trop grande vitesse de rotation
-		delay(150);
-// END DEBUG DETECTION 
+		delay(50);
+		// END DEBUG DETECTION 
 		s_state_next=RECULE;
 		//s_state_next=TOURNE;
 	} 
