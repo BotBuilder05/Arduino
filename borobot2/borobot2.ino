@@ -478,7 +478,7 @@ void loop() {
 	#ifdef DEBUG
 		Serial.println("BEGIN - BLINDATTACK");
 	#endif
-	tourneDroite();
+	tourneDroite(); // A coder pour faire que 90°
 	avance();  // pendant 300ms a coder
 	#ifdef DEBUG
 		Serial.println("END - BLINDATTACK");
@@ -492,7 +492,7 @@ void loop() {
 	#ifdef SLOW
 		delay(attente);
 	#endif
-	#ifdef DEBUG
+	#ifdef SLOW
 		Serial.println("DETECTION");
 	#endif
         
@@ -506,12 +506,20 @@ void loop() {
 		// On detect devant , on eteint la led rouge on alume la verte
 		digitalWrite(led1Pin, 0);
 		digitalWrite(led2Pin, 1);
+//DEBUG DETECTION
+		tourneGauche(); // Pour contracarer la trop grande vitesse de rotation
+		delay(50ms);
+// END DEBUG DETECTION 
 		s_state_next=AVANCE;
 	}
 	else if (detect == 2) {
 		// On detect derriere , on eteint la led verte on alume la rouge
 		digitalWrite(led1Pin, 1);
 		digitalWrite(led2Pin, 0);
+//DEBUG
+		tourneGauche(); // Pour contracarer la trop grande vitesse de rotation
+		delay(50ms);
+// END DEBUG DETECTION 
 		s_state_next=RECULE;
 		//s_state_next=TOURNE;
 	} 
@@ -549,7 +557,7 @@ void loop() {
       #ifdef SLOW
         delay(attente);
       #endif
-      #ifdef DEBUG
+      #ifdef SLOW
         Serial.println("TOURNE");
       #endif
       tourneDroite();
