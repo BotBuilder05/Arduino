@@ -201,7 +201,7 @@ int detecter() {
 	detection = 0;
     
 	#ifdef DEBUG_DETECTER
-		Serial.print("Seuil1: ");
+		Serial.print("Seuil1   : ");
 		Serial.print(*(seuil));
 		Serial.print("       ");
 		Serial.println(*(seuil+1));
