@@ -4,8 +4,8 @@ Code for Borobot2
 # BoRoBot - Pin list
 
 * Capteurs ligne blanche
-   * Avant   : A1
-   * Arriere : A0
+   * Avant   : A0
+   * Arriere : A1
 * Valeurs seuils des capteurs de ligne blanche
    * arrière sur le blanc,avant sur le noir
       * A0  < 60
@@ -15,8 +15,8 @@ Code for Borobot2
       * A1< 60
 
 * Capteurs IR
-  * Avant   : A2
-  * Arriere : A3
+  * Avant   : A3
+  * Arriere : A2
 * Valeurs deuils des capteur IR
   * Obstacle à  4  cm -> Valeur : 600
   * Obstacle à  40 cm -> Valeur : 60
