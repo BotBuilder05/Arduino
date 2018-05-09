@@ -418,6 +418,7 @@ void tourneDroite(){
 int detectionDojo() {
 	int bord_circuit_analog_front=0;
 	int bord_circuit_analog_rear=0;
+	int dojo_limit=0:
 
 	bord_circuit_analog_front = analogRead(capteurLF);// Black > 600 White < 180
 	bord_circuit_analog_rear = analogRead(capteurLR); // Black > 600 White < 180
