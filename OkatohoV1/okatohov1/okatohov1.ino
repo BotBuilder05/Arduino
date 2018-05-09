@@ -264,7 +264,7 @@ void rotationJupe(){
 
 void rotationJupeAleatoire(){
 	#ifdef DEBUG
-		Serial.println("JUPE - Mise en route de la jupe");
+		Serial.println("JUPE - Rotation 'aleatoire' de la jupe ");
 	#endif
 	nbPas = nbPas + 1;
 	if(nbPas == 5){	    
@@ -274,7 +274,7 @@ void rotationJupeAleatoire(){
 		nbPas = 0;
 		digitalWrite(moteurJupe5V, 1);
 		digitalWrite(moteurJupeGND, 0);
-		}
+	}
 }
 
 
