@@ -216,7 +216,7 @@ int * lectureCapteur(){
 }
 
 int * valeurMoyCal() {
-   
+  // ajouter un parametre a la fonction pour avoir 10 valeurs pendant l'init et 5 valeurs pendant le combat 
 	int *valeurLu;
 	static int valeurMoy[2];
     
@@ -365,14 +365,14 @@ void wait() {
 		Serial.println("WAIT - J'attends... et je calibre mes capteurs");
 	#endif
 	int x=0;
-	while (x<=3) {
+	while (x<=2) {
 		delay(1000);
 		x+=1;
 	} 
 	// INUTILE LES VOLETS SONT DEVANT LES CAPTEURS!!!!!!!
 	cal=calibrationIR();
 	//cal=calibrationMaxIR();
-	delay(100);
+	delay(600);
 }
 
 void Robot50HzInterrupt() {
@@ -444,8 +444,8 @@ void avance() {
 	digitalWrite(moteur1[1], LOW);
 	digitalWrite(moteur2[0], HIGH);
 	digitalWrite(moteur2[1], LOW);
-	analogWrite(speedPinMoteur1, 70);
-	analogWrite(speedPinMoteur2, 70);
+	analogWrite(speedPinMoteur1, 255);
+	analogWrite(speedPinMoteur2, 255);
 }
 
 void recule() {
@@ -456,8 +456,8 @@ void recule() {
 	digitalWrite(moteur1[1], HIGH);
 	digitalWrite(moteur2[0], LOW);
 	digitalWrite(moteur2[1], HIGH);
-	analogWrite(speedPinMoteur1, 70);
-	analogWrite(speedPinMoteur2, 70);
+	analogWrite(speedPinMoteur1, 255);
+	analogWrite(speedPinMoteur2, 255);
 }
 
 void tourneGauche(){
