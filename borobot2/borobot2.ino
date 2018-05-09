@@ -359,46 +359,6 @@ void ouvertureVolet() {
 	servo.write(VOLETS_LOCKED);
 }
 
-/*
-// Gestion Moteur
-void setMotor(int motorG, int motorD) {
-
-  //speed = map(speed, 0, 100, 0, 255);
-
-if (motorG > 127) {
-      digitalWrite(moteur1[0], LOW);
-      digitalWrite(moteur1[1], HIGH);
-      }
-else if  (motorG < 127) {
-      digitalWrite(moteur1[0], HIGH);
-      digitalWrite(moteur1[1], LOW);
-      }
-else {
-      digitalWrite(moteur1[0], LOW);
-      digitalWrite(moteur1[1], LOW);
-      }
-
-if (motorD > 127) {
-      digitalWrite(moteur2[0], LOW);
-      digitalWrite(moteur2[1], HIGH);
-      }
-else if  (motorD < 127) {
-      digitalWrite(moteur2[0], HIGH);
-      digitalWrite(moteur2[1], LOW);
-      }
-else {
-      digitalWrite(moteur2[0], LOW);
-      digitalWrite(moteur2[1], LOW);
-      }
-}
-
-void tourneDroite() {
-    #ifdef DEBUG
-      Serial.println("TOURNE A DROITE ");
-    #endif
-    setMotor(0,255);  
-}
-*/
 void avance() {
 	#ifdef DEBUG
 		Serial.println("AVANCE : on avance");
