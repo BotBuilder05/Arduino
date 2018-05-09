@@ -159,43 +159,6 @@ int identifyButtonPress() {
 	return buttonPressed;
 }
 
-
-/*
-void attenteAppuieBouton() {
-	int buttonStartState=0;
-
-	#ifdef DEBUG
-		Serial.print("START - initialisation:  ");
-		Serial.println(buttonStartState);
-	#endif
-    
-	// detection pression bouton Start
-	buttonStartState = digitalRead(buttonRedStartPin);
-	//filtrée ici le rebond...
-	#ifdef DEBUG
-		Serial.print("START - Etat bouton:  ");
-		Serial.println(buttonStartState);
-	#endif
-
-
-	if (buttonStartState == 1){
-		#ifdef DEBUG
-	        	Serial.println("START - Le bouton ROUGE start a ete appuye - La Led verte s'allume - La rouge s'eteint");
-	        #endif
-	  	digitalWrite(led1Pin, 0);
-	  	digitalWrite(led2Pin, 1);
-	        s_state_next=WAIT;
-	} 
-	else {
-		#ifdef DEBUG
-	        	Serial.println("START - Waiting for Start button to be pressed - Red led is on");
-	        #endif
-	  	digitalWrite(led1Pin, 1);
-	        s_state_next=START;
-	}
-}
-*/
-
 int * lectureCapteur(){
 
 	//tableau retournant les valeurs lues pour avant et arriere
@@ -515,7 +478,6 @@ void loop() {
 	 	Serial.println("DEPART");
 	#endif
 
-	//attenteAppuieBouton();
 	identifyButtonPress();
 	//s_state_next is set in the function
 	break;
