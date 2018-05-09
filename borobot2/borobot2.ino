@@ -185,7 +185,7 @@ int * valeurMoyCal(int nbLecture) {
 	int *valeurLu;
 	static int valeurMoy[2];
     
-	for(int z=0;z<(nbLecture-1);z++){
+	for(int z=0;z<nbLecture;z++){
 		valeurLu=lectureCapteur();
 		valeurMoy[0] += *(valeurLu);
 		valeurMoy[1] += *(valeurLu + 1);
@@ -268,7 +268,7 @@ int * calibrationIR(int nbLecture){
 	// TODO Veirifier si ces analoguRead sont necessaire avec la double alim!
 	//analogRead(capteurIRAvant);
 	//analogRead(capteurIRArriere);
-	for(int z=0;z<(nbLecture-1);z++){
+	for(int z=0;z<nbLecture;z++){
 		valeurLu=lectureCapteur();
 		CalibrationIR[0] += *(valeurLu);
 		CalibrationIR[1] += *(valeurLu + 1);
