@@ -35,7 +35,10 @@ const int ledCorp2Pin=10;
 
 int sState , sStateNext;
 int detect=0;
+//variable pour les boutons
 int buttonPressed;
+//variable pour la jupe
+ int nbPas=0;
 //variable pour les LED
 #define ledOn 0
 #define ledOff 1
@@ -259,6 +262,20 @@ void rotationJupe(){
 	digitalWrite(moteurJupe5V, 1);
 }
 
+void rotationJupeAleatoire(){
+	#ifdef DEBUG
+		Serial.println("JUPE - Mise en route de la jupe");
+	#endif
+	nbPas = nbPas + 1;
+	if(nbPas == 5){	    
+		digitalWrite(moteurJupe5V, 0);
+		digitalWrite(moteurJupeGND, 1);
+		delay(400);
+		nbPas = 0;
+		digitalWrite(moteurJupe5V, 1);
+		digitalWrite(moteurJupeGND, 0);
+		}
+}
 
 
 //fonction tempo servo Direction
@@ -349,7 +366,7 @@ int attaqueAveugle() {
   	*/
   	int etatSuivant = CHERCHE_ADV;
 	if(buttonPressed == 0){
-		for(int i=0; i<5; i++){
+		for(int i=0; i<4; i++){
 		    avance(DIR_GAUCHE);
 			avance(DIR_ARRIERE);
 		    if(detection()){
@@ -359,7 +376,7 @@ int attaqueAveugle() {
 		}
 	}
 	else{
-		for(int i=0; i<5; i++){
+		for(int i=0; i<4; i++){
 		    avance(DIR_AVANT);
 			avance(DIR_DROITE);
 		    if(detection()){
@@ -413,8 +430,9 @@ void loop() {
 			*/
 			digitalWrite(ledOeilPin, ledOn);	
 			digitalWrite(ledChapeauPin, ledOff);
-			for(int i=0; i<4; i++){
+			for(int i=0; i<2; i++){
 				avance(capteurQuiDetect); 
+				rotationJupeAleatoire();
 			}
 			digitalWrite(ledOeilPin, ledOff);	
 			digitalWrite(ledChapeauPin, ledOn);
