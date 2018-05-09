@@ -180,19 +180,19 @@ int * lectureCapteur(){
 	return valeursLu;
 }
 
-int * valeurMoyCal() {
+int * valeurMoyCal(int nbLecture) {
   // ajouter un parametre a la fonction pour avoir 10 valeurs pendant l'init et 5 valeurs pendant le combat 
 	int *valeurLu;
 	static int valeurMoy[2];
     
-	for(int z=0;z<10;z++){
+	for(int z=0;z<(nbLecture-1);z++){
 		valeurLu=lectureCapteur();
 		valeurMoy[0] += *(valeurLu);
 		valeurMoy[1] += *(valeurLu + 1);
 		delay(50);
 	}
-	valeurMoy[0] = valeurMoy[0] / 10;
-	valeurMoy[1] = valeurMoy[1] / 10;
+	valeurMoy[0] = valeurMoy[0] / nbLecture;
+	valeurMoy[1] = valeurMoy[1] / nbLecture;
 
 	return valeurMoy;
 }
@@ -222,7 +222,7 @@ int detecter() {
 	int *valeurLu;
 	valeurLu=lectureCapteur();*/
 	int *valeurMoy;
-	valeurMoy=valeurMoyCal();
+	valeurMoy=valeurMoyCal(5);
 
 	detection = 0;
     
@@ -255,7 +255,7 @@ int detecter() {
 	return detection;
 }
 
-int * calibrationIR(){
+int * calibrationIR(int nbLecture){
 	// Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
 	int *valeurLu;
 	static int CalibrationIR[2];
@@ -265,9 +265,10 @@ int * calibrationIR(){
 		Serial.println("  Valeur Capteur Arriere");
 	#endif
 	// Lecture a blanc pour virer eventuelle valeur aberente
-	analogRead(capteurIRAvant);
-	analogRead(capteurIRArriere);
-	for(int z=0;z<10;z++){
+	// TODO Veirifier si ces analoguRead sont necessaire avec la double alim!
+	//analogRead(capteurIRAvant);
+	//analogRead(capteurIRArriere);
+	for(int z=0;z<(nbLecture-1);z++){
 		valeurLu=lectureCapteur();
 		CalibrationIR[0] += *(valeurLu);
 		CalibrationIR[1] += *(valeurLu + 1);
@@ -278,11 +279,8 @@ int * calibrationIR(){
 		#endif
 		delay(100);
 	}
-	CalibrationIR[0] = CalibrationIR[0] / 10;
-	CalibrationIR[1] = CalibrationIR[1] / 10;
-	// suppresion, les valeurs sont plus stables depuis l'ajout condo
-	//CalibrationIR[0] = CalibrationIR[0] + 20;
-	//CalibrationIR[1] = CalibrationIR[1] + 30;
+	CalibrationIR[0] = CalibrationIR[0] / nbLecture;
+	CalibrationIR[1] = CalibrationIR[1] / nbLecture;
 
 	#ifdef DEBUG_CALIBRATION_IR
 		Serial.print("WAIT2 - Calibration capteur Avant  : ");
@@ -335,7 +333,7 @@ void wait() {
 		x+=1;
 	} 
 	// INUTILE LES VOLETS SONT DEVANT LES CAPTEURS!!!!!!!
-	cal=calibrationIR();
+	cal=calibrationIR(10);
 	//cal=calibrationMaxIR();
 	delay(600);
 }
