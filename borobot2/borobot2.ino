@@ -34,6 +34,9 @@ int speedPinMoteur2 = 6;
 int buttonPressed;
 
 // Variable to calibrate IR capteur
+#define capteurLF A0
+#define capteurLR A1
+
 #define capteurIRAvant A3
 #define capteurIRArriere A2
 int detection = 0; //1 capteur avant ; 2 capteur arriere ; 0 init calue
@@ -412,14 +415,18 @@ void tourneDroite(){
 	analogWrite(speedPinMoteur2, 80);
 }
 
-void detectionDojo() {
-	//bord_circuit_analog_front = analogRead(capteurLF);// Black > 600 White < 180
-	//bord_circuit_analog_rear = analogRead(capteurLR); // Black > 600 White < 180
+int detectionDojo() {
+	int bord_circuit_analog_front=0;
+	int bord_circuit_analog_rear=0;
 
-	//int const white_limit=180;
-	//if (bord_circuit_analog_front < white_limit || bord_circuit_analog_rear < white_limit) {
-	//  dojo_limit=1;
-	//}
+	bord_circuit_analog_front = analogRead(capteurLF);// Black > 600 White < 180
+	bord_circuit_analog_rear = analogRead(capteurLR); // Black > 600 White < 180
+
+	int const white_limit=180;
+	if (bord_circuit_analog_front < white_limit || bord_circuit_analog_rear < white_limit) {
+	  dojo_limit=1;
+	}
+	return dojo_limit;
 }
 
 void loop() {
