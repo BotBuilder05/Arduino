@@ -292,6 +292,7 @@ int * calibrationIR(int nbLecture){
 	return CalibrationIR;
 }
 
+/*
 int * calibrationMaxIR(){
 	// Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
 	int *valeurLu;
@@ -321,7 +322,7 @@ int * calibrationMaxIR(){
 
 	return CalibrationIR;
 }
-
+*/
 
 void wait() {
 	#ifdef DEBUG_WAIT
