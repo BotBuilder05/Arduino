@@ -36,6 +36,7 @@ int buttonPressed;
 // Variable to calibrate IR capteur
 #define capteurLF A0
 #define capteurLR A1
+int dojo;
 
 #define capteurIRAvant A3
 #define capteurIRArriere A2
@@ -424,9 +425,16 @@ int detectionDojo() {
 	bord_circuit_analog_rear = analogRead(capteurLR); // Black > 600 White < 180
 
 	int const white_limit=180;
-	if (bord_circuit_analog_front < white_limit || bord_circuit_analog_rear < white_limit) {
-	  dojo_limit=1;
+	if (bord_circuit_analog_front < white_limit) {
+		dojo_limit=1;
 	}
+	else if (bord_circuit_analog_rear < white_limit) {
+		dojo_limit=2;
+	}
+	#ifdef DEBUG
+		Serial.print("LimitDOJO:");
+		Serial.println("dojo_limit");
+	#endif
 	return dojo_limit;
 }
 
@@ -485,8 +493,8 @@ void loop() {
 		tourneGauche();
 	}
 	delay (500);
-	avance();  // pendant 300ms a coder
-	delay (30);
+	avance();  
+	delay (30); // Avance pendant 30ms pour eviter de sortir
 	#ifdef DEBUG
 		Serial.println("END - BLINDATTACK");
 	#endif
@@ -545,7 +553,7 @@ void loop() {
 	//#ifdef DEBUG
 	//  Serial.println("AVANCE");
 	//#endif
-	avance(); // lecture capteur + moteur
+	avance(); // TODO ajout un delai
 	s_state_next=DETECTION;     
 	break;
 
@@ -561,15 +569,24 @@ void loop() {
 	break;
 
      case TOURNE:
-      #ifdef SLOW
-        delay(attente);
-      #endif
-      #ifdef SLOW
-        Serial.println("TOURNE");
-      #endif
-      tourneDroite();
-      s_state_next=DETECTION;  
-      break;
+	#ifdef SLOW
+		delay(attente);
+	#endif
+	#ifdef SLOW
+		Serial.println("TOURNE");
+	#endif
+	tourneDroite();
+	dojo=detectionDojo();
+	if (dojo==1){ //dojo==1 -> capteur avant a vu du blanc donc on recule
+		recule();
+		delay(5);
+	}
+	else if (dojo==2) { //dojo==2 -> capteur arriere a vu du blanc donc on avance
+		avance();
+		delay(5);
+	}
+	s_state_next=DETECTION;  
+	break;
   }
   s_state = s_state_next;
 }
