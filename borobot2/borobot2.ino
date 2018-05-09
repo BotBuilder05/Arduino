@@ -160,6 +160,7 @@ int identifyButtonPress() {
 }
 
 
+/*
 void attenteAppuieBouton() {
 	int buttonStartState=0;
 
@@ -193,6 +194,7 @@ void attenteAppuieBouton() {
 	        s_state_next=START;
 	}
 }
+*/
 
 int * lectureCapteur(){
 
