@@ -67,7 +67,7 @@ Servo servo;
 const int servoPin=4; // VALEUR A VERIFIER
 
 
-#define VOLETS_LOCKED 45
+#define VOLETS_LOCKED 25
 #define VOLETS_OPENED 0
 
 
