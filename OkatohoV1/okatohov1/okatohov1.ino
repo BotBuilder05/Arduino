@@ -260,6 +260,7 @@ void rotationJupe(){
 		Serial.println("JUPE - Mise en route de la jupe");
 	#endif
 	digitalWrite(moteurJupe5V, 1);
+	digitalWrite(moteurJupeGND, 0);
 }
 
 void rotationJupeAleatoire(){
@@ -270,8 +271,9 @@ void rotationJupeAleatoire(){
 	if(nbPas == 5){	    
 		digitalWrite(moteurJupe5V, 0);
 		digitalWrite(moteurJupeGND, 1);
-		delay(400);
-		nbPas = 0;
+		nbPas=0;
+	}
+	else {
 		digitalWrite(moteurJupe5V, 1);
 		digitalWrite(moteurJupeGND, 0);
 	}
@@ -431,8 +433,8 @@ void loop() {
 			digitalWrite(ledOeilPin, ledOn);	
 			digitalWrite(ledChapeauPin, ledOff);
 			for(int i=0; i<2; i++){
-				avance(capteurQuiDetect); 
 				rotationJupeAleatoire();
+				avance(capteurQuiDetect); 
 			}
 			digitalWrite(ledOeilPin, ledOff);	
 			digitalWrite(ledChapeauPin, ledOn);
@@ -447,6 +449,7 @@ void loop() {
 			#endif
 			digitalWrite(ledOeilPin, ledOff);	
 			digitalWrite(ledChapeauPin, ledOn);
+			rotationJupe();
 			tourne(10);
 			detect=detection();
 			/* if find someone ATTAQUE*/
