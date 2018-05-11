@@ -103,6 +103,8 @@ void setup() {
 	// On initialise les moteurs
 	pinMode(speedPinMoteur1, OUTPUT);
 	pinMode(speedPinMoteur2, OUTPUT);
+	pinMode(capteurIRAvant, INPUT);
+	pinMode(capteurIRArriere, INPUT);
 	pinMode(moteur1[0], OUTPUT);
 	pinMode(moteur1[1], OUTPUT);
 	pinMode(moteur2[0], OUTPUT);
@@ -433,7 +435,7 @@ int detectionDojo() {
 	}
 	#ifdef DEBUG
 		Serial.print("LimitDOJO:");
-		Serial.println("dojo_limit");
+		Serial.println(dojo_limit);
 	#endif
 	return dojo_limit;
 }
