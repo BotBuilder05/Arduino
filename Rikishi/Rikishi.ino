@@ -2,7 +2,7 @@
 #include <MsTimer2.h>
 #include "Rikishi.h"
 
-int move_speed = 100, rotate_speed = 90, started = 0, was_detected = 0;
+int move_speed = 100, rotate_speed = 100, started = 0, was_detected = 0;
 
 /* Fonction qui attend 5 seconde
  * avec blink de la led
@@ -81,12 +81,12 @@ void stop(){
  */
 void read_capts(){
     if(started) {
-        if (analogRead(NEAR_CAPT) < 430) {
-            detected = 1;
-            end_detected = 0;
-        } else if(digitalRead(END_LIM) == HIGH) {
+        if(digitalRead(END_LIM) == HIGH) {
             detected = 0;
             end_detected = 1;
+        } else if (analogRead(NEAR_CAPT) < 1000) {
+            detected = 1;
+            end_detected = 0;
         } else {
             digitalWrite(SEND_PIN, LOW);
             read_echo = pulseIn(READ_PIN, HIGH);
@@ -104,7 +104,7 @@ void read_capts(){
 /*setup des pins */
 void setup() {
 
-    MsTimer2::set(500, read_capts);
+    MsTimer2::set(250, read_capts);
     MsTimer2::start();
 
     Serial.begin(9600);
@@ -139,6 +139,10 @@ void loop() {
 
         case START:
             wait5();
+            move_(move_speed, AVANCE);
+            delay(200);
+            move_(move_speed, RECULE);
+            delay(700);
             next_state = SEARCH;
             started = 1;
             break;

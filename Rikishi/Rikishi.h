@@ -20,7 +20,7 @@ uint8_t current_state, last_state, next_state;
 #define SEND_PIN 13
 #define READ_PIN 12
 long read_echo;
-const uint8_t detect_min = 35; // distance de detection en cm
+const uint8_t detect_min = 50; // distance de detection en cm
 
 //capteur sur la pelle
 #define NEAR_CAPT A1
