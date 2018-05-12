@@ -250,13 +250,17 @@ int detecter() {
 	#endif
 	// si la valeur(moyenne) capteur avant superieure au seuil avant et si la valeur(moyenne) capteur avant est supperieurie a la valeur du capteur arriere
 	if (( *(valeurMoy) > *(seuil)) && (*(valeurMoy) > *(valeurMoy + 1))) {
-		detection = 1;
+		detection = 2;
 	}
 	// si la valeur(moyenne) capteur arriere superieure au seuil arriere et si la valeur(moyenne) capteur arriere est supperieure a la valeur du capteur avant
 	else if (( *(valeurMoy + 1) > *(seuil+1)) && (*(valeurMoy + 1) > *(valeurMoy))) {
-		detection = 2;
+		detection = 1;
 	}
 
+	#ifdef DEBUG_DETECTER_SEUIL
+		Serial.print("DETECTION - Valeur de detect:");
+		Serial.println(detect);
+	#endif
 	status_detection=1;
 	return detection;
 }
@@ -374,8 +378,8 @@ void avance() {
 	digitalWrite(moteur1[1], LOW);
 	digitalWrite(moteur2[0], HIGH);
 	digitalWrite(moteur2[1], LOW);
-	analogWrite(speedPinMoteur1, 255);
-	analogWrite(speedPinMoteur2, 255);
+	analogWrite(speedPinMoteur1, 70);
+	analogWrite(speedPinMoteur2, 70);
 }
 
 void recule() {
@@ -386,8 +390,8 @@ void recule() {
 	digitalWrite(moteur1[1], HIGH);
 	digitalWrite(moteur2[0], LOW);
 	digitalWrite(moteur2[1], HIGH);
-	analogWrite(speedPinMoteur1, 255);
-	analogWrite(speedPinMoteur2, 255);
+	analogWrite(speedPinMoteur1, 70);
+	analogWrite(speedPinMoteur2, 70);
 }
 
 void tourneGauche(){
@@ -433,7 +437,11 @@ int detectionDojo() {
 	else if (bord_circuit_analog_rear < white_limit) {
 		dojo_limit=2;
 	}
-	#ifdef DEBUG
+	#ifdef DEBUG_DOJO
+		Serial.print("BordFront:");
+		Serial.println(bord_circuit_analog_front);
+		Serial.print("BordRear:");
+		Serial.println(bord_circuit_analog_rear);
 		Serial.print("LimitDOJO:");
 		Serial.println(dojo_limit);
 	#endif
@@ -515,10 +523,6 @@ void loop() {
         
 	int detect;
 	detect=detecter(); // lecture catpteur + tourne sur place droite ou gauche en fonction du catpeur qui detect
-	#ifdef DEBUG
-		Serial.print("DETECTION - Valeur de detect:");
-		Serial.println(detect);
-	#endif
 	if (detect == 1 ) {
 		// On detect devant , on eteint la led rouge on alume la verte
 		digitalWrite(led1Pin, 0);
@@ -556,6 +560,15 @@ void loop() {
 	//  Serial.println("AVANCE");
 	//#endif
 	avance(); // TODO ajout un delai
+	dojo=detectionDojo();
+	if (dojo==1){ //dojo==1 -> capteur avant a vu du blanc donc on recule
+		recule();
+		delay(5);
+	}
+	else if (dojo==2) { //dojo==2 -> capteur arriere a vu du blanc donc on avance
+		avance();
+		delay(5);
+	}
 	s_state_next=DETECTION;     
 	break;
 
