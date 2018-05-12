@@ -53,6 +53,7 @@ int *cal;
 int epoch20ms=0;
 boolean delayOngoing;
 int epocDelay;
+int lastEpoc;
 int *valeurMoy;
 
 // LED
@@ -111,6 +112,7 @@ void setup() {
 	pinMode(moteur2[1], OUTPUT);
 
 	delayOngoing=0;
+	lastEpoc=0;
 
 	// On initialise la machine d'etat 
 	s_state=START;
@@ -225,11 +227,6 @@ int detecter() {
 	if (cal[1] < 140) {
 		seuil[1]=140;
 	}
-
-	/*// Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
-	int *valeurLu;
-	valeurLu=lectureCapteur();*/
-	valeurMoy=valeurMoyCal(5);
 
 	detection = 0;
     
@@ -626,9 +623,12 @@ void loop() {
 	if (delayOngoing){
 		fermetureVolet();
 	}
-	if (epoch20ms>lastEpoc){
+	if (epoch20ms>lastEpoc && capteur avant){
 		lastEpoc=epoch20ms;
-		valeurMoy=valeurMoyCal(5);
+		//verifier que ADC a fini -> on prends la valeur, change le mux pour passer sur l'autre capteur et lancer la mesure ADC, calcul valeur moyenne de la valeur passee, while adc fini
 	}
+	if (adc fini && capteur arriere) {
+	}
+		valeurMoy=valeurMoyCal(5);
   s_state = s_state_next;
 }
