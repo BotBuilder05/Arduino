@@ -220,7 +220,7 @@ int detecter() {
 	}
 	//Seuil arriere
 	//seuil[1]=130;
-	if (cal[1] < 100) {
+	if (cal[1] < 140) {
 		seuil[1]=100;
 	}
 
