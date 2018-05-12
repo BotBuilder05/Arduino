@@ -68,9 +68,9 @@ const int HAUTE_AVANT = 0;
 const int HAUTE_ARRIERE = 1;
 boolean posActuelPied = HAUTE_AVANT ; // memorise la position HAUTE_AVANT ou HAUTE_ARRIERE du pied
 
-int tabPosPied[2] = {10,170};
-int posCentrePied = 90;
-int tempoServoD = 500;
+int tabPosPied[2] = {10,150};
+int posCentrePied = 80;
+int tempoServoD = 600;
 int tempoServoM = 700;
 
 // Capteurs
@@ -101,7 +101,7 @@ void setup() {
 	digitalWrite(buttonOeilGStartPin,HIGH );
 	pinMode(buttonChapeauDStartPin, INPUT);
 	// On initialise les servos
-	servoM.attach(SERVO_M,850,2220);  // attaches l'objet servo a la pin 9
+	servoM.attach(SERVO_M,700,2700);  // attaches l'objet servo a la pin 9
  	servoD.attach(SERVO_D,700,2700);
  	servoM.write(tabPosPied[posActuelPied]);
 	servoD.write(tabDirPied[posActuelPied][dirActuelPied]);
@@ -450,7 +450,7 @@ void loop() {
 			digitalWrite(ledOeilPin, ledOff);	
 			digitalWrite(ledChapeauPin, ledOn);
 			rotationJupe();
-			tourne(10);
+			tourne(20);
 			detect=detection();
 			/* if find someone ATTAQUE*/
 			if (detect == 1) {
