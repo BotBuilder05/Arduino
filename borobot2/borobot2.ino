@@ -3,6 +3,7 @@
 #define DEBUG_DETECTER
 #define DEBUG_CALIBRATION_IR
 #define DEBUG_WAIT
+#define DEBUG_DOJO
 //#define DEBUG_VOLET
 //#define DEBUG_LECTURE_CAPTEUR
 //#define DEBUG_DETECTER_SEUIL
@@ -45,6 +46,7 @@ int status_detection; //flag de detection
 // pointeur sur un entier pour acceder aux valeurs du tableau des valeurs de calibration
 int *cal;
 
+// int epoch20ms=0;
 
 // LED
 const int led1Pin = 7; //LED rouge
@@ -350,15 +352,8 @@ void wait() {
 }
 
 void Robot50HzInterrupt() {
-/*
-	#ifdef DEBUG
-		Serial.println("Interruptions");
-	#endif
-	beDetect = detecter();
-	if(beDetect){
-		digitalWrite(led1Pin, HIGH);
-	}
-*/
+	//Ne rien mettre d'autre
+	//epoch20ms++;
 }
 
 void ouvertureVolet() {
@@ -378,8 +373,8 @@ void avance() {
 	digitalWrite(moteur1[1], LOW);
 	digitalWrite(moteur2[0], HIGH);
 	digitalWrite(moteur2[1], LOW);
-	analogWrite(speedPinMoteur1, 70);
-	analogWrite(speedPinMoteur2, 70);
+	analogWrite(speedPinMoteur1, 100);
+	analogWrite(speedPinMoteur2, 100);
 }
 
 void recule() {
@@ -502,9 +497,9 @@ void loop() {
 	else {
 		tourneGauche();
 	}
-	delay (500);
+	delay (800);
 	avance();  
-	delay (30); // Avance pendant 30ms pour eviter de sortir
+	delay (500); // Avance pendant 30ms pour eviter de sortir
 	#ifdef DEBUG
 		Serial.println("END - BLINDATTACK");
 	#endif
@@ -594,11 +589,11 @@ void loop() {
 	dojo=detectionDojo();
 	if (dojo==1){ //dojo==1 -> capteur avant a vu du blanc donc on recule
 		recule();
-		delay(5);
+		delay(15);
 	}
 	else if (dojo==2) { //dojo==2 -> capteur arriere a vu du blanc donc on avance
 		avance();
-		delay(5);
+		delay(15);
 	}
 	s_state_next=DETECTION;  
 	break;
