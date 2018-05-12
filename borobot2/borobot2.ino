@@ -13,11 +13,12 @@
 #define START 1
 #define WAIT 2
 #define FLAPS 3
-#define BLINDATTACK 4
-#define DETECTION 5
-#define AVANCE 6
-#define RECULE 7
-#define TOURNE 8
+#define BLINDATTACKPHASE1 4
+#define BLINDATTACKPHASE2 5
+#define DETECTION 6
+#define AVANCE 7
+#define RECULE 8
+#define TOURNE 9
 
 int s_state, s_state_next, s_state_previous;
 
@@ -50,8 +51,8 @@ int status_detection; //flag de detection
 int *cal;
 
 int epoch20ms=0;
-boolean resteAFermerLesVolets;
-int epocFermeture;
+boolean delayOngoing;
+int epocDelay;
 
 // LED
 const int led1Pin = 7; //LED rouge
@@ -108,7 +109,7 @@ void setup() {
 	pinMode(moteur2[0], OUTPUT);
 	pinMode(moteur2[1], OUTPUT);
 
-	resteAFermerLesVolets=0;
+	delayOngoing=0;
 
 	// On initialise la machine d'etat 
 	s_state=START;
@@ -354,12 +355,14 @@ void Robot50HzInterrupt() {
 	epoch20ms++;
 }
 
-function delayNonBloquant(){
-	delayOngoing=1;
-        epocDelay=epoch20ms+TEMPS_DEPLACEMENT_SERVO_VOLET/20;
+#define TEMPS_DEPLACEMENT_SERVO_VOLET 200 // 200ms
+void delayNonBloquant(){
+	if(!delayOngoing){
+        	epocDelay=epoch20ms+TEMPS_DEPLACEMENT_SERVO_VOLET/20;
+		delayOngoing=1;
+	}
 }
 
-#define TEMPS_DEPLACEMENT_SERVO_VOLET 200 // 200ms
 void ouvertureVolet() {
 	#ifdef DEBUG_VOLET
 		Serial.println("FLAP - Ouverture Volets");
@@ -372,9 +375,9 @@ void fermetureVolet() {
 	#ifdef DEBUG_VOLET
 		Serial.println("FLAP - Fermeture Volets");
 	#endif
-	if (epoch20ms>epocFermeture){
+	if (epoch20ms>epocDelay){
 		servo.write(VOLETS_LOCKED);
-		resteAFermerLesVolets=0;
+		delayOngoing=0;
 	}
 }
 
@@ -494,10 +497,10 @@ void loop() {
 		Serial.println("FLAPS");
 	#endif
 	ouvertureVolet();
-	s_state_next=BLINDATTACK;
+	s_state_next=BLINDATTACKPHASE1;
 	break;
 
-    case BLINDATTACK:
+    case BLINDATTACKPHASE1:
 	#ifdef SLOW
 		delay(attente);
 	#endif
@@ -510,15 +513,23 @@ void loop() {
 	else {
 		tourneGauche();
 	}
-	delay (800);
-	avance();  
-	delay (500); // Avance pendant 30ms pour eviter de sortir
+	delayNonBloquant();
+	if (!delayOngoing) {
+		s_state_next=DETECTION;
+	}
 	#ifdef DEBUG
 		Serial.println("END - BLINDATTACK");
 	#endif
+	break;
+
+    case BLINDATTACKPHASE2:
+	avance();  
+	delayNonBloquant();
 	// On eteint la LED verte
 	digitalWrite(led1Pin, 0);
-	s_state_next=DETECTION;
+	if (!delayOngoing) {
+		s_state_next=DETECTION;
+	}
 	break;
 
     case DETECTION:
@@ -612,7 +623,7 @@ void loop() {
 	break;
   }
 	//Getion Event epoc
-	if (resteAFermerLesVolets){
+	if (delayOngoing){
 		fermetureVolet();
 	}
   s_state = s_state_next;
