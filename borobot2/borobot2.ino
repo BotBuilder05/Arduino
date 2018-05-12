@@ -373,8 +373,8 @@ void avance() {
 	digitalWrite(moteur1[1], LOW);
 	digitalWrite(moteur2[0], HIGH);
 	digitalWrite(moteur2[1], LOW);
-	analogWrite(speedPinMoteur1, 100);
-	analogWrite(speedPinMoteur2, 100);
+	analogWrite(speedPinMoteur1, 180);
+	analogWrite(speedPinMoteur2, 180);
 }
 
 void recule() {
@@ -385,8 +385,8 @@ void recule() {
 	digitalWrite(moteur1[1], HIGH);
 	digitalWrite(moteur2[0], LOW);
 	digitalWrite(moteur2[1], HIGH);
-	analogWrite(speedPinMoteur1, 70);
-	analogWrite(speedPinMoteur2, 70);
+	analogWrite(speedPinMoteur1, 180);
+	analogWrite(speedPinMoteur2, 180);
 }
 
 void tourneGauche(){
