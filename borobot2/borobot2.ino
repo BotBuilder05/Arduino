@@ -19,7 +19,7 @@
 #define RECULE 7
 #define TOURNE 8
 
-#define VOLETS_LOCKED 45
+#define VOLETS_LOCKED 30
 #define VOLETS_OPENED 0
 
 // Variable Gestion moteur
@@ -47,7 +47,9 @@ int status_detection; //flag de detection
 // pointeur sur un entier pour acceder aux valeurs du tableau des valeurs de calibration
 int *cal;
 
-// int epoch20ms=0;
+int epoch20ms=0;
+boolean resteAFermerLesVolets;
+int epocFermeture;
 
 // LED
 const int led1Pin = 7; //LED rouge
@@ -59,38 +61,6 @@ const int buttonJauneStartPin = 2;
 
 //creation de l'objet servo
 Servo servo;
-
-
-void setup() {  
-  #ifdef DEBUG
-    Serial.begin(9600 );
-  #endif
-  #ifdef DEBUG_SEUIL
-    Serial.begin(9600 );
-  #endif
-
-  //Inititalise les LED a OFF
-  #ifdef DEBUG
-  	Serial.println("SETUP : On eteint les leds");
-  #endif
-  digitalWrite(led1Pin, 0);
-  digitalWrite(led2Pin, 0);
-
-  // Met la LED rouge a ON
-  #ifdef DEBUG
-  	Serial.println("SETUP : On allume la led ROUGE");
-  #endif
-  digitalWrite(led1Pin, 1);
-
-	// Init PWM
-	pinMode(pwmD, OUTPUT);
-	pinMode(pwmG, OUTPUT);
-  // On initialise la machine d'etat 
-  s_state=START;
-=======
-#define VOLETS_LOCKED 30
-#define VOLETS_OPENED 0
-
 
 void setup() {  
 	#ifdef DEBUG
@@ -131,9 +101,10 @@ void setup() {
 	pinMode(moteur2[0], OUTPUT);
 	pinMode(moteur2[1], OUTPUT);
 
+	resteAFermerLesVolets=0;
+
 	// On initialise la machine d'etat 
 	s_state=START;
->>>>>>> master
 }
 
 int identifyButtonPress() {
@@ -373,16 +344,27 @@ void wait() {
 
 void Robot50HzInterrupt() {
 	//Ne rien mettre d'autre
-	//epoch20ms++;
+	epoch20ms++;
 }
 
+#define TEMPS_DEPLACEMENT_SERVO_VOLET 200 // 200ms
 void ouvertureVolet() {
 	#ifdef DEBUG_VOLET
 		Serial.println("FLAP - Ouverture Volets");
 	#endif
 	servo.write(VOLETS_OPENED);
-	delay(100);
-	servo.write(VOLETS_LOCKED);
+	resteAFermerLesVolets=1;
+	epocFermeture=epoch20ms+TEMPS_DEPLACEMENT_SERVO_VOLET/20;
+}
+
+void fermetureVolet() {
+	#ifdef DEBUG_VOLET
+		Serial.println("FLAP - Fermeture Volets");
+	#endif
+	if (epoch20ms>epocFermeture){
+		servo.write(VOLETS_LOCKED);
+		resteAFermerLesVolets=0;
+	}
 }
 
 void tourneDroiteLent() {
@@ -471,17 +453,6 @@ int detectionDojo() {
 }
 
 void loop() {
-/*
-for (int i=0;i<10;i++)
-{
-tourneDroite();
-delay(2000);
-tourneDroiteLent();
-delay(2000);
-}
-*/
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-	}
   switch (s_state){
 	#ifdef DEBUG
 		Serial.println("");
@@ -636,5 +607,9 @@ delay(2000);
 	s_state_next=DETECTION;  
 	break;
   }
+	//Getion Event epoc
+	if (resteAFermerLesVolets){
+		fermetureVolet();
+	}
   s_state = s_state_next;
 }
