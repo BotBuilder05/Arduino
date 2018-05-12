@@ -35,10 +35,7 @@ const int ledCorp2Pin=10;
 
 int sState , sStateNext;
 int detect=0;
-//variable pour les boutons
 int buttonPressed;
-//variable pour la jupe
- int nbPas=0;
 //variable pour les LED
 #define ledOn 0
 #define ledOff 1
@@ -70,7 +67,7 @@ boolean posActuelPied = HAUTE_AVANT ; // memorise la position HAUTE_AVANT ou HAU
 
 int tabPosPied[2] = {10,150};
 int posCentrePied = 80;
-int tempoServoD = 600;
+int tempoServoD = 500;
 int tempoServoM = 700;
 
 // Capteurs
@@ -118,6 +115,7 @@ void setup() {
         
 	// On initialise la machine d'etat 
 	sState=DEPART;
+	sStateNext=DEPART;
 }
 
 
@@ -260,24 +258,8 @@ void rotationJupe(){
 		Serial.println("JUPE - Mise en route de la jupe");
 	#endif
 	digitalWrite(moteurJupe5V, 1);
-	digitalWrite(moteurJupeGND, 0);
 }
 
-void rotationJupeAleatoire(){
-	#ifdef DEBUG
-		Serial.println("JUPE - Rotation 'aleatoire' de la jupe ");
-	#endif
-	nbPas = nbPas + 1;
-	if(nbPas == 5){	    
-		digitalWrite(moteurJupe5V, 0);
-		digitalWrite(moteurJupeGND, 1);
-		nbPas=0;
-	}
-	else {
-		digitalWrite(moteurJupe5V, 1);
-		digitalWrite(moteurJupeGND, 0);
-	}
-}
 
 
 //fonction tempo servo Direction
@@ -355,7 +337,26 @@ void tourne(int angleSouhaite) {		// max 35° ideal entre 5° et 25° (10)
 	servoD.write(angleInitial);		//on remet le pied a l'origine : on remet le servo de direction (servoD) dans sa position initial
 	delay(tempoTourne);
 }
-
+void lever() {		// max 35° ideal entre 5° et 25° (10)
+	servoM.write(tabPosPied[posActuelPied]);	
+	delay(1000);
+	servoM.write(posCentrePied); 	// on met le servo de marche (servoM) dans la position basse
+	delay(1000);
+	servoM.write(tabPosPied[!posActuelPied]); 	
+	delay(1000);
+	
+}
+void baisser() {		// max 35° ideal entre 5° et 25° (10)
+	if(buttonPressed == 0){
+	    servoM.write(tabPosPied[posActuelPied]);	
+	delay(tempoServoM/2);
+	}
+	else{
+	//servoM.write(tabPosPied[!posActuelPied]); 
+	servoM.write(posCentrePied); 	
+	delay(2000);
+	}
+}
 int attaqueAveugle() {
 	// retourne 5 ou 6 (Attaque ou recherche_adv)
 	/* 	- on commence par devant ou gauche en fonction du bouton apuyer pour le demarrage
@@ -399,7 +400,10 @@ void loop() {
         	digitalWrite(ledChapeauPin, ledOn);
 			digitalWrite(ledOeilPin, ledOn);
 			buttonPressed=identifyButtonPress();
-			sStateNext=ATT_5_SEC; 
+			lever();
+			baisser();
+			delay(2000);
+			//sStateNext=ATT_5_SEC; 
 		break;
 		case ATT_5_SEC:
 			#ifdef DEBUG
@@ -433,7 +437,6 @@ void loop() {
 			digitalWrite(ledOeilPin, ledOn);	
 			digitalWrite(ledChapeauPin, ledOff);
 			for(int i=0; i<2; i++){
-				rotationJupeAleatoire();
 				avance(capteurQuiDetect); 
 			}
 			digitalWrite(ledOeilPin, ledOff);	
@@ -449,8 +452,7 @@ void loop() {
 			#endif
 			digitalWrite(ledOeilPin, ledOff);	
 			digitalWrite(ledChapeauPin, ledOn);
-			rotationJupe();
-			tourne(20);
+			tourne(10);
 			detect=detection();
 			/* if find someone ATTAQUE*/
 			if (detect == 1) {
