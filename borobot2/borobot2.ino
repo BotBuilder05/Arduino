@@ -53,6 +53,7 @@ int *cal;
 int epoch20ms=0;
 boolean delayOngoing;
 int epocDelay;
+int *valeurMoy;
 
 // LED
 const int led1Pin = 7; //LED rouge
@@ -228,7 +229,6 @@ int detecter() {
 	/*// Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
 	int *valeurLu;
 	valeurLu=lectureCapteur();*/
-	int *valeurMoy;
 	valeurMoy=valeurMoyCal(5);
 
 	detection = 0;
@@ -515,7 +515,7 @@ void loop() {
 	}
 	delayNonBloquant();
 	if (!delayOngoing) {
-		s_state_next=DETECTION;
+		s_state_next=BLINDATTACKPHASE2;
 	}
 	#ifdef DEBUG
 		Serial.println("END - BLINDATTACK");
@@ -625,6 +625,10 @@ void loop() {
 	//Getion Event epoc
 	if (delayOngoing){
 		fermetureVolet();
+	}
+	if (epoch20ms>lastEpoc){
+		lastEpoc=epoch20ms;
+		valeurMoy=valeurMoyCal(5);
 	}
   s_state = s_state_next;
 }
