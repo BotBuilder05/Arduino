@@ -19,6 +19,8 @@
 #define RECULE 7
 #define TOURNE 8
 
+int s_state, s_state_next, s_state_previous;
+
 #define VOLETS_LOCKED 30
 #define VOLETS_OPENED 0
 
@@ -59,8 +61,13 @@ const int led2Pin = 8; //LED verte
 const int buttonRedStartPin = 3;
 const int buttonJauneStartPin = 2;
 
+// Servo
+// ne pas utiliser pin 9 et 10 pwm a cause du timer
+// Import biblio gestion servo-moteur
+#include <Servo.h>
 //creation de l'objet servo
 Servo servo;
+const int servoPin=4; // VALEUR A VERIFIER
 
 void setup() {  
 	#ifdef DEBUG
@@ -347,14 +354,18 @@ void Robot50HzInterrupt() {
 	epoch20ms++;
 }
 
+function delayNonBloquant(){
+	delayOngoing=1;
+        epocDelay=epoch20ms+TEMPS_DEPLACEMENT_SERVO_VOLET/20;
+}
+
 #define TEMPS_DEPLACEMENT_SERVO_VOLET 200 // 200ms
 void ouvertureVolet() {
 	#ifdef DEBUG_VOLET
 		Serial.println("FLAP - Ouverture Volets");
 	#endif
 	servo.write(VOLETS_OPENED);
-	resteAFermerLesVolets=1;
-	epocFermeture=epoch20ms+TEMPS_DEPLACEMENT_SERVO_VOLET/20;
+	delayNonBloquant();
 }
 
 void fermetureVolet() {
@@ -365,13 +376,6 @@ void fermetureVolet() {
 		servo.write(VOLETS_LOCKED);
 		resteAFermerLesVolets=0;
 	}
-}
-
-void tourneDroiteLent() {
-    #ifdef DEBUG
-      Serial.println("TOURNE A DROITE LENT");
-    #endif
-    setMotor(63,192);  
 }
 
 void avance() {
