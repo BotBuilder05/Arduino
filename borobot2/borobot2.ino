@@ -410,8 +410,8 @@ void tourneDroite(){
 	digitalWrite(moteur1[1], HIGH);
 	digitalWrite(moteur2[0], HIGH);
 	digitalWrite(moteur2[1], LOW);
-	analogWrite(speedPinMoteur1, 80);
-	analogWrite(speedPinMoteur2, 80);
+	analogWrite(speedPinMoteur1, 100);
+	analogWrite(speedPinMoteur2, 100);
 }
 
 int detectionDojo() {
