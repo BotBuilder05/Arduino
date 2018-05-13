@@ -496,7 +496,7 @@ void loop() {
 	}
 	delay (800);
 	avance();  
-	delay (500); // Avance pendant 30ms pour eviter de sortir
+	delay (250); // Avance pendant 30ms pour eviter de sortir
 	#ifdef DEBUG
 		Serial.println("END - BLINDATTACK");
 	#endif
