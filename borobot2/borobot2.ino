@@ -625,7 +625,7 @@ void loop() {
 	}
 	if (epoch20ms>lastEpoc && capteur avant){
 		lastEpoc=epoch20ms;
-		//verifier que ADC a fini -> on prends la valeur, change le mux pour passer sur l'autre capteur et lancer la mesure ADC, calcul valeur moyenne de la valeur passee, while adc fini
+		//verifier que ADC a fini -> on prends la valeur, change le admux pour passer sur l'autre capteur et lancer la mesure ADC, calcul valeur moyenne de la valeur passee, while adc fini
 	}
 	if (adc fini && capteur arriere) {
 	}
