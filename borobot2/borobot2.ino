@@ -249,11 +249,11 @@ int detecter() {
 	#endif
 	// si la valeur(moyenne) capteur avant superieure au seuil avant et si la valeur(moyenne) capteur avant est supperieurie a la valeur du capteur arriere
 	if (( *(valeurMoy) > *(seuil)) && (*(valeurMoy) > *(valeurMoy + 1))) {
-		detection = 2;
+		detection = 1;
 	}
 	// si la valeur(moyenne) capteur arriere superieure au seuil arriere et si la valeur(moyenne) capteur arriere est supperieure a la valeur du capteur avant
 	else if (( *(valeurMoy + 1) > *(seuil+1)) && (*(valeurMoy + 1) > *(valeurMoy))) {
-		detection = 1;
+		detection = 2;
 	}
 
 	#ifdef DEBUG_DETECTER_SEUIL
