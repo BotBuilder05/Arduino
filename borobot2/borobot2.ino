@@ -77,9 +77,6 @@ void setup() {
 	#ifdef DEBUG
 		Serial.begin(9600 );
 	#endif
-	#ifdef DEBUG_SEUIL
-		Serial.begin(9600 );
-	#endif
 
 	//Inititalise les LED a OFF
 	#ifdef DEBUG
