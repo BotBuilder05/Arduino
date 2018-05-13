@@ -114,6 +114,12 @@ void setup() {
 	delayOngoing=0;
 	lastEpoc=0;
 
+	//reglage diviseur ADC
+	
+	ADCSRA =  bit (ADEN);   // turn ADC on
+	ADCSRA |= bit (ADPS0) |  bit (ADPS1) | bit (ADPS2);  // Prescaler of 128
+	ADMUX =   bit (REFS0) | (adcPin & 0x07);  // AVcc  adcPin=capteurIRAvant
+
 	// On initialise la machine d'etat 
 	s_state=START;
 }
