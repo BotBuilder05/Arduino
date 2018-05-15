@@ -33,6 +33,8 @@ const int ledChapeauPin=4;
 const int ledCorp1Pin=7;
 const int ledCorp2Pin=10;
 
+const int music = 2;
+
 int sState , sStateNext;
 int detect=0;
 //variable pour les boutons
@@ -87,6 +89,9 @@ void setup() {
 	#ifdef DEBUG
 		Serial.begin(9600 );
 	#endif
+	// On initialise la music
+	pinMode(music, OUTPUT);
+	digitalWrite(music, 0);
 	// On initialise les leds
 	pinMode(ledOeilPin, OUTPUT);
 	pinMode(ledChapeauPin, OUTPUT);
@@ -412,6 +417,7 @@ void loop() {
 			#ifdef DEBUG
 				Serial.println("JUPE DEPART");
 			#endif
+			digitalWrite(music, 1);
 			rotationJupe();
 			digitalWrite(ledCorp1Pin, ledOn);
 			sStateNext=ATTAQUE_AVEUGLE;
