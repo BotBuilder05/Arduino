@@ -8,7 +8,7 @@ void Robot50HzInterrupt() {
     x++;
     if(x%10 == 0)
         Serial.println(x);
-    Serial.println("In interrupt");
+
 }
 
 void setup() {

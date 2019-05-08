@@ -16,7 +16,7 @@
 
 //définition des modes du volet
 #define VOLET_OPEN 0
-#define VOLET_CLOSE 90
+#define VOLET_CLOSE 45
 
 //définition des Boutons pour waitForClick()
 #define BUT_1 2

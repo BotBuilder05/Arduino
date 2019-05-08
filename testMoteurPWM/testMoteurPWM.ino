@@ -1,12 +1,15 @@
 // connect motor controller pins to Arduino digital pins
 // motor one
-int enA = 6;
-int in1 = 9;
-int in2 = 10;
+int enB = 10;
+int in3 = 5;
+int in4 = 6;
 // motor two
-int enB = 5;
-int in3 = 11;
-int in4 = 12; 
+int enA = 9;
+int in1 = 3;
+int in2 = 4; 
+
+int relais = 2;
+int microstart= 7;
 void setup()
 {
   // set all the motor control pins to outputs
@@ -16,6 +19,13 @@ void setup()
   pinMode(in2, OUTPUT);
   pinMode(in3, OUTPUT);
   pinMode(in4, OUTPUT);
+  pinMode(relais, OUTPUT);
+  digitalWrite(relais, LOW);
+  pinMode(microstart, INPUT);
+  Serial.begin(9600);
+
+  digitalWrite(enA, HIGH);
+  digitalWrite(enB, HIGH);
 }
 void demoOne()
 {
@@ -24,12 +34,12 @@ void demoOne()
   digitalWrite(in1, HIGH);
   digitalWrite(in2, LOW);
   // set speed to 200 out of possible range 0~255
-  analogWrite(enA, 200);
+  //analogWrite(enA, 255);
   // turn on motor B
   digitalWrite(in3, HIGH);
   digitalWrite(in4, LOW);
   // set speed to 200 out of possible range 0~255
-  analogWrite(enB, 200);
+  //analogWrite(enB, 255);
   delay(2000);
   // now change motor directions
   digitalWrite(in1, LOW);
@@ -55,7 +65,7 @@ void demoTwo()
   digitalWrite(in3, LOW);
   digitalWrite(in4, HIGH); 
   // accelerate from zero to maximum speed
-  for (int i = 0; i < 256; i++)
+  /*for (int i = 0; i < 256; i++)
   {
     analogWrite(enA, i);
     analogWrite(enB, i);
@@ -67,17 +77,30 @@ void demoTwo()
     analogWrite(enA, i);
     analogWrite(enB, i);
     delay(20);
-  } 
+  }*/
   // now turn off motors
+  delay(1000);
   digitalWrite(in1, LOW);
   digitalWrite(in2, LOW);  
   digitalWrite(in3, LOW);
   digitalWrite(in4, LOW);  
 }
 void loop()
-{
+{ //if(digitalRead(microstart)==1){
   demoOne();
   delay(1000);
+  digitalWrite(relais, HIGH);
   demoTwo();
   delay(1000);
+  digitalWrite(relais, LOW);
+//}
+  /*digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);  
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, HIGH);
+  delay(1000);
+  digitalWrite(relais, HIGH);
+  delay(1000);
+  digitalWrite(relais, LOW);*/
+  
 }
