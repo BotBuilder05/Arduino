@@ -49,8 +49,8 @@ void setSpeed (int speed = 255) {
 }
 
 void setSpeedForEach(int left, int right) {
-  analogWrite(motor_1_en, left);
-  analogWrite(motor_2_en, right);
+  /*analogWrite(motor_1_en, left);
+  analogWrite(motor_2_en, right);*/
 }
 
 void move (uint8_t sens, int speed = 255){
