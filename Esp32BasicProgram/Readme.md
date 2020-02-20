@@ -9,3 +9,12 @@
  alias espmake32="make -f ~/Arduino/hardware/makeEspArduino/makeEspArduino.mk CHIP=esp32 ESP_ROOT=../espressif/esp32 CHIP=esp32"
 
 Penser a source le .bashrc pour utilisaiton sans le shell courant
+
+Command pour compiler et upload 
+espmake32 SKETCH="~/GIT/Arduino/Esp32BasicProgram/SensorTest/SensorTest.ino"
+espmake32 SKETCH="~/GIT/Arduino/Esp32BasicProgram/SensorTest/SensorTest.ino" flash
+
+Console
+minicom /dev/ttyUSB0
+
+Attention il faut tuer minicom pour re-uploader le code
