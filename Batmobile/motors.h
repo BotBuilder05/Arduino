@@ -40,7 +40,8 @@ void desactiveBoost(){
 void stop() {
   digitalWrite(motor_1_en, LOW);
   digitalWrite(motor_2_en, LOW);
-  PORTD = B00000000;
+  for(int i=3; i<7; i++)
+    digitalWrite(i, LOW);
 }
 
 void setSpeed (int speed = 255) {
