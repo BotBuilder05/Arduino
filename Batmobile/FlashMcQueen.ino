@@ -1,3 +1,5 @@
+#include <ArduinoJson.hpp>
+#include <ArduinoJson.h>
 #include <Preferences.h>
 #include <Update.h>
 #include <WiFi.h>
@@ -66,7 +68,9 @@ void IdleLoop(void* pvParams)
 {
 	Cmd_t cmd[CMD_SIZE];
 	String cmds;
+	char log[LOG_SIZE];
 	for (;;) {
+		memset(log, 0, LOG_SIZE);
 		if (xQueueReceive(Global_cmd_queue, cmd, 100)) {
 			//digitalWrite(BLUE_LED, HIGH);
 			Serial.printf("Incoming command %s\n", cmd);
@@ -95,20 +99,25 @@ void IdleLoop(void* pvParams)
 				ESP.restart();
 			}
 			else if (cmds.startsWith(CMD_SET)) {
-				cmds = cmds.substring(4);
+				cmds = cmds.substring(strlen(CMD_SET)+1);
 				if (cmds.startsWith(CMD_SET_MODE)) {
-					cmds = cmds.substring(5);
-					if (cmds.startsWith("1")) {
+					cmds = cmds.substring(strlen(CMD_SET_MODE)+1);
+					if (cmds.startsWith(CMD_MODE_AUTO)) {
 						set.mode = SETTING_MODE_AUTO;
-						LOG("Setted mode to auto");
+						strcat(log, "Setted mode to auto\n");
 					}
-					else if (cmds.startsWith("2")) {
+					else if (cmds.startsWith(CMD_MODE_MANUAL)) {
 						set.mode = SETTING_MODE_MANUAL;
-						LOG("Setted mode to manual");
+						strcat(log, "Setted mode to manual\n");
 					}
-				}
+					else if (cmds.startsWith(CMD_MODE_TEST)) {
+						set.mode = SETTING_MODE_TEST;
+						strcat(log, "Setted mode to test\n");
+					}
+				} 
 				Settings::save(set);
-				LOG("Configuration saved !");
+				strcat(log, "Configuration saved !");
+				LOG(log);
 			}
 		} 
 		vTaskDelay(500);
