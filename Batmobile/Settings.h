@@ -1,6 +1,6 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
-#include <ArduinoJson.h>
+#include <ArduinoJson.hpp>
 #include <stdint.h>
 
 #define SETTING_MODE_AUTO (uint8_t)1
@@ -13,6 +13,8 @@
 #define SETTING_STRATEGY_BASIC (uint8_t)1
 
 namespace Settings {
+
+	constexpr int size_json = JSON_OBJECT_SIZE(8);
 
 	typedef struct Setting_t {
 		uint8_t mode = SETTING_MODE_AUTO;
@@ -27,7 +29,8 @@ namespace Settings {
 
 	Setting_t init();
 	void save(const Setting_t);
-
+	ArduinoJson6141_0000010::JsonDocument getJson(const Setting_t);
+	Setting_t setJson(const ArduinoJson6141_0000010::JsonDocument);
 };
 
 #endif

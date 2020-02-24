@@ -1,5 +1,4 @@
 #include <ArduinoJson.hpp>
-#include <ArduinoJson.h>
 #include <Preferences.h>
 #include <Update.h>
 #include <WiFi.h>
@@ -43,7 +42,7 @@ void setup()
 	xTaskCreatePinnedToCore(
 		IdleLoop,
 		"IdleLoop",
-		5000,
+		25000,
 		NULL,
 		1,
 		NULL,
@@ -98,6 +97,12 @@ void IdleLoop(void* pvParams)
 				Settings::save(Settings::Setting_t{});
 				ESP.restart();
 			}
+			else if (cmds.startsWith(CMD_GET)) {
+				//cmds = cmds.substring(strlen(CMD_GET) + 1);
+				ArduinoJson6141_0000010::JsonDocument json = Settings::getJson(set);
+				serializeJson(json, log);
+				LOG(log);
+			}
 			else if (cmds.startsWith(CMD_SET)) {
 				cmds = cmds.substring(strlen(CMD_SET)+1);
 				if (cmds.startsWith(CMD_SET_MODE)) {
@@ -114,8 +119,15 @@ void IdleLoop(void* pvParams)
 						set.mode = SETTING_MODE_TEST;
 						strcat(log, "Setted mode to test\n");
 					}
-				} 
-				Settings::save(set);
+					Settings::save(set);
+				}
+				else if (cmds.startsWith(CMD_SETGET_JSON)) {
+					cmds = cmds.substring(strlen(CMD_SETGET_JSON) + 1);
+					ArduinoJson6141_0000010::StaticJsonDocument<Settings::size_json> doc;
+					deserializeJson(doc, cmds.c_str());
+					set = Settings::setJson(doc);
+					strcat(log, "Json added\n");
+				}
 				strcat(log, "Configuration saved !");
 				LOG(log);
 			}
