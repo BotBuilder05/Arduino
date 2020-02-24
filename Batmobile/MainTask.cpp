@@ -3,7 +3,7 @@
 
 uint8_t next_state;
 hw_timer_t* timer = NULL;
-Settings::Setting_t config;
+ArduinoJson6141_0000010::JsonDocument config;
 xTaskHandle ParseTaskH;
 
 SemaphoreHandle_t parseSem;
@@ -23,36 +23,37 @@ void ParseTask(void *pvParams)
 			SensorRead_t val = readAll();
 			Serial.printf("%d|%d|%d|%d cm\n", val.laser[0], val.laser[1], val.laser[2], val.laser[3]);
 			/* white line test */
-			if (val.color1 > config.color_black_limit || val.color2 > config.color_black_limit) {
+			if (val.color1 > config["color_black_limit"] || val.color2 > config["color_black_limit"]) {
 				next_state = ESCAPE;
 			}
 
 			/* ennemy position */
-			if (val.laser[0] + val.laser[1] < config.detect_distance * 2) {
+			if (val.laser[0] + val.laser[1] < config["detect_distance"] * 2) {
 				ennemy_front = 1;
-				if (val.laser[0] + val.laser[1] < config.boost_distance * 2)
+				if (val.laser[0] + val.laser[1] < config["boost_distance"] * 2)
 					ennemy_near = 1;
 				else
 					ennemy_near = 0;
-			} else {
+			}
+			else {
 				ennemy_front = 0;
 				ennemy_near = 0;
-				if (val.laser[0] < config.detect_distance)
+				if (val.laser[0] < config["detect_distance"])
 					ennemy_front_right = 1;
-				else if (val.laser[1] < config.detect_distance)
+				else if (val.laser[1] < config["detect_distance"])
 					ennemy_front_left = 1;
 				else {
 					ennemy_front_left = 0;
 					ennemy_front_right = 0;
 				}
 			}
-			if (val.laser[2] < config.detect_distance) {
+			if (val.laser[2] < config["detect_distance"]) {
 				ennemy_left = 1;
 			}
 			else {
 				ennemy_left = 1;
 			}
-			if (val.laser[3] < config.detect_distance) {
+			if (val.laser[3] < config["detect_distance"]) {
 				ennemy_right = 1;
 			}
 			else {
@@ -100,7 +101,7 @@ void MainTask(void* pvParams)
 	timerAlarmWrite(timer, TIMER_INTERRUPT, true);
 	timerAlarmEnable(timer);
 
-	if (config.mode == SETTING_MODE_TEST) {
+	if (config["mode"] == SETTING_MODE_TEST) {
 		current_state = next_state = DEBUG;
 		timerStop(timer);
 	}
@@ -111,7 +112,7 @@ void MainTask(void* pvParams)
 		log[0] = '\0';
 		switch (current_state) {
 			case INIT:
-				if (config.start_mode == SETTING_START_MICROSTART) {
+				if (config["start_mode"] == SETTING_START_MICROSTART) {
 					attachInterrupt(MICROSTART_IN, stopMainTask, FALLING);
 					digitalWrite(MICROSTART_EN, HIGH);
 				}
@@ -119,12 +120,12 @@ void MainTask(void* pvParams)
 				break;
 
 			case READY:
-				if (config.start_mode == SETTING_START_MICROSTART) {
+				if (config["start_mode"] == SETTING_START_MICROSTART) {
 					//if (digitalRead(MICROSTART_IN) == HIGH) {
 						next_state = START_SEQ;
 					//}
 				}
-				else if (config.start_mode == SETTING_START_5SEC) {
+				else if (config["start_mode"] == SETTING_START_5SEC) {
 					if (xQueueReceive(
 						((TaskParam_t*)pvParams)->cmd,
 						cmd,
@@ -185,7 +186,7 @@ void MainTask(void* pvParams)
 						next_state = ATTACK;
 					}
 				}
-				else if (counter > config.boost_count_max) {
+				else if (counter > config["boost_count_max"]) {
 					desactiveBoost();
 					counter = 0;
 					next_state = ESCAPE;
@@ -193,7 +194,7 @@ void MainTask(void* pvParams)
 				break;
 
 			case ESCAPE:
-				if (counter++ < config.escape_count_max && !ennemy_front)
+				if (counter++ < config["escape_count_max"] && !ennemy_front)
 					move(BACKWARD, 200);
 				else {
 					counter = 0;

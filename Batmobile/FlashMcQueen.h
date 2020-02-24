@@ -105,13 +105,13 @@ typedef struct {
 	xQueueHandle log;
 	xQueueHandle cmd;
 	SemaphoreHandle_t sem;
-	Settings::Setting_t* set;
+	ArduinoJson6141_0000010::JsonDocument* set;
 } TaskParam_t;
 
 /* ###### Proto function ###### */
 
 //sensors
-void setupSensors(Settings::Setting_t*);
+void setupSensors();
 SensorRead_t IRAM_ATTR readAll(void);
 
 //motors

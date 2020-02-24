@@ -1,5 +1,4 @@
 #include <ArduinoJson.hpp>
-#include <ArduinoJson.h>
 #include <Preferences.h>
 #include <Update.h>
 #include <WiFi.h>
@@ -13,7 +12,7 @@ xQueueHandle Global_log_queue, Global_cmd_queue;// , Read_queue;
 SemaphoreHandle_t idle_sem;
 xTaskHandle WifiTaskH, MainTaskH;
 TaskParam_t params;
-Settings::Setting_t set;
+ArduinoJson6141_0000010::JsonDocument set;
 
 void setup()
 {
@@ -36,7 +35,7 @@ void setup()
 	pinMode(MICROSTART_IN, INPUT);
 	pinMode(BLUE_LED, OUTPUT);
 
-	setupSensors(&set);
+	setupSensors();
 	setupMotors();
 
 	Serial.println("Creating tasks...");
@@ -95,7 +94,7 @@ void IdleLoop(void* pvParams)
 				}
 			}
 			else if (cmds.startsWith(CMD_RESET)) {
-				Settings::save(Settings::Setting_t{});
+				Settings::reset();
 				ESP.restart();
 			}
 			else if (cmds.startsWith(CMD_SET)) {
@@ -103,15 +102,15 @@ void IdleLoop(void* pvParams)
 				if (cmds.startsWith(CMD_SET_MODE)) {
 					cmds = cmds.substring(strlen(CMD_SET_MODE)+1);
 					if (cmds.startsWith(CMD_MODE_AUTO)) {
-						set.mode = SETTING_MODE_AUTO;
+						set["mode"] = SETTING_MODE_AUTO;
 						strcat(log, "Setted mode to auto\n");
 					}
 					else if (cmds.startsWith(CMD_MODE_MANUAL)) {
-						set.mode = SETTING_MODE_MANUAL;
+						set["mode"] = SETTING_MODE_MANUAL;
 						strcat(log, "Setted mode to manual\n");
 					}
 					else if (cmds.startsWith(CMD_MODE_TEST)) {
-						set.mode = SETTING_MODE_TEST;
+						set["mode"] = SETTING_MODE_TEST;
 						strcat(log, "Setted mode to test\n");
 					}
 				} 

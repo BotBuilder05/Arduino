@@ -8,7 +8,7 @@ VEML6040 color1(&Wire), color2(&Wire1);
 uint8_t lasers_pins[NB_LASER] = { LASER_1_XSHUT, LASER_2_XSHUT, LASER_3_XSHUT, LASER_4_XSHUT };
 SensorRead_t reads;
 
-void setupSensors(Settings::Setting_t* set)
+void setupSensors()
 {
 
 	Wire.begin(I2C_SDA2, I2C_SCL2);

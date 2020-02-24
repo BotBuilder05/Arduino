@@ -1,20 +1,20 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
-#include <ArduinoJson.h>
+#include <ArduinoJson.hpp>
 #include <stdint.h>
 
-#define SETTING_MODE_AUTO (uint8_t)1
-#define SETTING_MODE_MANUAL (uint8_t)2
-#define SETTING_MODE_TEST (uint8_t)3
+#define SETTING_MODE_AUTO "auto"
+#define SETTING_MODE_MANUAL "manual"
+#define SETTING_MODE_TEST "test"
 
-#define SETTING_START_MICROSTART (uint8_t)1
-#define SETTING_START_5SEC (uint8_t)2
+#define SETTING_START_MICROSTART "microstart"
+#define SETTING_START_5SEC "5sec"
 
 #define SETTING_STRATEGY_BASIC (uint8_t)1
 
 namespace Settings {
 
-	typedef struct Setting_t {
+	/*typedef struct Setting_t {
 		uint8_t mode = SETTING_MODE_AUTO;
 		uint8_t strategy = SETTING_STRATEGY_BASIC;
 		uint8_t start_mode = SETTING_START_MICROSTART;
@@ -23,10 +23,11 @@ namespace Settings {
 		uint16_t boost_distance = 15;
 		uint16_t escape_count_max = 75;
 		uint16_t boost_count_max = 200;
-	};
+	};*/
 
-	Setting_t init();
-	void save(const Setting_t);
+	ArduinoJson6141_0000010::JsonDocument init();
+	void save(ArduinoJson6141_0000010::JsonDocument);
+	ArduinoJson6141_0000010::JsonDocument reset();
 
 };
 

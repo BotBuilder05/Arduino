@@ -7,7 +7,7 @@ namespace Settings {
 
 	const int settings_size = JSON_OBJECT_SIZE(8);
 
-	char settings[] = "{"
+	char settings_json[] = "{"
 		"\"mode\": \"auto\","
 		"\"strategy\": \"basic\","
 		"\"start_mode\": \"microstart\","
@@ -18,20 +18,32 @@ namespace Settings {
 		"\"boost_count_max\": 200"
 		"}";
 
-	Setting_t init()
+	ArduinoJson6141_0000010::JsonDocument init()
 	{
-		Setting_t set;
-		char buf[sizeof(Setting_t)];
+		ArduinoJson6141_0000010::StaticJsonDocument<settings_size> set;
+		//Setting_t set;
+		char buf[ settings_size ];
 		EEsetting.begin("settings", false);
 		if (EEsetting.getBytesLength("settings") > 0) {
-			EEsetting.getBytes("settings", buf, sizeof(Setting_t));
-			set = *((Setting_t*)buf);
+			EEsetting.getBytes("settings", buf, settings_size);
+			deserializeJson(set, buf);
+		}
+		else {
+			deserializeJson(set, settings_json);
 		}
 		return set;
 	}
 
-	void save(const Setting_t set) {
-		EEsetting.putBytes("settings", &set, sizeof(Setting_t));
+	ArduinoJson6141_0000010::JsonDocument reset() 
+	{
+		EEsetting.remove("settings");
+		return init();
+	}
+
+	void save(ArduinoJson6141_0000010::JsonDocument set) {
+		char buf[settings_size];
+		serializeJson(set, buf);
+		EEsetting.putBytes("settings", buf, strlen(buf));
 	}
 
 }
