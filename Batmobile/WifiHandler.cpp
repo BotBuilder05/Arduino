@@ -28,7 +28,7 @@ namespace WifiHandling {
 			
 			if (client) {
 				Serial.println("Client connected !");
-				client.printf("\n=== FlashMcQueen ===\n<<<< Hello %s >>>>\n", client.remoteIP().toString().c_str());
+				client.printf("\n=== Batmobile ===\n<<<< Hello %s >>>>\n", client.remoteIP().toString().c_str());
 				//if there is log to write
 				while (client.connected()) {
 					
@@ -89,7 +89,8 @@ namespace WifiHandling {
 							xQueueSend(cmd_queue, cmd.c_str(), 10);
 							if (xQueueReceive(log_queue, buf, 100)) {
 								//write log
-								client.printf("%s\n", (char*)buf);
+								if(strlen((char *)buf) > 0)
+									client.printf("%s\n", (char*)buf);
 							}
 						}
 						digitalWrite(BLUE_LED, LOW);

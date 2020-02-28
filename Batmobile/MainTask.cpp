@@ -14,20 +14,18 @@ uint8_t ennemy_front = 0,
 		ennemy_front_left = 0,
 		ennemy_front_right = 0,
 		ennemy_left = 0,
-		ennemy_right = 0,
-		white_line = 0;
+		ennemy_right = 0;
 
 void ParseTask(void *pvParams)
 {
 	for (;;) {
 		if (xSemaphoreTake(parseSem, portMAX_DELAY)) {
 			SensorRead_t val = readAll();
-			Serial.printf("%dcm|%dcm\n", val.laser[1], val.laser[0]);
+			Serial.printf("%d|%d|%d|%d cm\n", val.laser[0], val.laser[1], val.laser[2], val.laser[3]);
 			/* white line test */
-			if (val.color1 > config.color_black_limit || val.color2 > config.color_black_limit)
-				white_line = 1;
-			else
-				white_line = 0;
+			if (val.color1 > config.color_black_limit || val.color2 > config.color_black_limit) {
+				next_state = ESCAPE;
+			}
 
 			/* ennemy position */
 			if (val.laser[0] + val.laser[1] < config.detect_distance * 2) {
@@ -47,6 +45,18 @@ void ParseTask(void *pvParams)
 					ennemy_front_left = 0;
 					ennemy_front_right = 0;
 				}
+			}
+			if (val.laser[2] < config.detect_distance) {
+				ennemy_left = 1;
+			}
+			else {
+				ennemy_left = 1;
+			}
+			if (val.laser[3] < config.detect_distance) {
+				ennemy_right = 1;
+			}
+			else {
+				ennemy_right = 1;
 			}
 
 			//Serial.printf("%d|%d|%d\n", white_line, ennemy_front, ennemy_near);
@@ -68,8 +78,9 @@ void MainTask(void* pvParams)
 {
 	uint8_t current_state;
 	current_state = next_state = INIT;
+	char log[LOG_SIZE], cmd[CMD_SIZE];
 
-	char log[100];
+	config = *((TaskParam_t*)pvParams)->set;
 
 	parseSem = xSemaphoreCreateBinary();
 	xTaskCreatePinnedToCore(
@@ -88,24 +99,60 @@ void MainTask(void* pvParams)
 	timerAttachInterrupt(timer, timedRead, true);
 	timerAlarmWrite(timer, TIMER_INTERRUPT, true);
 	timerAlarmEnable(timer);
-	//timerStop(timer);
 
-	attachInterrupt(MICROSTART_IN, stopMainTask, FALLING);
+	if (config.mode == SETTING_MODE_TEST) {
+		current_state = next_state = DEBUG;
+		timerStop(timer);
+	}
+
 	vTaskDelay(100);
 
 	while (true) {
+		log[0] = '\0';
 		switch (current_state) {
 			case INIT:
-				digitalWrite(MICROSTART_EN, HIGH);
+				if (config.start_mode == SETTING_START_MICROSTART) {
+					attachInterrupt(MICROSTART_IN, stopMainTask, FALLING);
+					digitalWrite(MICROSTART_EN, HIGH);
+				}
 				next_state = READY;
 				break;
 
 			case READY:
-				if (digitalRead(MICROSTART_IN) == HIGH) {
-					//digitalWrite(MICROSTART_EN, LOW);
-					next_state = SEARCH;
+				if (config.start_mode == SETTING_START_MICROSTART) {
+					//if (digitalRead(MICROSTART_IN) == HIGH) {
+						next_state = START_SEQ;
+					//}
+				}
+				else if (config.start_mode == SETTING_START_5SEC) {
+					if (xQueueReceive(
+						((TaskParam_t*)pvParams)->cmd,
+						cmd,
+						0
+						)) {
+						if (strcmp(cmd, CMD_RUN) == 0) {
+							/* 5000ms delay */
+							next_state = START_SEQ;
+							vTaskDelay(4900 / portTICK_PERIOD_MS);
+						}
+					}
 				}
 
+				break;
+
+			case START_SEQ:
+				move(BACKWARD);
+				vTaskDelay(300 / portTICK_PERIOD_MS);
+				next_state = ATTACK_BOOST;
+				if (ennemy_left) {
+					move(LEFT);
+					vTaskDelay(100 / portTICK_PERIOD_MS);
+				}
+				else if (ennemy_right) {
+					move(RIGHT);
+					vTaskDelay(100 / portTICK_PERIOD_MS);
+				} else
+					next_state = SEARCH;
 				break;
 
 			case SEARCH:
@@ -113,23 +160,20 @@ void MainTask(void* pvParams)
 				move(RIGHT, 210);
 				if (ennemy_front)
 					next_state = ATTACK;
-				else if (white_line)
-					next_state = ESCAPE;
 				break;
 
 			case ATTACK:
 				move(FORWARD);
 				if (ennemy_near)
 					next_state = ATTACK_BOOST;
-				else if (white_line)
-					next_state = ESCAPE;
 				else if (ennemy_front == 0)
 					next_state = SEARCH;
-				
+
 				break;
 
 			case ATTACK_BOOST:
 				activeBoost();
+				counter++;
 				if (ennemy_near == 0) {
 					if (ennemy_front_left)
 						setSpeed(230, 255);
@@ -137,35 +181,52 @@ void MainTask(void* pvParams)
 						setSpeed(255, 230);
 					else {
 						desactiveBoost();
+						counter = 0;
 						next_state = ATTACK;
 					}
+				}
+				else if (counter > config.boost_count_max) {
+					desactiveBoost();
+					counter = 0;
+					next_state = ESCAPE;
 				}
 				break;
 
 			case ESCAPE:
-				if (counter++ < 100 && white_line && !ennemy_front)
+				if (counter++ < config.escape_count_max && !ennemy_front)
 					move(BACKWARD, 200);
 				else {
 					counter = 0;
-					next_state = SEARCH;
+					if (ennemy_front)
+						next_state = ATTACK;
+					else
+						next_state = SEARCH;
 				}
 				break;
 
 			case END:
-				//stop motor
 				timerStop(timer);
 				vTaskDelete(ParseTaskH);
 				TASK_LOG("MainTask : End state");
 				digitalWrite(MICROSTART_EN, LOW);
+				/* stop the bot */
 				setSpeed(0, 0);
 				desactiveBoost();
+
+				/* same as return */
 				xSemaphoreGive(((TaskParam_t*)pvParams)->sem);
 				vTaskDelay(1000);
+				break;
+
+			case DEBUG:
+				vTaskDelay(100);
+				SensorRead_t val = readAll();
+				sprintf(log, "Laser: %d|%d|%d|%d Color: %d|%d\n", val.laser[0], val.laser[1], val.laser[2], val.laser[3], val.color1, val.color2);
 				break;
 		}
 
 		current_state = next_state;
-		vTaskDelay(5);
+		if(strlen(log)>0) TASK_LOG(log);
 	}
 	return;
 }

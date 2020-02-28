@@ -10,9 +10,9 @@
 #define XCORE_1 (BaseType_t)0
 #define XCORE_2 (BaseType_t)1
 
-#define LOG_SIZE 100 //log string size
+#define LOG_SIZE 1000 //log string size
 #define LOG_MAX 5 //max logs in queue
-#define CMD_SIZE 100
+#define CMD_SIZE 1000
 #define CMD_MAX 3
 typedef uint8_t Cmd_t;
 
@@ -20,20 +20,28 @@ typedef uint8_t Cmd_t;
 
 #define LOG(s) xQueueSend(Global_log_queue, s, 0)
 #define TASK_LOG(s) xQueueSend(((TaskParam_t*)pvParams)->log, s, 0);
+/* ################ */
 
+/* #### Commands ##### */
 #define CMD_UPDATE "UPD"
 #define CMD_STOP "STP"
 #define CMD_START "SRT"
 #define CMD_SET "SET"
 #define CMD_RESET "RST"
+#define CMD_RUN "RUN"
+#define CMD_GET "GET"
+#define CMD_SETGET_JSON "JSON"
 
 #define CMD_SET_MODE "MODE"
-/* ################ */
+#define CMD_MODE_AUTO "1"
+#define CMD_MODE_MANUAL "2"
+#define CMD_MODE_TEST "3"
+/* #################### */
 
 
 /* ###### Wifi infos ####### */
-#define AP_SSID "FlashMcQueen"
-#define AP_PASS "FMQ_INSANEPwd"
+#define AP_SSID "Batmobile"
+#define AP_PASS "BAT_INSANEPwd"
 
 #define LOCAL_IP (uint8_t*)"192.168.0.1"
 #define GATEWAY_IP (uint8_t*)"192.168.1.1"
@@ -66,8 +74,8 @@ typedef uint8_t Cmd_t;
 #define MOTOR_1_A 16
 #define MOTOR_1_B 4
 #define MOTOR_2_EN 5
-#define MOTOR_2_A 18
-#define MOTOR_2_B 19
+#define MOTOR_2_A 19
+#define MOTOR_2_B 18
 /* ######################### */
 
 /* ##### States ##### */
@@ -78,11 +86,13 @@ typedef uint8_t Cmd_t;
 #define END 5
 #define ATTACK_BOOST 6
 #define ESCAPE 9
+#define START_SEQ 10
+#define DEBUG 11
 /* ################## */
 
 /* ##### MOVE SENS ##### */
-#define FORWARD 1
-#define BACKWARD 2
+#define FORWARD 2
+#define BACKWARD 1
 #define RIGHT 3
 #define LEFT 4
 /* ##################### */

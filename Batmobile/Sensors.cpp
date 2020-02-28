@@ -14,12 +14,12 @@ void setupSensors(Settings::Setting_t* set)
 	Wire.begin(I2C_SDA2, I2C_SCL2);
 	Wire1.begin(I2C_SDA1, I2C_SCL1);
 
-	for (uint8_t i = 0; i < 2; i++) {
+	for (uint8_t i = 0; i < NB_LASER; i++) {
 		pinMode(lasers_pins[i], OUTPUT);
 		digitalWrite(lasers_pins[i], LOW);
 	}
 	
-	for (uint8_t i = 0; i < 2; i++) {
+	for (uint8_t i = 0; i < NB_LASER; i++) {
 		digitalWrite(lasers_pins[i], HIGH);
 		vTaskDelay(100);
 		lasers[i].init();
@@ -39,7 +39,7 @@ void setupSensors(Settings::Setting_t* set)
 SensorRead_t readAll()
 {
 
-	for (uint8_t i = 0; i < 2; i++)
+	for (uint8_t i = 0; i < NB_LASER; i++)
 		reads.laser[i] = lasers[i].readRangeContinuousMillimeters() / 10;
 	
 	reads.color1 = color1.getWhite();
