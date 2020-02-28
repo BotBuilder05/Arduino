@@ -104,4 +104,3 @@ void readAll(){
   Serial.print(" | ");
   Serial.println(read_sensors[SENSOR_FR]);*/
 }
-

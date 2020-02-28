@@ -5,6 +5,7 @@
 
 //state machine
 #define INIT 1
+#define TEST_CAPTEUR 11
 #define START 2
 #define SEARCH 3
 #define ATTACK 4
@@ -14,6 +15,9 @@
 #define RUSH 8
 #define STOP 9
 
+//Pour l'affichage
+int position_curseur = 2;
+//
 
 uint8_t current_state = 0, next_state = 0, last_state = 0;
 //####end state machine def####
@@ -33,8 +37,32 @@ uint8_t rotate_sens = RIGHT;
 boolean started = false;
 
 //##### functions #####
+void init_affiche(){                      //initialise l'affichage et affiche le cadre
+  oled.init();                            // Initialze SSD1306 OLED display
+  oled.activateScroll();
+  oled.clearDisplay();                    // Clear screen
+  oled.setTextXY(0,0);                    // Set cursor position, start of line 0
+  oled.putString("################");
+  for(unsigned char i=1; i<=6; i++) { 
+    oled.setTextXY(i,0);
+    oled.putString("#              #");
+  }
+  oled.setTextXY(7,0);              
+  oled.putString("################");
+}
 
 
+void affiche_S(const char* message,int ligne) { 
+  oled.setTextXY(ligne,5);
+  oled.putString(message);
+}
+
+void affiche_I(int message,int ligne) { 
+  oled.setTextXY(ligne,2);
+  oled.putString("   ");
+  oled.setTextXY(ligne,2);
+  oled.putNumber(message);
+}
 //timed function 
 void routine() {
   if(started){
@@ -84,18 +112,7 @@ void setup() {
 
   //init sensors
   setupSensors();
-
-  oled.init();                      // Initialze SSD1306 OLED display
-  oled.activateScroll();
-  oled.clearDisplay();              // Clear screen
-  oled.setTextXY(0,0);              // Set cursor position, start of line 0
-  oled.putString("################");
-  for(unsigned char i=1; i<=6; i++) { 
-    oled.setTextXY(i,0);
-    oled.putString("#              #");
-  }
-  oled.setTextXY(7,0);              
-  oled.putString("################");
+  init_affiche();               //initialise l'affichage et affiche le cadre
   
   //init motors
   setupMotors();
@@ -115,9 +132,11 @@ void setup() {
   TIMSK1 |= (1 << OCIE1A);
   sei();*/
 
-  current_state = next_state = INIT;
+  current_state = next_state = TEST_CAPTEUR; //INIT;
   oled.setTextXY(4,6);              
   oled.putString("READY");
+  delay(1000);
+  oled.clearDisplay();
 }
 
 void loop() {
@@ -127,14 +146,30 @@ void loop() {
     Serial.println(read_sensors[SENSOR_FR]);*/
     routine();
     switch(current_state) {
-      case INIT:
-        old = read_sensors[SENSOR_L];
-        next_state = START;
+      case TEST_CAPTEUR:
+        started = 1;
+        oled.setTextXY(0,0);
+        oled.putString("# TEST_CAPTEUR #");
+        affiche_I(read_sensors[SENSOR_FL],2);
+        affiche_S(" F Gauche ",2);
+        affiche_I(read_sensors[SENSOR_FR],3);
+        affiche_S(" F RIGHT ",3);
+        affiche_I(read_sensors[SENSOR_L],4);
+        affiche_S(" L ",4);
+        affiche_I(read_sensors[SENSOR_LINE_L],5);
+        affiche_S(" LB Gauche ",5);
+        affiche_I(read_sensors[SENSOR_LINE_R],6);
+        affiche_S(" LB RIGHT ",6);
+        next_state = TEST_CAPTEUR;
+        delay(100);
+        if(read_sensors[SENSOR_L] == 3)
+          next_state = INIT;
         break;
-     
-      case START:
-        readAll();
-        
+
+      case INIT:
+        oled.setTextXY(1,0);
+        oled.putString("#     INIT     #");
+        old = read_sensors[SENSOR_L]   ;
         if(abs(read_sensors[SENSOR_L]-old) > 2){
           rotate_sens = LEFT;
           oled.setTextXY(4,13);
@@ -148,6 +183,16 @@ void loop() {
           oled.setTextXY(4,13);
           oled.putString("|");
         }
+        delay(1000);
+        next_state = START;
+        break;
+     
+      case START:
+       // readAll();
+        oled.setTextXY(0,0);
+        oled.putString("#     START    #");
+        delay(1000);
+        
         if(digitalRead(microstart) == HIGH) {
           oled.setTextXY(0,0);
           oled.putString("Starting !");
