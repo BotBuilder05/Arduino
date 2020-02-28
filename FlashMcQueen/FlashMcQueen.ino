@@ -86,9 +86,16 @@ void setup() {
   setupSensors();
 
   oled.init();                      // Initialze SSD1306 OLED display
+  oled.activateScroll();
   oled.clearDisplay();              // Clear screen
   oled.setTextXY(0,0);              // Set cursor position, start of line 0
-  oled.putString("Flash McQueen !");
+  oled.putString("################");
+  for(unsigned char i=1; i<=6; i++) { 
+    oled.setTextXY(i,0);
+    oled.putString("#              #");
+  }
+  oled.setTextXY(7,0);              
+  oled.putString("################");
   
   //init motors
   setupMotors();
@@ -109,8 +116,8 @@ void setup() {
   sei();*/
 
   current_state = next_state = INIT;
-  oled.setTextXY(1,0);              
-  oled.putString("READY !");
+  oled.setTextXY(4,6);              
+  oled.putString("READY");
 }
 
 void loop() {
@@ -121,23 +128,25 @@ void loop() {
     routine();
     switch(current_state) {
       case INIT:
-        oled.setTextXY(2,0);
-        oled.putString("Waiting for");
-        oled.setTextXY(3,0);
-        oled.putString("microstart");
         old = read_sensors[SENSOR_L];
         next_state = START;
         break;
      
       case START:
         readAll();
-        oled.setTextXY(4,0);
+        
         if(abs(read_sensors[SENSOR_L]-old) > 2){
           rotate_sens = LEFT;
-          oled.putString("Ennemi on left ");
+          oled.setTextXY(4,13);
+          oled.putString(" ");
+          oled.setTextXY(4,3);
+          oled.putString("|");
         } else {
           rotate_sens = RIGHT;
-          oled.putString("Ennemi on right");
+          oled.setTextXY(4,3);
+          oled.putString(" ");
+          oled.setTextXY(4,13);
+          oled.putString("|");
         }
         if(digitalRead(microstart) == HIGH) {
           oled.setTextXY(0,0);
