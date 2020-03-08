@@ -96,11 +96,11 @@ void setupSensors()
 
 void readAll(){
   //Serial.print("Read : ");
+  //old_read = read_sensors;
   read_sensors[SENSOR_FL] = sensor_fl.readRangeContinuousMillimeters()/10;
   read_sensors[SENSOR_FR] = sensor_fr.readRangeContinuousMillimeters()/10;
   read_sensors[SENSOR_L] = sensor_l.readRangeContinuousMillimeters()/10;
-  //readLineSensors();
-  /*Serial.print(read_sensors[SENSOR_FL]);
-  Serial.print(" | ");
-  Serial.println(read_sensors[SENSOR_FR]);*/
-}
+  read_sensors[SENSOR_LINE_R] = analogRead(LINE_R_SENSOR_PIN);
+  read_sensors[SENSOR_LINE_L] = analogRead(LINE_L_SENSOR_PIN);
+
+  }

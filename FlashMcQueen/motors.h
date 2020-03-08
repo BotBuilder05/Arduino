@@ -2,6 +2,7 @@
 #define BACKWARD 2
 #define LEFT 3
 #define RIGHT 4
+#define STOP 5
 
 uint8_t motor_1_A = 3,
         motor_1_B = 4,
@@ -29,12 +30,12 @@ void toggleBoost(){
 
 void activeBoost(){
   boosted = true;
-  digitalWrite(boost, boosted);
+  digitalWrite(boost, HIGH);
 }
 
 void desactiveBoost(){
   boosted = false;
-  digitalWrite(boost, boosted);
+  digitalWrite(boost, LOW);
 }
 
 void stop() {
@@ -66,7 +67,7 @@ void move (uint8_t sens, int speed = 255){
     digitalWrite(motor_1_B, LOW);
     digitalWrite(motor_2_A, HIGH);
     digitalWrite(motor_2_B, LOW);*/   
-  } else if(sens == LEFT) {
+  } else if (sens == LEFT) {
     PORTD = B01001000;
     /*digitalWrite(motor_1_A, HIGH);
     digitalWrite(motor_1_B, LOW);
@@ -78,6 +79,8 @@ void move (uint8_t sens, int speed = 255){
     digitalWrite(motor_1_B, HIGH);
     digitalWrite(motor_2_A, HIGH);
     digitalWrite(motor_2_B, LOW);*/
+  } else if (sens == STOP){
+    PORTD = B00000000;
   }
   setSpeed(speed);
 }

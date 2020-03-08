@@ -2,10 +2,13 @@
 #include "motors.h"
 #include "sensors.h"
 
+//#define DEBUG
+//#define DEBUG_Detection
 
 //state machine
 #define INIT 1
 #define TEST_CAPTEUR 11
+#define DETECT_LIGNE_BLANCHE 12
 #define START 2
 #define SEARCH 3
 #define ATTACK 4
@@ -27,7 +30,7 @@ uint8_t microstart = 12;
 
 //constant
 const int boost_distance = 15,
-          detection_distance = 35,
+          detection_distance = 30,
           max_time_boost = 100;
 
 int count_time_boost = 0, old;
@@ -35,6 +38,8 @@ int count_time_boost = 0, old;
 uint8_t rotate_sens = RIGHT;
 
 boolean started = false;
+
+int white_value = 300; //calibrate the white color
 
 //##### functions #####
 void init_affiche(){                      //initialise l'affichage et affiche le cadre
@@ -53,14 +58,14 @@ void init_affiche(){                      //initialise l'affichage et affiche le
 
 
 void affiche_S(const char* message,int ligne) { 
-  oled.setTextXY(ligne,5);
+  oled.setTextXY(ligne,4);
   oled.putString(message);
 }
 
 void affiche_I(int message,int ligne) { 
-  oled.setTextXY(ligne,2);
+  oled.setTextXY(ligne,1);
   oled.putString("   ");
-  oled.setTextXY(ligne,2);
+  oled.setTextXY(ligne,1);
   oled.putNumber(message);
 }
 //timed function 
@@ -104,6 +109,10 @@ void routine() {
   }
 }
 
+void stopBot() {
+  next_state = STOP;
+}
+
 void setup() {  
   Serial.begin(9600);
   Wire.begin();
@@ -117,21 +126,6 @@ void setup() {
   //init motors
   setupMotors();
 
-  /*timed interrupt*/
-  /*cli();//stop interrupts
-  TCCR1A = 0;// set entire TCCR1A register to 0
-  TCCR1B = 0;// same for TCCR1B
-  TCNT1  = 0;//initialize counter value to 0
-  // set compare match register for 1hz increments
-  OCR1A = 5000;// = (16*10^6) / (1*1024) - 1 (must be <65536)
-  // turn on CTC mode
-  TCCR1B |= (1 << WGM12);
-  // Set CS10 and CS12 bits for 1024 prescaler
-  TCCR1B |= (1 << CS12) | (1 << CS10);  
-  // enable timer compare interrupt
-  TIMSK1 |= (1 << OCIE1A);
-  sei();*/
-
   current_state = next_state = TEST_CAPTEUR; //INIT;
   oled.setTextXY(4,6);              
   oled.putString("READY");
@@ -144,34 +138,99 @@ void loop() {
     /*Serial.print(read_sensors[SENSOR_FL]);
     Serial.print(" | ");
     Serial.println(read_sensors[SENSOR_FR]);*/
-    routine();
+    //routine();
+  readAll();
     switch(current_state) {
       case TEST_CAPTEUR:
-        started = 1;
-        oled.setTextXY(0,0);
-        oled.putString("# TEST_CAPTEUR #");
-        affiche_I(read_sensors[SENSOR_FL],2);
-        affiche_S(" F Gauche ",2);
-        affiche_I(read_sensors[SENSOR_FR],3);
-        affiche_S(" F RIGHT ",3);
-        affiche_I(read_sensors[SENSOR_L],4);
-        affiche_S(" L ",4);
-        affiche_I(read_sensors[SENSOR_LINE_L],5);
-        affiche_S(" LB Gauche ",5);
-        affiche_I(read_sensors[SENSOR_LINE_R],6);
-        affiche_S(" LB RIGHT ",6);
-        next_state = TEST_CAPTEUR;
-        delay(100);
-        if(read_sensors[SENSOR_L] == 3)
-          next_state = INIT;
+        #ifdef DEBUG
+          oled.clearDisplay();
+          oled.setTextXY(0,0);
+          oled.putString("# TEST_CAPTEUR #");
+          affiche_I(read_sensors[SENSOR_FL],2);
+          affiche_S(" F Gauche ",2);
+          affiche_I(read_sensors[SENSOR_FR],3);
+          affiche_S(" F RIGHT ",3);
+          affiche_I(read_sensors[SENSOR_L],4);
+          affiche_S(" L ",4);
+          affiche_I(read_sensors[SENSOR_LINE_L],5);
+          affiche_S(" LB Gauche ",5);
+          affiche_I(read_sensors[SENSOR_LINE_R],6);
+          affiche_S(" LB RIGHT ",6);
+          delay(500);
+        #endif
+        //if(read_sensors[SENSOR_L] == 3){
+         // next_state = INIT;
+          //next_state = TEST_CAPTEUR;
+          next_state = DETECT_LIGNE_BLANCHE;
+
+        //}
+        break;
+
+      case DETECT_LIGNE_BLANCHE:
+        #ifdef DEBUG
+          oled.clearDisplay();
+          oled.setTextXY(0,0);
+          oled.putString("#  DETECT_L_B  #");
+          next_state = TEST_CAPTEUR;
+        #endif
+        #ifdef DEBUG_Detection
+          oled.clearDisplay();
+          oled.setTextXY(0,0);
+          oled.putString("#  DETECT_L_B  #");
+        #endif
+          /*move(LEFT);
+          delay(1000);
+          move(FORWARD);
+          delay(1000);
+          move(RIGHT);
+          delay(1000);
+          move(BACKWARD);
+          delay(1000);
+          move(STOP);
+          */
+
+        if(read_sensors[SENSOR_LINE_L] > white_value){ 
+          #ifdef DEBUG_Detection
+
+            affiche_S(" LB Gauche ",1);
+          #endif
+
+          move(LEFT);
+          delay(400);
+          
+        }else {
+          #ifdef DEBUG_Detection
+            affiche_S("           ",1);
+          #endif
+          move(FORWARD;255);
+        }
+
+        //move(STOP);
+       //move(FORWARD);
+       // next_state = TEST_CAPTEUR;
         break;
 
       case INIT:
-        oled.setTextXY(1,0);
+        oled.setTextXY(0,0);
         oled.putString("#     INIT     #");
-        old = read_sensors[SENSOR_L]   ;
+
+        delay(400);
+        readAll();
+        old = read_sensors[SENSOR_L];
+        next_state = START;
+        attachInterrupt(digitalPinToInterrupt(microstart), stopBot, FALLING);
+        oled.clearDisplay();
+        oled.setTextXY(0,0);
+        oled.putString("#     START    #");
+        break;
+     
+      case START:
+       // readAll();
+        
+        
         if(abs(read_sensors[SENSOR_L]-old) > 2){
           rotate_sens = LEFT;
+         // oled.clearDisplay();
           oled.setTextXY(4,13);
           oled.putString(" ");
           oled.setTextXY(4,3);
@@ -182,46 +241,55 @@ void loop() {
           oled.putString(" ");
           oled.setTextXY(4,13);
           oled.putString("|");
+          
         }
-        delay(1000);
-        next_state = START;
-        break;
-     
-      case START:
-       // readAll();
-        oled.setTextXY(0,0);
-        oled.putString("#     START    #");
-        delay(1000);
         
         if(digitalRead(microstart) == HIGH) {
-          oled.setTextXY(0,0);
-          oled.putString("Starting !");
-          oled.setTextXY(3,0);
-          
+          oled.clearDisplay();
+          //oled.setTextXY(0,0);
+          //oled.putString("Starting !");
+          for(int i=5; i != 0; i--) {
+            oled.setTextXY(3,7);
+            oled.putNumber(i);
+            delay(940);
+          }
           started = true;
-          move(rotate_sens, 200);
-          delay(200);
+          move(rotate_sens);
+          delay(210);
           move(FORWARD);
-          activeBoost();
-          delay(200);
+          activeBoost(); 
           next_state = ATTACK;
         }
         break;
         
       case SEARCH:
-        desactiveBoost();
-        move(rotate_sens, 100);
-        /*oled.setTextXY(2,0);
-        oled.putString("Searching ...");*/
+        /*oled.clearDisplay();
+        oled.setTextXY(0,0);
+        oled.putString("#    SEARCH   #");
+        oled.setTextXY(2,0);
+        oled.putNumber(read_sensors[SENSOR_FR]);
+        */
+        if((read_sensors[SENSOR_FR] < detection_distance && abs(read_sensors[SENSOR_FR] - old_read[SENSOR_FR]) < PARASIT_DIFF) || read_sensors[SENSOR_FL] < detection_distance){
+          next_state = ATTACK;
+          /*move(rotate_sens==LEFT ? RIGHT : LEFT);
+          delay(50);*/
+          //&& 
+        } else{
+          desactiveBoost();
+          move(rotate_sens, 150);
+        }
         break;
   
       //attack 
       case ATTACK:
-        move(FORWARD);
-        desactiveBoost();    
-        /*oled.setTextXY(2,0);
-        oled.putString("Attacking ...");*/
+        /*oled.setTextXY(0,0);
+        oled.putString("#    ATTACK   #");
+        */
         
+        move(FORWARD);
+        activeBoost();
+        
+        next_state = SEARCH;
         break;
   
       //when we are at less than boost_distance toggle the boost
