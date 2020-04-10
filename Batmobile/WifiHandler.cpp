@@ -32,11 +32,10 @@ namespace WifiHandling {
 				//if there is log to write
 				while (client.connected()) {
 					
-					if (xQueueReceive(log_queue, buf, 10)) {
+					if (xQueueReceive(log_queue, buf, 100)) {
 						//write log
 						client.printf("%s\n", (char*)buf);
 					}
-					vTaskDelay(10);
 					if (client.available()) {
 						digitalWrite(BLUE_LED, HIGH);
 						cmd = client.readStringUntil('\n');
@@ -96,6 +95,7 @@ namespace WifiHandling {
 						digitalWrite(BLUE_LED, LOW);
 					}
 				}
+				stopMainTask();
 			}
 			vTaskDelay(500);
 		}

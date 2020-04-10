@@ -88,6 +88,11 @@ typedef uint8_t Cmd_t;
 #define ESCAPE 9
 #define START_SEQ 10
 #define DEBUG 11
+#define FOLLOW_LEFT 12
+#define FOLLOW_RIGHT 13
+#define DEBUG_MOTOR 14
+#define ESCAPE_TO_LEFT 15
+#define ESCAPE_TO_RIGHT 16
 /* ################## */
 
 /* ##### MOVE SENS ##### */

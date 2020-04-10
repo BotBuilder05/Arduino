@@ -11,6 +11,8 @@
 #define SETTING_START_5SEC (uint8_t)2
 
 #define SETTING_STRATEGY_BASIC (uint8_t)1
+#define SETTING_STRATEGY_DIFF_START (uint8_t)2
+#define SETTING_STRATEGY_DIFF_START2 (uint8_t)3
 
 namespace Settings {
 
@@ -21,7 +23,7 @@ namespace Settings {
 		uint8_t strategy = SETTING_STRATEGY_BASIC;
 		uint8_t start_mode = SETTING_START_MICROSTART;
 		int color_black_limit = 20000;
-		uint16_t detect_distance = 50; //in cm
+		uint16_t detect_distance = 33; //in cm
 		uint16_t boost_distance = 15;
 		uint16_t escape_count_max = 75;
 		uint16_t boost_count_max = 200;

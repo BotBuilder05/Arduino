@@ -18,9 +18,6 @@
     <None Include="FlashMcQueen.ino" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="__vm\.FlashMcQueen.vsarduino.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FlashMcQueen.h">
       <Filter>Header Files</Filter>
     </ClInclude>

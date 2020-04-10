@@ -63,7 +63,9 @@ void move(uint8_t sens, uint8_t speed) {
 	setSpeed(speed, speed);
 }
 
-void setSpeed(uint8_t speed, uint8_t speed2) {
-	ledcWrite(PWM_MOTOR_1, speed);
-	ledcWrite(PWM_MOTOR_2, speed2);
+void setSpeed(uint8_t left, uint8_t right) {
+	/*digitalWrite(MOTOR_1_EN, left);
+	digitalWrite(MOTOR_2_EN, right);*/
+	ledcWrite(PWM_MOTOR_1, left);
+	ledcWrite(PWM_MOTOR_2, right);
 }
