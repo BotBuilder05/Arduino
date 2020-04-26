@@ -21,11 +21,9 @@ namespace Settings {
 	Setting_t init()
 	{
 		Setting_t set;
-		char buf[sizeof(Setting_t)];
 		EEsetting.begin("settings", false);
 		if (EEsetting.getBytesLength("settings") > 0) {
-			EEsetting.getBytes("settings", buf, sizeof(Setting_t));
-			set = *((Setting_t*)buf);
+			EEsetting.getBytes("settings", (char *)&set, sizeof(Setting_t));
 		}
 		return set;
 	}
@@ -34,9 +32,9 @@ namespace Settings {
 		EEsetting.putBytes("settings", &set, sizeof(Setting_t));
 	}
 
-	ArduinoJson6141_0000010::JsonDocument getJson(const Setting_t set)
+	::DynamicJsonDocument getJson(const Setting_t &set)
 	{
-		ArduinoJson6141_0000010::DynamicJsonDocument doc(size_json);
+		::DynamicJsonDocument doc(size_json);
 		doc["mode"]				 = set.mode;
 		doc["strategy"]			 = set.strategy;
 		doc["start_mode"]		 = set.start_mode;
@@ -49,7 +47,7 @@ namespace Settings {
 		return doc;
 	}
 
-	Setting_t setJson(const ArduinoJson6141_0000010::JsonDocument doc)
+	Setting_t setJson(const ::JsonDocument &doc)
 	{
 		Setting_t set;
 		set.mode			  = doc["mode"] | set.mode;
@@ -66,4 +64,3 @@ namespace Settings {
 	}
 
 }
-

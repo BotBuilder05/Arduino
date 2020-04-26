@@ -1,6 +1,6 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
-#include <ArduinoJson.hpp>
+#include <ArduinoJson.h>
 #include <stdint.h>
 
 #define SETTING_MODE_AUTO (uint8_t)1
@@ -27,12 +27,12 @@ namespace Settings {
 		uint16_t boost_distance = 15;
 		uint16_t escape_count_max = 75;
 		uint16_t boost_count_max = 200;
-	};
+	} Setting_t;
 
 	Setting_t init();
 	void save(const Setting_t);
-	ArduinoJson6141_0000010::JsonDocument getJson(const Setting_t);
-	Setting_t setJson(const ArduinoJson6141_0000010::JsonDocument);
+	::DynamicJsonDocument getJson(const Setting_t &);
+	Setting_t setJson(const ::JsonDocument &);
 };
 
 #endif

@@ -1,4 +1,4 @@
-#include "FlashMcQueen.h"
+#include "Batmobile.h"
 #include <Arduino.h>
 
 uint8_t next_state, urgent_state = 0;
@@ -66,7 +66,7 @@ void IRAM_ATTR timedRead(void)
 	xSemaphoreGiveFromISR(parseSem, &wake);
 }
 
-void IRAM_ATTR stopMainTask(void) 
+void IRAM_ATTR stopMainTask(void)
 {
 	next_state = END;
 }
@@ -182,7 +182,7 @@ void MainTask(void* pvParams)
 				strcat(log, "Searching...");
 				move(ennemy_start_pos, 225);
 				//setSpeed(ennemy_start_pos == LEFT ? 230 : 150, ennemy_start_pos == LEFT ? 230 : 150);
-				
+
 				if (ennemy_front) {
 					move(ennemy_start_pos == LEFT ? RIGHT : LEFT, 255);
 					next_state = ATTACK;
@@ -209,7 +209,7 @@ void MainTask(void* pvParams)
 						move(ennemy_start_pos);
 						delay(100);
 					}
-					
+
 				}
 
 				/*if (millis() - timeCounter > 100) {

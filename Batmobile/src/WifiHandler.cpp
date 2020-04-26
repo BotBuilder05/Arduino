@@ -1,4 +1,4 @@
-#include <WifiServer.h>
+#include <WiFiServer.h>
 #include <WiFiClient.h>
 #include <WiFi.h>
 #include <Update.h>
@@ -25,13 +25,13 @@ namespace WifiHandling {
 
 		for (;;) {
 			client = server.available();
-			
+
 			if (client) {
 				Serial.println("Client connected !");
 				client.printf("\n=== Batmobile ===\n<<<< Hello %s >>>>\n", client.remoteIP().toString().c_str());
 				//if there is log to write
 				while (client.connected()) {
-					
+
 					if (xQueueReceive(log_queue, buf, 100)) {
 						//write log
 						client.printf("%s\n", (char*)buf);
@@ -67,7 +67,7 @@ namespace WifiHandling {
 									vTaskDelay(20);
 									client.print("OK");
 								} while (Update.remaining() > 0);
-								
+
 								Serial.printf("%d written/%d\n", written, update_size);
 								if (written == update_size && Update.end()) {
 									client.printf("Succefuly written %d bytes.\nRebooting...\n", written);

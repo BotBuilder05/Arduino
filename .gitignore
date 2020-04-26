@@ -51,5 +51,8 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+*.vcxproj*
+*.sln
+
 .DS_Store
 borobot2/borobot2.c

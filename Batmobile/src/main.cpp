@@ -1,10 +1,10 @@
-#include <ArduinoJson.hpp>
+#include <ArduinoJson.h>
 #include <Preferences.h>
 #include <Update.h>
 #include <WiFi.h>
 #include <Wire.h>
 #include <pins_arduino.h>
-#include "FlashMcQueen.h"
+#include "Batmobile.h"
 #include "WifiHandler.h"
 #include "Settings.h"
 
@@ -48,7 +48,7 @@ void setup()
 		NULL,
 		XCORE_2
 	);
-	
+
 	xTaskCreatePinnedToCore(
 		WifiHandling::WifiTask,
 		"WifiHandler",
@@ -73,7 +73,7 @@ void IdleLoop(void* pvParams)
 		if (xQueueReceive(Global_cmd_queue, cmd, 100)) {
 			//digitalWrite(BLUE_LED, HIGH);
 			Serial.printf("Incoming command %s\n", cmd);
-			//parse cmd 
+			//parse cmd
 			cmds = String((char *)cmd);
 			if (cmds.startsWith(CMD_START)) {
 				LOG("Main task started !");
@@ -99,7 +99,7 @@ void IdleLoop(void* pvParams)
 			}
 			else if (cmds.startsWith(CMD_GET)) {
 				//cmds = cmds.substring(strlen(CMD_GET) + 1);
-				ArduinoJson6141_0000010::JsonDocument json = Settings::getJson(set);
+				auto json = Settings::getJson(set);
 				serializeJson(json, log);
 				LOG(log);
 			}
@@ -123,7 +123,7 @@ void IdleLoop(void* pvParams)
 				}
 				else if (cmds.startsWith(CMD_SETGET_JSON)) {
 					cmds = cmds.substring(strlen(CMD_SETGET_JSON) + 1);
-					ArduinoJson6141_0000010::StaticJsonDocument<Settings::size_json> doc;
+					::StaticJsonDocument<Settings::size_json> doc;
 					deserializeJson(doc, cmds.c_str());
 					set = Settings::setJson(doc);
 					strcat(log, "Json added\n");
@@ -131,7 +131,7 @@ void IdleLoop(void* pvParams)
 				strcat(log, "Configuration saved !");
 				LOG(log);
 			}
-		} 
+		}
 		vTaskDelay(500);
 	}
 }
