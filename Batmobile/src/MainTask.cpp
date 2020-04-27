@@ -1,9 +1,10 @@
-#include "Batmobile.h"
 #include <Arduino.h>
+#include <WifiHandler.hpp>
+#include <Settings.hpp>
+#include "Batmobile.h"
 
 uint8_t next_state, urgent_state = 0;
 hw_timer_t* timer = NULL;
-Settings::Setting_t config;
 xTaskHandle ParseTaskH;
 
 SensorRead_t val;
@@ -42,18 +43,18 @@ void ParseTask(void *pvParams)
 				urgent_state = 0;
 
 			/* ennemy position */
-			if (val.laser[0] < config.detect_distance && val.laser[1] < config.detect_distance) {
+			if (val.laser[0] < Settings::set["detect_distance"] && val.laser[1] < Settings::set["detect_distance"]) {
 				ennemy_front = 1;
-				ennemy_near = (val.laser[0] < config.boost_distance && val.laser[1] < config.boost_distance);
+				ennemy_near = (val.laser[0] < Settings::set["boost_distance"] && val.laser[1] < Settings::set["boost_distance"]);
 			} else {
 				ennemy_front = 0;
 				ennemy_near = 0;
-				ennemy_front_right = val.laser[0] < config.detect_distance;
-				ennemy_front_left = val.laser[1] < config.detect_distance;
+				ennemy_front_right = val.laser[0] < Settings::set["detect_distance"];
+				ennemy_front_left = val.laser[1] < Settings::set["detect_distance"];
 			}
 
-			ennemy_left = val.laser[2] < config.detect_distance;
-			ennemy_right = val.laser[3] < config.detect_distance;
+			ennemy_left = val.laser[2] < Settings::set["detect_distance"];
+			ennemy_right = val.laser[3] < Settings::set["detect_distance"];
 
 			//Serial.printf("%d|%d\n", white_line_left, white_line_right);
 		}
@@ -77,8 +78,6 @@ void MainTask(void* pvParams)
 	current_state = next_state = INIT;
 	char log[LOG_SIZE], cmd[CMD_SIZE];
 
-	config = *((TaskParam_t*)pvParams)->set;
-
 	parseSem = xSemaphoreCreateBinary();
 	xTaskCreatePinnedToCore(
 		ParseTask,
@@ -97,7 +96,7 @@ void MainTask(void* pvParams)
 	timerAlarmWrite(timer, TIMER_INTERRUPT, true);
 	timerAlarmEnable(timer);
 
-	if (config.mode == SETTING_MODE_TEST) {
+	if (Settings::set["mode"] == SETTING_MODE_TEST) {
 		current_state = next_state = DEBUG;
 		timerStop(timer);
 	}
@@ -106,7 +105,7 @@ void MainTask(void* pvParams)
 		log[0] = '\0';
 		switch (current_state) {
 			case INIT:
-				if (config.start_mode == SETTING_START_MICROSTART) {
+				if (Settings::set["start_mode"] == SETTING_START_MICROSTART) {
 					attachInterrupt(MICROSTART_IN, stopMainTask, FALLING);
 					digitalWrite(MICROSTART_EN, HIGH);
 				}
@@ -114,12 +113,12 @@ void MainTask(void* pvParams)
 				break;
 
 			case READY:
-				if (config.start_mode == SETTING_START_MICROSTART) {
+				if (Settings::set["start_mode"] == SETTING_START_MICROSTART) {
 					if (digitalRead(MICROSTART_IN) == HIGH) {
 						next_state = START_SEQ;
 					}
 				}
-				else if (config.start_mode == SETTING_START_5SEC) {
+				else if (Settings::set["start_mode"] == SETTING_START_5SEC) {
 					if (xQueueReceive(
 						((TaskParam_t*)pvParams)->cmd,
 						cmd,
@@ -150,7 +149,7 @@ void MainTask(void* pvParams)
 					ennemy_start_pos = RIGHT;
 				/*color1_white_limit = white_line_left ? val.color1 + 1000 : color1_white_limit;
 				color2_white_limit = white_line_right ? val.color2 + 1000 : color2_white_limit;*/
-				if (config.strategy == SETTING_STRATEGY_BASIC) {
+				if (Settings::set["strategy"] == SETTING_STRATEGY_BASIC) {
 					delay(100);
 					move(ennemy_start_pos);
 					delay(100);
@@ -158,14 +157,14 @@ void MainTask(void* pvParams)
 					delay(100);
 					next_state = SEARCH;
 				}
-				else if (config.strategy == SETTING_STRATEGY_DIFF_START) {
+				else if (Settings::set["strategy"] == SETTING_STRATEGY_DIFF_START) {
 					move(ennemy_start_pos);
 					delay(200);
 					move(FORWARD);
 					delay(50);
 					next_state = ATTACK;
 				}
-				else if (config.strategy == SETTING_STRATEGY_DIFF_START2) {
+				else if (Settings::set["strategy"] == SETTING_STRATEGY_DIFF_START2) {
 					move(ennemy_start_pos);
 					delay(250);
 					move(BACKWARD);
@@ -269,8 +268,8 @@ void MainTask(void* pvParams)
 
 			case ESCAPE:
 				move(BACKWARD);
-				delay(config.escape_count_max);
-				//if (pdMS_TO_TICKS(++counter) > config.escape_count_max) {
+				delay(Settings::set["escape_count_max"]);
+				//if (pdMS_TO_TICKS(++counter) > Settings::set["escape_count_max"]) {
 					counter = 0;
 					next_state = ennemy_front ? ATTACK : SEARCH;
 				//}
@@ -278,13 +277,13 @@ void MainTask(void* pvParams)
 
 			case ESCAPE_TO_LEFT:
 				move(LEFT, 230);
-				delay(config.escape_count_max);
+				delay(Settings::set["escape_count_max"]);
 				next_state = ennemy_front ? ATTACK : SEARCH;
 				break;
 
 			case ESCAPE_TO_RIGHT:
 				move(RIGHT, 230);
-				delay(config.escape_count_max);
+				delay(Settings::set["escape_count_max"]);
 				next_state = ennemy_front ? ATTACK : SEARCH;
 				break;
 
@@ -315,7 +314,7 @@ void MainTask(void* pvParams)
 			case DEBUG:
 				vTaskDelay(100);
 				SensorRead_t val = readAll();
-				sprintf(log, "Laser: %d|%d|%d|%d Color: %d|%d\n", val.laser[0], val.laser[1], val.laser[2], val.laser[3], val.color1, val.color2);
+				WifiHandler::_client.printf("Laser: %d|%d|%d|%d Color: %d|%d\n", val.laser[0], val.laser[1], val.laser[2], val.laser[3], val.color1, val.color2);
 				break;
 		}
 

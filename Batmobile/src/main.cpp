@@ -1,18 +1,16 @@
+#include <Arduino.h>
 #include <ArduinoJson.h>
-#include <Preferences.h>
-#include <Update.h>
 #include <WiFi.h>
 #include <Wire.h>
 #include <pins_arduino.h>
 #include "Batmobile.h"
-#include "WifiHandler.h"
-#include "Settings.h"
+#include <WifiHandler.hpp>
+#include <Settings.hpp>
 
 xQueueHandle Global_log_queue, Global_cmd_queue;// , Read_queue;
 SemaphoreHandle_t idle_sem;
-xTaskHandle WifiTaskH, MainTaskH;
+xTaskHandle MainTaskH;
 TaskParam_t params;
-Settings::Setting_t set;
 
 void setup()
 {
@@ -23,19 +21,19 @@ void setup()
 	Serial.println("Creating sync objects...");
 	Global_log_queue = xQueueCreate(LOG_MAX, LOG_SIZE);
 	Global_cmd_queue = xQueueCreate(CMD_MAX, CMD_SIZE);
-	//Read_queue = xQueueCreate(1, sizeof(SensorRead_t));
 	idle_sem = xSemaphoreCreateBinary();
 
-	set = Settings::init();
+	Serial.println("Init settings ...");
+	Settings::init();
 
-	params = { Global_log_queue, Global_cmd_queue, idle_sem, &set };
+	params = { Global_log_queue, Global_cmd_queue, idle_sem };
 
-	Serial.println("Configuring pins");
+	Serial.println("Configuring general pins");
 	pinMode(MICROSTART_EN, OUTPUT);
 	pinMode(MICROSTART_IN, INPUT);
 	pinMode(BLUE_LED, OUTPUT);
 
-	setupSensors(&set);
+	setupSensors();
 	setupMotors();
 
 	Serial.println("Creating tasks...");
@@ -49,15 +47,7 @@ void setup()
 		XCORE_2
 	);
 
-	xTaskCreatePinnedToCore(
-		WifiHandling::WifiTask,
-		"WifiHandler",
-		10000,
-		(void*)&params,
-		1,
-		&WifiTaskH,
-		XCORE_1
-	);
+	WifiHandler::begin((void *)&params);
 
 	Serial.println("Inited !");
 }
@@ -67,17 +57,13 @@ void IdleLoop(void* pvParams)
 {
 	Cmd_t cmd[CMD_SIZE];
 	String cmds;
-	char log[LOG_SIZE];
 	for (;;) {
-		memset(log, 0, LOG_SIZE);
 		if (xQueueReceive(Global_cmd_queue, cmd, 100)) {
-			//digitalWrite(BLUE_LED, HIGH);
 			Serial.printf("Incoming command %s\n", cmd);
 			//parse cmd
-			cmds = String((char *)cmd);
+			cmds = String{(char *)cmd};
 			if (cmds.startsWith(CMD_START)) {
-				LOG("Main task started !");
-				Serial.println("Creating !");
+				Serial.println("[+] Creating main task");
 				xTaskCreatePinnedToCore(
 					MainTask,
 					"MainTask",
@@ -87,49 +73,48 @@ void IdleLoop(void* pvParams)
 					&MainTaskH,
 					XCORE_2
 				);
+				WifiHandler::_client.println("[+] Main task started");
 				Serial.println("Idle loop blocked");
 				if (xSemaphoreTake(idle_sem, portMAX_DELAY)) {
 					vTaskDelete(MainTaskH);
-					Serial.println("Main task ended");
+					WifiHandler::_client.println("[-] Main task ended");
+					Serial.println("[-] Main task ended");
 				}
 			}
 			else if (cmds.startsWith(CMD_RESET)) {
-				Settings::save(Settings::Setting_t{});
+				Settings::save();
 				ESP.restart();
 			}
 			else if (cmds.startsWith(CMD_GET)) {
 				//cmds = cmds.substring(strlen(CMD_GET) + 1);
-				auto json = Settings::getJson(set);
-				serializeJson(json, log);
-				LOG(log);
+				serializeJson(Settings::set, WifiHandler::_client);
 			}
 			else if (cmds.startsWith(CMD_SET)) {
 				cmds = cmds.substring(strlen(CMD_SET)+1);
 				if (cmds.startsWith(CMD_SET_MODE)) {
 					cmds = cmds.substring(strlen(CMD_SET_MODE)+1);
 					if (cmds.startsWith(CMD_MODE_AUTO)) {
-						set.mode = SETTING_MODE_AUTO;
-						strcat(log, "Setted mode to auto\n");
+						Settings::set["mode"] = SETTING_MODE_AUTO;
+						WifiHandler::_client.println("Setted mode to auto\n");
 					}
 					else if (cmds.startsWith(CMD_MODE_MANUAL)) {
-						set.mode = SETTING_MODE_MANUAL;
-						strcat(log, "Setted mode to manual\n");
+						Settings::set["mode"] = SETTING_MODE_MANUAL;
+						WifiHandler::_client.println("Setted mode to manual\n");
 					}
 					else if (cmds.startsWith(CMD_MODE_TEST)) {
-						set.mode = SETTING_MODE_TEST;
-						strcat(log, "Setted mode to test\n");
+						Settings::set["mode"] = SETTING_MODE_TEST;
+						WifiHandler::_client.println("Setted mode to test");
 					}
-					Settings::save(set);
+					Settings::save();
 				}
 				else if (cmds.startsWith(CMD_SETGET_JSON)) {
 					cmds = cmds.substring(strlen(CMD_SETGET_JSON) + 1);
-					::StaticJsonDocument<Settings::size_json> doc;
-					deserializeJson(doc, cmds.c_str());
-					set = Settings::setJson(doc);
-					strcat(log, "Json added\n");
+					if(Settings::setJson(cmds))
+						WifiHandler::_client.println("[+] Json saved");
+					else
+					    WifiHandler::_client.println("[-] Failed to save json");
 				}
-				strcat(log, "Configuration saved !");
-				LOG(log);
+				WifiHandler::_client.println("[+] Configuration saved");
 			}
 		}
 		vTaskDelay(500);
