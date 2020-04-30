@@ -1,10 +1,10 @@
-#pragma once
+#ifndef BATMOBILE_H
+#define BATMOBILE_H
+
 #include <stdint.h>
 #include <driver/i2c.h>
-#include "Settings.h"
 
-#define VERSION "0.0.1"
-#define UPDATE_SIZE 700000
+#define VERSION "0.1.0"
 
 /* ##### RTOS ##### */
 #define XCORE_1 (BaseType_t)0
@@ -88,6 +88,11 @@ typedef uint8_t Cmd_t;
 #define ESCAPE 9
 #define START_SEQ 10
 #define DEBUG 11
+#define FOLLOW_LEFT 12
+#define FOLLOW_RIGHT 13
+#define DEBUG_MOTOR 14
+#define ESCAPE_TO_LEFT 15
+#define ESCAPE_TO_RIGHT 16
 /* ################## */
 
 /* ##### MOVE SENS ##### */
@@ -107,13 +112,12 @@ typedef struct {
 	xQueueHandle log;
 	xQueueHandle cmd;
 	SemaphoreHandle_t sem;
-	Settings::Setting_t* set;
 } TaskParam_t;
 
 /* ###### Proto function ###### */
 
 //sensors
-void setupSensors(Settings::Setting_t*);
+void setupSensors();
 SensorRead_t IRAM_ATTR readAll(void);
 
 //motors
@@ -132,3 +136,4 @@ void IdleLoop(void*);
 void MainTask(void*);
 /* ############################ */
 
+#endif

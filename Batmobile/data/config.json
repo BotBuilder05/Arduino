@@ -1,0 +1,10 @@
+{
+	"mode": "auto",
+	"strategy": "basic",
+	"start_mode": "microstart",
+	"color_black_limit": 20000,
+	"detect_distance": 50,
+	"boost_distance": 15,
+	"escape_count_max": 75,
+	"boost_count_max": 200
+}
