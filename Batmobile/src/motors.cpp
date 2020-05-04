@@ -69,3 +69,11 @@ void setSpeed(uint8_t left, uint8_t right) {
 	ledcWrite(PWM_MOTOR_1, left);
 	ledcWrite(PWM_MOTOR_2, right);
 }
+
+void stop() {
+	digitalWrite(MOTOR_1_A, LOW);
+	digitalWrite(MOTOR_1_B, LOW);
+	digitalWrite(MOTOR_2_A, LOW);
+	digitalWrite(MOTOR_2_B, LOW);
+	setSpeed(255,255);
+}

@@ -9,6 +9,9 @@
 #define SETTING_MODE_MANUAL "manual"
 #define SETTING_MODE_TEST "test"
 
+#define SETTING_DEBUG_NO ""
+#define SETTING_DEBUG_SENSOR "sensor"
+
 #define SETTING_START_MICROSTART "microstart"
 #define SETTING_START_5SEC "5sec"
 

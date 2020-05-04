@@ -31,6 +31,9 @@ typedef uint8_t Cmd_t;
 #define CMD_RUN "RUN"
 #define CMD_GET "GET"
 #define CMD_SETGET_JSON "JSON"
+#define CMD_SET_PARAM "PARAM"
+
+#define CMD_CALIBRATE "CLB"
 
 #define CMD_SET_MODE "MODE"
 #define CMD_MODE_AUTO "1"
@@ -93,6 +96,9 @@ typedef uint8_t Cmd_t;
 #define DEBUG_MOTOR 14
 #define ESCAPE_TO_LEFT 15
 #define ESCAPE_TO_RIGHT 16
+#define WAIT 17
+#define TURN_RIGHT 18
+#define TURN_LEFT 19
 /* ################## */
 
 /* ##### MOVE SENS ##### */
@@ -103,12 +109,6 @@ typedef uint8_t Cmd_t;
 /* ##################### */
 
 typedef struct {
-	uint16_t laser[NB_LASER];
-	uint16_t color1;
-	uint16_t color2;
-} SensorRead_t;
-
-typedef struct {
 	xQueueHandle log;
 	xQueueHandle cmd;
 	SemaphoreHandle_t sem;
@@ -116,16 +116,13 @@ typedef struct {
 
 /* ###### Proto function ###### */
 
-//sensors
-void setupSensors();
-SensorRead_t IRAM_ATTR readAll(void);
-
 //motors
 void setupMotors(void);
 void move(uint8_t sens, uint8_t speed = 255);
 void setSpeed(uint8_t speed, uint8_t speed2);
 void activeBoost(void);
 void desactiveBoost(void);
+void stop();
 
 
 //interrupt
