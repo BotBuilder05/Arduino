@@ -1,4 +1,5 @@
 #include <Update.h>
+#include <ArduinoOTA.h>
 #include <WifiHandler.hpp>
 
 xTaskHandle WifiHandler::_th;
@@ -20,8 +21,13 @@ void WifiHandler::begin(void *params)
 
 void WifiHandler::OtaUpdate(int update_size)
 {
-	Serial.println("Begin ota");
-	digitalWrite(BLUE_LED, LOW);
+	Serial.println("[+] Begin ota update");
+
+	ArduinoOTA.setRebootOnSuccess(true);
+	ArduinoOTA.setMdnsEnabled(false);
+	ArduinoOTA.begin();
+	_client.println("[+] Ready for an update");
+	/*digitalWrite(BLUE_LED, LOW);
 
 	int written = 0;
 	uint8_t buffer[4096];
@@ -42,7 +48,7 @@ void WifiHandler::OtaUpdate(int update_size)
 
 		Serial.printf("%d written/%d\n", written, update_size);
 		if (written == update_size && Update.end()) {
-			_client.printf("Succefuly written %d bytes.\nRebooting...\n", written);
+			_client.printf("[+] Succefuly written %d bytes.\nRebooting...\n", written);
 			digitalWrite(BLUE_LED, LOW);
 			vTaskDelay(100);
 			ESP.restart();
@@ -54,29 +60,35 @@ void WifiHandler::OtaUpdate(int update_size)
 		}
 	}
 	else
-		_client.printf("Not enough space !\n");
+		_client.printf("[-] Not enough space !\n");*/
 }
 
 void WifiHandler::Task(void* pvParams)
 {
-	Serial.println("Wifitask, getting params..");
-	Cmd_t buf[LOG_SIZE];
+	Serial.print("[+] Creating wifi AP ");
 	String cmd;
-	xQueueHandle log_queue = ((TaskParam_t*)pvParams)->log;
 	xQueueHandle cmd_queue = ((TaskParam_t*)pvParams)->cmd;
 
-	Serial.println("Creating wifi...");
 	WiFi.softAP(AP_SSID, AP_PASS);
-	//WiFi.softAPConfig(IPAddress(LOCAL_IP), IPAddress(GATEWAY_IP), IPAddress(SUBNET_IP));
 	_server.begin(SERVER_PORT);
-	Serial.println(WiFi.softAPIP());
+	Serial.printf("[OK]\nLocal ip is : %s\n", WiFi.softAPIP().toString().c_str());
 
 	for (;;) {
 		_client = _server.available();
 
 		if (_client) {
-			Serial.println("Client connected !");
-			_client.printf("\n=== Batmobile ===\n<<<< Hello %s >>>>\n", _client.remoteIP().toString().c_str());
+			Serial.println("[+] [Wifi] Client connected");
+			_client.printf(
+			"'########:::::'###::::'########:'##::::'##::'#######::'########::'####:'##:::::::'########:\n"
+			" ##.... ##:::'## ##:::... ##..:: ###::'###:'##.... ##: ##.... ##:. ##:: ##::::::: ##.....::\n"
+			" ##:::: ##::'##:. ##::::: ##:::: ####'####: ##:::: ##: ##:::: ##:: ##:: ##::::::: ##:::::::\n"
+			" ########::'##:::. ##:::: ##:::: ## ### ##: ##:::: ##: ########::: ##:: ##::::::: ######:::\n"
+			" ##.... ##: #########:::: ##:::: ##. #: ##: ##:::: ##: ##.... ##:: ##:: ##::::::: ##...::::\n"
+			" ##:::: ##: ##.... ##:::: ##:::: ##:.:: ##: ##:::: ##: ##:::: ##:: ##:: ##::::::: ##:::::::\n"
+			" ########:: ##:::: ##:::: ##:::: ##:::: ##:. #######:: ########::'####: ########: ########:\n"
+			"........:::..:::::..:::::..:::::..:::::..:::.......:::........:::....::........::........::\n"
+			);
+			_client.printf("> Hello %s\n", _client.remoteIP().toString().c_str());
 			//if there is log to write
 			while (_client.connected()) {
 
@@ -85,9 +97,11 @@ void WifiHandler::Task(void* pvParams)
 					cmd = _client.readStringUntil('\n');
 					//if there is an update action ota
 					if (cmd.startsWith(CMD_STOP)) {
-						Serial.println("Stopping main task !");
+						Serial.println("[+] Stopping main task");
 						stopMainTask();
-						_client.println("Main task stopped");
+						vTaskDelay(50);
+						stopMainTask();
+						_client.println("[+] Main task stopped");
 					}
 					else if (cmd.startsWith(CMD_UPDATE)) {
 
@@ -96,17 +110,11 @@ void WifiHandler::Task(void* pvParams)
 					}
 					else {
 						xQueueSend(cmd_queue, cmd.c_str(), 10);
-						if (xQueueReceive(log_queue, buf, 100)) {
-							//write log
-							if(strlen((char *)buf) > 0)
-								_client.printf("%s\n", (char*)buf);
-						}
 					}
 					digitalWrite(BLUE_LED, LOW);
 				}
 				vTaskDelay(50);
 			}
-			stopMainTask();
 		}
 		vTaskDelay(500);
 	}

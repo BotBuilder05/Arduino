@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ArduinoOTA.h>
 #include <ArduinoJson.h>
 #include <WiFi.h>
 #include <Wire.h>
@@ -6,6 +7,7 @@
 #include "Batmobile.h"
 #include <WifiHandler.hpp>
 #include <Settings.hpp>
+#include <Sensors.hpp>
 
 xQueueHandle Global_log_queue, Global_cmd_queue;// , Read_queue;
 SemaphoreHandle_t idle_sem;
@@ -14,29 +16,30 @@ TaskParam_t params;
 
 void setup()
 {
-
 	Serial.begin(115200);
-	Serial.println("Init...");
+	Serial.println("[+] Init board");
 
-	Serial.println("Creating sync objects...");
+	Serial.print("[+] Creating sync objects ");
 	Global_log_queue = xQueueCreate(LOG_MAX, LOG_SIZE);
 	Global_cmd_queue = xQueueCreate(CMD_MAX, CMD_SIZE);
 	idle_sem = xSemaphoreCreateBinary();
+	Serial.println("[OK]");
 
-	Serial.println("Init settings ...");
+	Serial.println("[+] Load saved configuration");
 	Settings::init();
 
 	params = { Global_log_queue, Global_cmd_queue, idle_sem };
 
-	Serial.println("Configuring general pins");
+	Serial.println("[+] Configuring IO");
 	pinMode(MICROSTART_EN, OUTPUT);
 	pinMode(MICROSTART_IN, INPUT);
 	pinMode(BLUE_LED, OUTPUT);
 
-	setupSensors();
+	Sensors::init();
+
 	setupMotors();
 
-	Serial.println("Creating tasks...");
+	Serial.println("[+] Creating tasks");
 	xTaskCreatePinnedToCore(
 		IdleLoop,
 		"IdleLoop",
@@ -49,7 +52,7 @@ void setup()
 
 	WifiHandler::begin((void *)&params);
 
-	Serial.println("Inited !");
+	Serial.println("[DONE INITIALISATION]");
 }
 
 //main loop code
@@ -64,6 +67,7 @@ void IdleLoop(void* pvParams)
 			cmds = String{(char *)cmd};
 			if (cmds.startsWith(CMD_START)) {
 				Serial.println("[+] Creating main task");
+				WifiHandler::_client.println("[+] Main task started");
 				xTaskCreatePinnedToCore(
 					MainTask,
 					"MainTask",
@@ -73,7 +77,6 @@ void IdleLoop(void* pvParams)
 					&MainTaskH,
 					XCORE_2
 				);
-				WifiHandler::_client.println("[+] Main task started");
 				Serial.println("Idle loop blocked");
 				if (xSemaphoreTake(idle_sem, portMAX_DELAY)) {
 					vTaskDelete(MainTaskH);
@@ -88,6 +91,9 @@ void IdleLoop(void* pvParams)
 			else if (cmds.startsWith(CMD_GET)) {
 				//cmds = cmds.substring(strlen(CMD_GET) + 1);
 				serializeJson(Settings::set, WifiHandler::_client);
+			}
+			else if(cmds.startsWith(CMD_CALIBRATE)) {
+				Sensors::calibrate();
 			}
 			else if (cmds.startsWith(CMD_SET)) {
 				cmds = cmds.substring(strlen(CMD_SET)+1);
@@ -106,6 +112,13 @@ void IdleLoop(void* pvParams)
 						WifiHandler::_client.println("Setted mode to test");
 					}
 					Settings::save();
+				} else if(cmds.startsWith(CMD_SET_PARAM)) {
+					cmds = cmds.substring(strlen(CMD_SET_PARAM) + 1);
+					int i = cmds.indexOf(' ');
+					if(i != 0)
+						Settings::set[cmds.substring(0, i)] = cmds.substring(i+1);
+
+					Settings::save();
 				}
 				else if (cmds.startsWith(CMD_SETGET_JSON)) {
 					cmds = cmds.substring(strlen(CMD_SETGET_JSON) + 1);
@@ -121,4 +134,7 @@ void IdleLoop(void* pvParams)
 	}
 }
 
-void loop(void) {  }
+void loop(void) {
+	ArduinoOTA.handle();
+	delay(500);
+}

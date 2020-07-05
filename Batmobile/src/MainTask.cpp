@@ -1,25 +1,30 @@
 #include <Arduino.h>
 #include <WifiHandler.hpp>
 #include <Settings.hpp>
+#include <Sensors.hpp>
 #include "Batmobile.h"
+
+#define wait(ms) timeToWait = ms; saved_state = current_state; timeCounter=millis(); next_state = WAIT
 
 uint8_t next_state, urgent_state = 0;
 hw_timer_t* timer = NULL;
 xTaskHandle ParseTaskH;
 
 SensorRead_t val;
+uint8_t detect_distance, boost_distance;
 
 SemaphoreHandle_t parseSem;
 //flags
-long timeCounter = 0;
+long timeCounter = 0, timeToWait = 0;
 uint16_t counter = 0;
-uint16_t color1_white_limit = 14000, color2_white_limit = 21000;
 uint8_t ennemy_start_pos = RIGHT,
 		ennemy_front = 0,
 		ennemy_near = 0,
 		ennemy_front_left = 0,
 		ennemy_front_right = 0,
 		ennemy_left = 0,
+		ennemy_left_near = 0,
+		ennemy_right_near = 0,
 		ennemy_right = 0,
 		white_line_left = 0,
 		white_line_right = 0;
@@ -28,11 +33,11 @@ void ParseTask(void *pvParams)
 {
 	for (;;) {
 		if (xSemaphoreTake(parseSem, portMAX_DELAY)) {
-			val = readAll();
+			val = Sensors::readAll();
 			//Serial.printf("%d|%d|%d|%d cm\n", val.laser[0], val.laser[1], val.laser[2], val.laser[3]);
 			/* white line test */
-			white_line_left = val.color1 > color1_white_limit;
-			white_line_right = val.color2 > color2_white_limit;
+			white_line_left = val.color1 > 100;
+			white_line_right = val.color2 > 100;
 			if (white_line_left && white_line_right)
 				urgent_state = ESCAPE;
 			else if (white_line_left)
@@ -43,18 +48,20 @@ void ParseTask(void *pvParams)
 				urgent_state = 0;
 
 			/* ennemy position */
-			if (val.laser[0] < Settings::set["detect_distance"] && val.laser[1] < Settings::set["detect_distance"]) {
+			if (val.laser[0] < detect_distance && val.laser[1] < detect_distance) {
 				ennemy_front = 1;
-				ennemy_near = (val.laser[0] < Settings::set["boost_distance"] && val.laser[1] < Settings::set["boost_distance"]);
+				ennemy_near = (val.laser[0] < boost_distance && val.laser[1] < boost_distance);
 			} else {
 				ennemy_front = 0;
 				ennemy_near = 0;
-				ennemy_front_right = val.laser[0] < Settings::set["detect_distance"];
-				ennemy_front_left = val.laser[1] < Settings::set["detect_distance"];
+				ennemy_front_right = val.laser[0] < detect_distance;
+				ennemy_front_left = val.laser[1] < detect_distance;
 			}
 
-			ennemy_left = val.laser[2] < Settings::set["detect_distance"];
-			ennemy_right = val.laser[3] < Settings::set["detect_distance"];
+			ennemy_left = val.laser[2] < detect_distance;
+			ennemy_left_near = val.laser[2] < boost_distance;
+			ennemy_right = val.laser[3] < detect_distance;
+			ennemy_right_near = val.laser[3] < boost_distance;
 
 			//Serial.printf("%d|%d\n", white_line_left, white_line_right);
 		}
@@ -74,9 +81,12 @@ void IRAM_ATTR stopMainTask(void)
 
 void MainTask(void* pvParams)
 {
-	uint8_t current_state;
+	uint8_t current_state, saved_state = 0;
 	current_state = next_state = INIT;
-	char log[LOG_SIZE], cmd[CMD_SIZE];
+	char cmd[CMD_SIZE];
+
+	detect_distance = Settings::set["detect_distance"];
+	boost_distance = Settings::set["boost_distance"];
 
 	parseSem = xSemaphoreCreateBinary();
 	xTaskCreatePinnedToCore(
@@ -96,16 +106,16 @@ void MainTask(void* pvParams)
 	timerAlarmWrite(timer, TIMER_INTERRUPT, true);
 	timerAlarmEnable(timer);
 
-	if (Settings::set["mode"] == SETTING_MODE_TEST) {
+	if (Settings::set["mode"].as<String>().equals(SETTING_MODE_TEST)) {
 		current_state = next_state = DEBUG;
 		timerStop(timer);
 	}
 
 	while (true) {
-		log[0] = '\0';
 		switch (current_state) {
 			case INIT:
-				if (Settings::set["start_mode"] == SETTING_START_MICROSTART) {
+				if (Settings::set["start_mode"].as<String>().equals(SETTING_START_MICROSTART)) {
+					WifiHandler::_client.println("> Microstart started");
 					attachInterrupt(MICROSTART_IN, stopMainTask, FALLING);
 					digitalWrite(MICROSTART_EN, HIGH);
 				}
@@ -113,19 +123,19 @@ void MainTask(void* pvParams)
 				break;
 
 			case READY:
-				if (Settings::set["start_mode"] == SETTING_START_MICROSTART) {
+				if (Settings::set["start_mode"].as<String>().equals(SETTING_START_MICROSTART)) {
 					if (digitalRead(MICROSTART_IN) == HIGH) {
 						next_state = START_SEQ;
 					}
 				}
-				else if (Settings::set["start_mode"] == SETTING_START_5SEC) {
+				else if (Settings::set["start_mode"].as<String>().equals(SETTING_START_5SEC)) {
 					if (xQueueReceive(
 						((TaskParam_t*)pvParams)->cmd,
 						cmd,
 						0
 						)) {
 						if (strcmp(cmd, CMD_RUN) == 0) {
-							Serial.println("Starting 5s");
+							WifiHandler::_client.println("=> start in 5 sec");
 							/* 5000ms delay */
 							next_state = START_SEQ;
 							delay(4800);
@@ -147,24 +157,23 @@ void MainTask(void* pvParams)
 					ennemy_start_pos = LEFT;
 				else if(ennemy_right)
 					ennemy_start_pos = RIGHT;
-				/*color1_white_limit = white_line_left ? val.color1 + 1000 : color1_white_limit;
-				color2_white_limit = white_line_right ? val.color2 + 1000 : color2_white_limit;*/
-				if (Settings::set["strategy"] == SETTING_STRATEGY_BASIC) {
+
+				if (Settings::set["strategy"].as<String>().equals(SETTING_STRATEGY_BASIC)) {
 					delay(100);
 					move(ennemy_start_pos);
 					delay(100);
 					setSpeed(0, 0);
 					delay(100);
 					next_state = SEARCH;
-				}
-				else if (Settings::set["strategy"] == SETTING_STRATEGY_DIFF_START) {
+				} 
+				else if (Settings::set["strategy"].as<String>().equals(SETTING_STRATEGY_DIFF_START)) {
 					move(ennemy_start_pos);
 					delay(200);
 					move(FORWARD);
 					delay(50);
 					next_state = ATTACK;
 				}
-				else if (Settings::set["strategy"] == SETTING_STRATEGY_DIFF_START2) {
+				else if (Settings::set["strategy"].as<String>().equals(SETTING_STRATEGY_DIFF_START2)) {
 					move(ennemy_start_pos);
 					delay(250);
 					move(BACKWARD);
@@ -178,95 +187,68 @@ void MainTask(void* pvParams)
 				break;
 
 			case SEARCH:
-				strcat(log, "Searching...");
+				//WifiHandler::_client.println("=> Searching");
+				//setSpeed(0,0);
 				move(ennemy_start_pos, 225);
 				//setSpeed(ennemy_start_pos == LEFT ? 230 : 150, ennemy_start_pos == LEFT ? 230 : 150);
 
-				if (ennemy_front) {
-					move(ennemy_start_pos == LEFT ? RIGHT : LEFT, 255);
-					next_state = ATTACK;
-					delay(15);
-				}
-				else if (ennemy_front_left)
-					next_state = FOLLOW_LEFT;
-				else if (ennemy_front_right)
-					next_state = FOLLOW_RIGHT;
-				else {
-					if (ennemy_left) {
-						ennemy_start_pos = LEFT;
-						move(BACKWARD);
-						setSpeed(255, 200);
-						delay(150);
-						move(ennemy_start_pos);
-						delay(100);
-					}
-					else if (ennemy_right) {
-						ennemy_start_pos = RIGHT;
-						move(BACKWARD);
-						setSpeed(200, 255);
-						delay(150);
-						move(ennemy_start_pos);
-						delay(100);
-					}
+				if (millis() - timeCounter > 200)
+					stop();
 
-				}
-
-				/*if (millis() - timeCounter > 100) {
-					setSpeed(0, 0);
-					delay(30);
-					timeCounter = millis();
-				}*/
+				wait(300);
 				break;
 
 			case FOLLOW_LEFT:
+				WifiHandler::_client.println("=> Follow left");
 				move(FORWARD);
-				setSpeed(0, 255);
+				setSpeed(200, 230);
 				if (ennemy_front)
 					next_state = ATTACK;
 				else if (!ennemy_front_left)
 					next_state = SEARCH;
+				wait(10);
 				break;
 
 			case FOLLOW_RIGHT:
+				WifiHandler::_client.println("=> Follow right");
 				move(FORWARD);
-				setSpeed(255, 0);
+				setSpeed(230, 200);
 				if (ennemy_front)
 					next_state = ATTACK;
 				else if (!ennemy_front_right)
 					next_state = SEARCH;
+				wait(10);
 				break;
 
 			case ATTACK:
-				strcat(log, "Attack !");
+				WifiHandler::_client.println("=> Attack");
 				desactiveBoost();
 				move(FORWARD);
 				if (ennemy_near)
 					next_state = ATTACK_BOOST;
-				else if (ennemy_front_left)
-					next_state = FOLLOW_LEFT;
-				else if (ennemy_front_right)
-					next_state = FOLLOW_RIGHT;
-				else if (white_line_left || white_line_right)
-					next_state = ESCAPE;
-				else if (!ennemy_front)
-					next_state = SEARCH;
-
+				else if (!ennemy_front) {
+					if (ennemy_front_left)
+						next_state = FOLLOW_LEFT;
+					else if (ennemy_front_right)
+						next_state = FOLLOW_RIGHT;
+					else
+						next_state = SEARCH;
+				}
 				break;
 
 			case ATTACK_BOOST:
-				strcat(log, "All on you !");
+				WifiHandler::_client.println("=> Rush");
 				move(FORWARD);
 				activeBoost();
-				if (white_line_left || white_line_left)
-					next_state = ESCAPE;
-				else if (ennemy_near == 0) {
+				if (ennemy_near == 0) {
 					desactiveBoost();
 					counter = 0;
-					next_state = ennemy_near == 0 ? ATTACK : ESCAPE;
+					next_state = ennemy_front ? ATTACK : SEARCH;
 				}
 				break;
 
 			case ESCAPE:
+				WifiHandler::_client.println("=> White line detected");
 				move(BACKWARD);
 				delay(Settings::set["escape_count_max"]);
 				//if (pdMS_TO_TICKS(++counter) > Settings::set["escape_count_max"]) {
@@ -287,14 +269,51 @@ void MainTask(void* pvParams)
 				next_state = ennemy_front ? ATTACK : SEARCH;
 				break;
 
+			case TURN_RIGHT:
+				if(ennemy_right_near) {
+					move(BACKWARD);
+					setSpeed(240, 255);
+					wait(1000);
+				}
+				move(RIGHT);
+				wait(200);
+				saved_state = ATTACK;
+				break;
+			
+			case TURN_LEFT:
+				if(ennemy_left_near) {
+					move(BACKWARD);
+					setSpeed(255, 240);
+					wait(1000);
+				}
+				move(LEFT);
+				wait(200);
+				saved_state = ATTACK;
+				break;
+
+			case WAIT:
+				if (ennemy_front || ennemy_front_left || ennemy_front_right) {
+					next_state = ATTACK;
+				} else if (ennemy_left && saved_state != TURN_LEFT) {
+					next_state = TURN_LEFT;
+				} else if (ennemy_right && saved_state != TURN_RIGHT) {
+					next_state = TURN_RIGHT;
+				}
+				else if(millis() - timeCounter >= timeToWait) {
+					timeCounter = millis();
+					next_state = saved_state;
+				}
+				break;
+
 			case END:
 				timerStop(timer);
 				vTaskDelete(ParseTaskH);
-				TASK_LOG("MainTask : End state");
 				digitalWrite(MICROSTART_EN, LOW);
 				/* stop the bot */
 				setSpeed(0, 0);
 				desactiveBoost();
+
+				WifiHandler::_client.println("> Main task ended");
 
 				/* same as return */
 				xSemaphoreGive(((TaskParam_t*)pvParams)->sem);
@@ -313,13 +332,12 @@ void MainTask(void* pvParams)
 
 			case DEBUG:
 				vTaskDelay(100);
-				SensorRead_t val = readAll();
+				SensorRead_t val = Sensors::readAll();
 				WifiHandler::_client.printf("Laser: %d|%d|%d|%d Color: %d|%d\n", val.laser[0], val.laser[1], val.laser[2], val.laser[3], val.color1, val.color2);
 				break;
 		}
 
 		current_state = urgent_state ? urgent_state : next_state;
-		if(strlen(log)>0) TASK_LOG(log);
 		vTaskDelay(1);
 	}
 	return;
