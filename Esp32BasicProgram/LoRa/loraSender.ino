@@ -64,10 +64,12 @@ void fermeture(){
 */
 void sendDataWithLoRa(){
   Serial.print("Sending packet: ");
+  SerialBT.print("Sending packet: ");
   Serial.println(loraCount);
+  SerialBT.println(loraCount);
   LoRa.beginPacket();
   LoRa.print('hello');
-  Serial.print("Hello");
+  //Serial.print("Hello");
   LoRa.print(loraCount);
   Serial.print(loraCount);
   LoRa.endPacket();
