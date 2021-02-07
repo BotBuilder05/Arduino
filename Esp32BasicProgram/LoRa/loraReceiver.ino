@@ -4,7 +4,7 @@
 *********/
 
 //Add bluetooth for logs
-#include "BluetoothSerial.h"
+//#include "BluetoothSerial.h"
 #include <SPI.h>
 #include <LoRa.h>
 
@@ -13,16 +13,16 @@
 #define rst 14
 #define dio0 2
 
-BluetoothSerial SerialBT;
+//BluetoothSerial SerialBT;
 void setup() {
   //initialize Serial Monitor
   Serial.begin(115200);
-  SerialBT.begin("ESP32BT");
+  //SerialBT.begin("ESP32BT2");
+  Serial.println("The device started, now you can pair it with bluetooth!");
   while (!Serial);
-  Serial.println("LoRa Receiver");
   // LoRa
   Serial.println("LoRa Receiver");
-  SerialBT.println("LoRa Receiver");
+  //SerialBT.println("LoRa Receiver");
 
   //setup LoRa transceiver module
   LoRa.setPins(ss, rst, dio0);
@@ -33,7 +33,7 @@ void setup() {
   //915E6 for North America
   while (!LoRa.begin(866E6)) {
     Serial.print(".");
-    SerialBT.print(".");
+    //SerialBT.print(".");
     delay(500);
   }
    // Change sync word (0xF3) to match the receiver
@@ -48,20 +48,20 @@ void loop() {
   int packetSize = LoRa.parsePacket();
   if (packetSize) {
     // received a packet
-    Serial.print("Received packet '");
-    SerialBT.print("Received packet '");
+    Serial.print("Received packet ");
+    //SerialBT.print("Received packet ");
 
     // read packet
     while (LoRa.available()) {
       String LoRaData = LoRa.readString();
       Serial.print(LoRaData); 
-      SerialBT.print(LoRaData); 
+      //SerialBT.print(LoRaData); 
     }
 
     // print RSSI of packet
     Serial.print("' with RSSI ");
-    SerialBT.print("' with RSSI ");
+    //SerialBT.print("' with RSSI ");
     Serial.println(LoRa.packetRssi());
-    SerialBT.println(LoRa.packetRssi());
+    //SerialBT.println(LoRa.packetRssi());
   }
 }

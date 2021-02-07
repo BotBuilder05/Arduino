@@ -67,14 +67,21 @@ void sendDataWithLoRa(){
   SerialBT.print("Sending packet: ");
   Serial.println(loraCount);
   SerialBT.println(loraCount);
+
   LoRa.beginPacket();
+
   LoRa.print('hello');
-  //Serial.print("Hello");
+  Serial.print("Hello");
+
   LoRa.print(loraCount);
   Serial.print(loraCount);
+
   LoRa.endPacket();
+  Serial.print("EndPacket");
 
   loraCount++;
+  Serial.print(loraCount);
+  delay(2000);
 }
 
 
