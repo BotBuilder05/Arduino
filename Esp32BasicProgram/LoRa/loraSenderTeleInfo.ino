@@ -101,8 +101,8 @@ void Recupere_la_Teleinfo() {
 
     charIn_Trame_Teleinfo = Serial_Teleinfo.read() & 0x7F ;
     // debug
-    Serial.println("On a lu une Teleinfo : ");
-    Serial.print(charIn_Trame_Teleinfo);
+    Serial.print("On a lu une Teleinfo : ");
+    Serial.println(charIn_Trame_Teleinfo);
 
 
     switch (charIn_Trame_Teleinfo) {
