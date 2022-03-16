@@ -206,22 +206,42 @@ void Recupere_la_Teleinfo() {
 }
 /*
 EXAMPLE DE TRAME
-ADCO 524563565245 /
-OPTARIF HC.. <
-ISOUSC 20 8
-HCHC 001065963 _
-HCHP 001521211 '
-PTEC HC.. S
-IINST 001 I
-IMAX 008 2
-PMAX 06030 3
-PAPP 01250 +
-HHPHC E 0
-MOTDETAT 000000 B
-PPOT 00 #
-ADCO 524563565245 /
-OPTARIF HC.. <
-ISOUSC 20 8
+
+            ADCO 524563565245 /
+            OPTARIF HC.. <
+4374 Isousc ISOUSC 20 8
+            HCHC 001065963 _
+            HCHP 001521211 '
+            PTEC HC.. S
+     I_A    IINST 001 I
+     Imax   IMAX 008 2
+            PMAX 06030 3
+4375 P_W    PAPP 01250 +
+            HHPHC E 0
+            MOTDETAT 000000 B
+            PPOT 00 #
+
+            ADCO 524563565245 /
+            OPTARIF HC.. <
+4374 Isousc ISOUSC 20 8
+
+int idx_kwh_msg = 4376; //4376 Ã  renseigner, l'idx de l'objet Domoticz Ã  mettre Ã  jour
+int idx_papp_msg = 4375;//4375
+int idx_current_msg = 4372; //4372
+int idx_vcurrent_max_msg = 4373;//4373
+int idx_index_HC_msg = 0;
+int idx_index_HP_msg = 0;
+
+int idx_edf_compteur = 88888;//4377 4379 pour test
+
+Base = Valeur.toFloat(); Serial.print(" => Consommation : "); Serial.print(Base); Serial.println(" Wh");
+P_W = Valeur.toInt(); Serial.print(" => Puissance apparente : "); Serial.print(P_W); Serial.println(" W");
+I_A = Valeur.toInt(); Serial.print(" => Intensite instantanee : "); Serial.print(I_A); Serial.println(" A");
+Imax = Valeur.toInt(); Serial.print(" => I.Maximum : "); Serial.print(Imax); Serial.println(" A");
+Isousc = Valeur.toInt(); Serial.print(" => I.Souscrit : "); Serial.print(Isousc); Serial.println(" A");
+Index_HC = Valeur.toFloat();Serial.print(" => Index Heures creuses : ");Serial.print(Index_HC);Serial.println(" Wh");
+Index_HP = Valeur.toFloat();Serial.print(" => Index Heures pleines : ");Serial.print(Index_HP);Serial.println(" Wh");
+
 */
 void sendFrame() {
 
