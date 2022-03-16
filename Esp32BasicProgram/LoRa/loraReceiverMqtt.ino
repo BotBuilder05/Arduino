@@ -76,10 +76,12 @@ void connect_MQTT(){
 void setup() {
   //initialize Serial Monitor
   Serial.begin(115200);
+  //SerialBT.begin("ESP32BT2");
 
   while (!Serial);
   // LoRa
   Serial.println("LoRa Receiver");
+  //SerialBT.println("LoRa Receiver");
 
   //setup LoRa transceiver module
   LoRa.setPins(ss, rst, dio0);
