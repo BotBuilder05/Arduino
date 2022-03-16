@@ -70,18 +70,18 @@ void sendDataWithLoRa(){
 
   LoRa.beginPacket();
 
-  LoRa.print('hello');
-  Serial.print("Hello");
+  LoRa.print("hello");
+  Serial.print("Hello: ");
+  SerialBT.print("Hello: ");
 
   LoRa.print(loraCount);
-  Serial.print(loraCount);
+  Serial.println(loraCount);
+  SerialBT.println(loraCount);
 
   LoRa.endPacket();
-  Serial.print("EndPacket");
+  Serial.println("EndPacket");
+  SerialBT.println("EndPacket");
 
-  loraCount++;
-  Serial.print(loraCount);
-  delay(2000);
 }
 
 
@@ -265,6 +265,11 @@ void setup() {
  // ouverture();
 //  fermeture();
   sendDataWithLoRa();
+  loraCount++;
+  Serial.print("Next count value: ");
+  SerialBT.print("Next count value: ");
+  Serial.println(loraCount);
+  SerialBT.println(loraCount);
   Serial.println("Going to sleep now");
   SerialBT.println("Going to sleep now");
   delay(1000);
