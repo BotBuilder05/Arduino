@@ -364,7 +364,6 @@ void manageGateSignal() {
   if (packetSize) {
     // received a packet
     Serial.print("Received packet ");
-    }
 
     // read packet
     while (LoRa.available()) {
