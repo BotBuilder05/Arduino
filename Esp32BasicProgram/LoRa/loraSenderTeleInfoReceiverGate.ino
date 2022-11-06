@@ -366,7 +366,6 @@ void manageGateSignal() {
   if (packetSize) {
     // received a packet
     Serial.print("Received packet ");
-    }
 
   Serial.println("On est la ");
   // read packet
