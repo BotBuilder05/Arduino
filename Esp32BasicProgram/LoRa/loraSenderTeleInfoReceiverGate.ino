@@ -5,7 +5,7 @@
 *********/
 
 //Add bluetooth for logs
-#include "BluetoothSerial.h"
+//#include "BluetoothSerial.h"
 #include <SPI.h>
 #include <LoRa.h>
 #include "DHT.h"
@@ -20,7 +20,7 @@
 
 #define GATE 22
 
-BluetoothSerial SerialBT;
+//BluetoothSerial SerialBT;
 //int counter = 0;
 
 DHT dht(DHTPIN, DHTTYPE);
@@ -318,10 +318,10 @@ void setup() {
 
   //initialize Serial Monitor
   Serial.begin(115200);
-  SerialBT.begin("ESP32BT");
+//  SerialBT.begin("ESP32BT");
   while (!Serial);
   Serial.println("LoRa Sender");
-  SerialBT.println("LoRa Sender");
+//  SerialBT.println("LoRa Sender");
 
   Serial_Teleinfo.begin(1200);
 
@@ -334,7 +334,7 @@ void setup() {
   //915E6 for North America
   while (!LoRa.begin(866E6)) {
     Serial.print(".");
-    SerialBT.print(".");
+//    SerialBT.print(".");
     delay(500);
   }
    // Change sync word (0xF3) to match the receiver
@@ -345,7 +345,7 @@ void setup() {
 //  SerialBT.println("LoRa Initializing OK!");
 
   dht.begin();
-//  Serial.println("DHT Initializing OK!");
+ Serial.println("DHT Initializing OK!");
 //  SerialBT.println("DHT Initializing OK!");
 }
 
@@ -359,27 +359,39 @@ void manageGateSignal() {
   // try to parse packet
   int packetSize = LoRa.parsePacket();
   String LoRaData = "";
-  Serial.print(".");
-  //Serial.println(packetSize);
+
+  Serial.print("PacketSize:");
+  Serial.println(packetSize);
+
   if (packetSize) {
     // received a packet
     Serial.print("Received packet ");
     }
 
-    // read packet
-    while (LoRa.available()) {
-      //String LoRaData = LoRa.readString();
-      LoRaData = LoRa.readString();
-      //LoRaData = "DATA";
-      Serial.print("Data: "); 
-      Serial.println(LoRaData); 
-    }
-    if (LoRaData){
-      driveGate();
-    }
+  Serial.println("On est la ");
+  // read packet
+  while (LoRa.available()) {
+    //String LoRaData = LoRa.readString();
+  Serial.println("On est encore la ");
+    LoRaData = LoRa.readString();
+    //LoRaData = "DATA";
+    Serial.print("Data: "); 
+    Serial.println(LoRaData); 
+    // print RSSI of packet
+    Serial.print(" with RSSI ");
+    Serial.println(LoRa.packetRssi());
+  }
+  if (LoRaData) { // revoir le test on rentre ds le if meme quand LoRaData est vide
+      // Minicom output:
+      //On est passe par driveGate
+      //Data:
+      //On sort driveGate
+
+    driveGate();
+  Serial.println("On est passe par driveGate ");
   }
   else {
-      LoRaData = "NO_DATA";
+    LoRaData = "NO_DATA";
   }
 }
 
@@ -387,8 +399,8 @@ void manageGateSignal() {
 void loop() {
 
   // Wait a few seconds between measurements.
-  Recupere_la_Teleinfo();
-  delay(2000);
+//  Recupere_la_Teleinfo();
+//  delay(2000);
 
   // Reading temperature or humidity takes about 250 milliseconds!
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
@@ -404,6 +416,7 @@ void loop() {
   Serial.print(F("Temperature: "));
   Serial.print(t);
   Serial.println(F("°C "));
+
 //  SerialBT.print(F("Temperature: "));
 //  SerialBT.print(t);
 //  SerialBT.print(F("°C "));
@@ -414,15 +427,15 @@ void loop() {
 //  SerialBT.println(counter);
 
   //Send LoRa packet to receiver
-  LoRa.beginPacket();
+////  LoRa.beginPacket();
   //LoRa.print("hello ");
   //LoRa.print(counter);
-  LoRa.print(t);
-  sendFrame();
+////  LoRa.print(t);
+////  sendFrame();
   //SerialBT.print("hello ");
   //SerialBT.println(counter);
   //SerialBT.println(t);
-  LoRa.endPacket();
+////  LoRa.endPacket();
 
 //  counter++;
 //  if  (counter == 20000) {
@@ -431,8 +444,35 @@ void loop() {
 //      counter = 0;
 //  }
 
+//LoRa.idle();
+//oRa.enableInvertIQ();
+// try to light a led - That works
+//driveGate();
+//  delay(200);
   manageGateSignal();
+//    Serial.println(F("Before delay"));
+//  delay(10000);
+//    Serial.println(F("After delay"));
 
-  delay(10000);
+ // try to parse packet
+
+/* uncomment to test recieve only
+int packetSize = LoRa.parsePacket();
+  if (packetSize) {
+    // received a packet
+    Serial.print("Received packet ");
+
+    // read packet
+    while (LoRa.available()) {
+      String LoRaData = LoRa.readString();
+      Serial.print(LoRaData);
+    }
+
+    // print RSSI of packet
+    Serial.print("' with RSSI ");
+
+    Serial.println(LoRa.packetRssi());
+  }
+*/
 }
 
