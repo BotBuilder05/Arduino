@@ -7,10 +7,10 @@
 //#include "BluetoothSerial.h"
 #include <SPI.h>
 #include <LoRa.h>
-#include "WiFi.h" // Enables the ESP32 to connect to the local network (via WiFi)
+////#include "WiFi.h" // Enables the ESP32 to connect to the local network (via WiFi)
 #include "PubSubClient.h" // Connect and publish to the MQTT broker
 #include "FS.h"
-#include "WebServer.h" // Enable WebServer
+////#include "WebServer.h" // Enable WebServer
 
 //define the pins used by the transceiver module
 #define ss 5
@@ -37,18 +37,18 @@ const char* humidity_topic = "test";
 //BluetoothSerial SerialBT;
 
 // Initialise the WiFi and MQTT Client objects
-WiFiClient wifiClient;
+////WiFiClient wifiClient;
 
 // Webserver
-WebServer server(80);
-int order=0;
+////WebServer server(80);
+float order=0;
 
 // 1883 is the listener port for the Broker
-PubSubClient client(mqtt_server, 1883, wifiClient);
+////PubSubClient client(mqtt_server, 1883, wifiClient);
 
 // Custom function to connet to the MQTT broker via WiFi
+/*
 void connect_MQTT(){
-
   // Connect to MQTT Broker
   // client.connect returns a boolean value to let us know if the connection was successful.
   // If the connection is failing, make sure you are using the correct MQTT Username and Password (Setup Earlier in the Instructable)
@@ -60,29 +60,39 @@ void connect_MQTT(){
     Serial.println(client.state());
   }
 }
+*/
 
-void handleRoot() {
+/*void handleRoot() {
   String message="<h1>Control your ESP32 by your Browser</h1>";
   message += "Minimal version, just one GATE</BR></BR>";
   server.send(200, "text/html", message);
   order=0; // set Signal to 0 in order to be able to reopen the gate
 }
-
+*/
 void sendGateOrder(){
   LoRa.beginPacket();
   Serial.print ("Order value: ");
   Serial.println(order);
-  LoRa.print(order);
+ //// LoRa.print(order);
+  LoRa.print("Hello");
+    Serial.print("ReturnCodei:");
+    Serial.println(LoRa.print());
   LoRa.endPacket();
   Serial.println("Order sent via LoRa!");
+    // print RSSI of packet
+    Serial.print(" with RSSI ");
+    Serial.println(LoRa.packetRssi());
 }
 
+/*
 void gateon(){
   order=1; // set Signal for gate
   server.send(200, "text/html", "Opening gate...");
+  Serial.print ("Order value gateon: ");
+  Serial.println(order);
   sendGateOrder();
 }
-
+*/
 
 void setup() {
   //initialize Serial Monitor
@@ -112,41 +122,42 @@ void setup() {
   Serial.println("LoRa Initializing OK!");
 
 
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+////  Serial.print("Connecting to ");
+////  Serial.println(ssid);
 
   // Connect to the WiFi
-  WiFi.begin(ssid, password);
+////  WiFi.begin(ssid, password);
 
   // Wait until the connection has been confirmed before continuing
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
+////  while (WiFi.status() != WL_CONNECTED) {
+////    delay(500);
+////    Serial.print(".");
+////  }
 
   // Debugging - Output the IP Address of the ESP8266
   Serial.println("WiFi connected");
   Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+////  Serial.println(WiFi.localIP());
 
   // Initialise the WiFi and MQTT Client objects
-  WiFiClient wifiClient;
+////  WiFiClient wifiClient;
 
   // 1883 is the listener port for the Broker
-  PubSubClient client(mqtt_server, 1883, wifiClient);
+//  PubSubClient client(mqtt_server, 1883, wifiClient);
 
   // Webserver
-  server.on("/",handleRoot);
-  server.on("/gate_open", gateon);
-  server.begin();
-  Serial.println("HTTP server started");
+////  server.on("/",handleRoot);
+////  server.on("/gate_open", gateon);
+////  server.begin();
+////  Serial.println("HTTP server started");
 }
 
 void loop() {
-  // try to parse packet
+/*
+// try to parse packet
   int packetSize = LoRa.parsePacket();
   String LoRaData = "";
-  Serial.print(".");
+  //Serial.print(".");
   //Serial.println(packetSize);
   if (packetSize) {
     // received a packet
@@ -158,7 +169,7 @@ void loop() {
       connect_MQTT();
     }
     client.loop();
-
+  Serial.println(LoRa.available());
     // read packet
     while (LoRa.available()) {
       //String LoRaData = LoRa.readString();
@@ -192,5 +203,9 @@ void loop() {
   else {
       LoRaData = "NO_DATA";
   }
-  server.handleClient();
+  */
+  sendGateOrder();
+  delay(10000);
+
+////server.handleClient();
 }
