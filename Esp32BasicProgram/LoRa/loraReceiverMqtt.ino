@@ -51,7 +51,7 @@ void connect_MQTT(){
   // Wait until the connection has been confirmed before continuing
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
+    //Serial.print(".");
   }
 
   // Debugging - Output the IP Address of the ESP8266
@@ -101,18 +101,19 @@ void setup() {
   Serial.println("LoRa Initializing OK!");
 
   // Initialise the WiFi and MQTT Client objects
-  WiFiClient wifiClient;
+  //WiFiClient wifiClient;
 
   // 1883 is the listener port for the Broker
-  PubSubClient client(mqtt_server, 1883, wifiClient);
+  //PubSubClient client(mqtt_server, 1883, wifiClient);
 }
 
 void loop() {
   // try to parse packet
   int packetSize = LoRa.parsePacket();
   String LoRaData = "";
+/*  Serial.print("Loop");
   Serial.print(".");
-  //Serial.println(packetSize);
+  Serial.println(packetSize);*/
   if (packetSize) {
     // received a packet
     Serial.print("Received packet ");

@@ -243,6 +243,20 @@ Index_HC = Valeur.toFloat();Serial.print(" => Index Heures creuses : ");Serial.p
 Index_HP = Valeur.toFloat();Serial.print(" => Index Heures pleines : ");Serial.print(Index_HP);Serial.println(" Wh");
 
 */
+
+void sendFrame(){
+int ADCO=524563565245;
+P_W=01250;
+//int f_base=;
+I_A=001;
+Isousc=20;
+    LoRa.println(ADCO);
+    LoRa.println(P_W);
+    LoRa.println(I_A);
+    LoRa.println(Isousc);
+}
+
+/* Useless, idw are just for domoticz
 void sendFrame() {
 
   char mqttmsg[128];
@@ -309,6 +323,8 @@ void sendFrame() {
 
   }
 }
+*/
+
 
 void setup() {
   //initialize Serial Monitor
@@ -377,7 +393,7 @@ void loop() {
   LoRa.beginPacket();
   //LoRa.print("hello ");
   //LoRa.print(counter);
-  LoRa.print(t);
+  LoRa.println(t);
   sendFrame();
   //SerialBT.print("hello ");
   //SerialBT.println(counter);
@@ -391,6 +407,8 @@ void loop() {
 //      counter = 0;
 //  }
 
+  Serial.println("Before delay");
   delay(10000);
+  Serial.println("After dela ");
 }
 
