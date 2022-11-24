@@ -23,6 +23,11 @@ BluetoothSerial SerialBT;
 
 RTC_DATA_ATTR int bootCount = 0;
 
+// Wake touchpad
+#define Threshold 40 /* Greater the value, more the sensitivity */
+touch_pad_t touchPin;
+
+
 // Motor A
 const int motorPinIA = 23;
 const int motorPinIB = 22; 
@@ -65,6 +70,34 @@ void print_wakeup_reason(){
     default : Serial.printf("Wakeup was not caused by deep sleep: %d\n",wakeup_reason); break;
   }
 }
+
+
+void print_wakeup_touchpad(){
+  touchPin = esp_sleep_get_touchpad_wakeup_status();
+
+  switch(touchPin)
+  {
+    case 0  : Serial.println("Touch detected on GPIO 4"); break;
+    case 1  : Serial.println("Touch detected on GPIO 0"); break;
+    case 2  : Serial.println("Touch detected on GPIO 2"); break;
+    case 3  : Serial.println("Touch detected on GPIO 15"); break;
+    case 4  : Serial.println("Touch detected on GPIO 13"); break;
+    case 5  : Serial.println("Touch detected on GPIO 12"); break;
+    case 6  : Serial.println("Touch detected on GPIO 14"); break;
+    case 7  : Serial.println("Touch detected on GPIO 27"); break;
+    case 8  : Serial.println("Touch detected on GPIO 33"); break;
+    case 9  : Serial.println("Touch detected on GPIO 32"); break;
+    default : Serial.println("Wakeup not by touchpad"); break;
+  }
+}
+
+void callback(){
+  //placeholder callback function
+}
+
+
+
+
 
 
 void setup() {
@@ -127,13 +160,20 @@ void setup() {
 
   //Print the wakeup reason for ESP32
   print_wakeup_reason();
+  print_wakeup_touchpad();
+
+  //Setup interrupt on Touch Pad 3 (GPIO15)
+  touchAttachInterrupt(T3, callback, Threshold);
+
+  //Configure Touchpad as wakeup source
+  esp_sleep_enable_touchpad_wakeup();
 
   /*
   First we configure the wake up source
   We set our ESP32 to wake up every 5 seconds
   */
   //esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-  esp_sleep_enable_timer_wakeup(3600000000);
+  esp_sleep_enable_timer_wakeup(60000000);
   //esp_sleep_enable_timer_wakeup(3600000000);
   Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
   SerialBT.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
@@ -165,24 +205,8 @@ void setup() {
   Serial.flush(); 
   esp_deep_sleep_start();
   Serial.println("This will never be printed");
-
-  // testing
-  Serial.print("Testing DC Motor...");
-
-}
-
-
-void stop(){
-  // Stop the DC motor
-  Serial.println("Motor stopped");
-  digitalWrite(motorPinIA, LOW);
-  digitalWrite(motorPinIB, LOW);
-  delay(1000);
 }
 
 void loop() {
-  ouverture();
-
-  fermeture();
-
+    // With deep sleep nothing is exceuted from loop function -> NO CODE THERE!!
 }
