@@ -4,20 +4,21 @@
 #include <ESPmDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+#include <Update.h>
 
-const char* ssid = "-----";
-const char* password = "-----";
+const char* ssid = "velours";
+const char* password = "valentineaudreyxavier";
 
 //variabls for blinking an LED with Millis
-/*const int led = 2; 
+const int led = 2; 
 // ESP32 Pin to which onboard LED is connected
 unsigned long previousMillis = 0;  // will store last time LED was updated
 const long interval = 1000;  // interval at which to blink (milliseconds)
-int ledState = LOW;*/ // ledState used to set the LED
+int ledState = LOW; // ledState used to set the LED
 
 void setup() {
 
-//pinMode(led, OUTPUT);  
+  pinMode(led, OUTPUT);  
   Serial.begin(115200);
   Serial.println("Booting");
   WiFi.mode(WIFI_STA);
@@ -29,10 +30,10 @@ void setup() {
   }
 
   // Port defaults to 3232
-  // ArduinoOTA.setPort(3232);
+  ArduinoOTA.setPort(3232);
 
   // Hostname defaults to esp3232-[MAC]
-  // ArduinoOTA.setHostname("myesp32");
+  ArduinoOTA.setHostname("myesp32");
 
   // No authentication by default
   // ArduinoOTA.setPassword("admin");
@@ -77,7 +78,7 @@ void setup() {
 void loop() {
   ArduinoOTA.handle();
   //loop to blink without delay
- /*unsigned long currentMillis = millis();
+ unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
   // save the last time you blinked the LED
   previousMillis = currentMillis;
@@ -85,5 +86,5 @@ void loop() {
   ledState = not(ledState);
   // set the LED with the ledState of the variable:
   digitalWrite(led,  ledState);
-  }*/
+  }
 }
