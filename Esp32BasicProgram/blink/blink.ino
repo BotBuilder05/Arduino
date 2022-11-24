@@ -5,8 +5,9 @@
  * 
  * ON Board LED GPIO 2
  */
+// 4/23 marche
+#define LED 22
 
-#define LED 2
 
 void setup() {
   // Set pin mode
