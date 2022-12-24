@@ -4,6 +4,7 @@
   DHT : https://randomnerdtutorials.com/esp32-dht11-dht22-temperature-humidity-sensor-arduino-ide/
 *********/
 
+
 //Add bluetooth for logs
 #include "BluetoothSerial.h"
 #include <SPI.h>
