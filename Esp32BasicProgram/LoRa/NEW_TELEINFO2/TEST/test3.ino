@@ -22,56 +22,54 @@
 
 #include <LibTeleinfo.h>
 
-//#define BOARD_EZSBC
-//#define BOARD_LOLIN32
 #define BOARD_DENKY32
 
 // https://www.tindie.com/products/ddebeer/esp32-dev-board-wifibluetooth-with-ftdi-/
-#if defined (BOARD_EZSBC)
+//#if defined (BOARD_EZSBC)
 // Set up the rgb led names
-#define LED_RED_PIN 16
-#define LED_GRN_PIN 17
-#define LED_BLU_PIN 18
+//#define LED_RED_PIN 16
+//#define LED_GRN_PIN 17
+//#define LED_BLU_PIN 18
 
-#define PUSH_BUTTON 0
+//#define PUSH_BUTTON 0
 
-#define TIC_ENABLE_PIN 27
-#define TIC_RX_PIN     33
-#define TIC_TX_PIN     32
+//#define TIC_ENABLE_PIN 27
+//#define TIC_RX_PIN     16
+//#define TIC_TX_PIN     17
 
 // Lolin32
-#elif defined (BOARD_LOLIN32)
+//#elif defined (BOARD_LOLIN32)
 
-#define PUSH_BUTTON     15
+//#define PUSH_BUTTON     15
 
-#define TIC_ENABLE_PIN  32
-#define TIC_RX_PIN      16
-#define TIC_TX_PIN      17
+//#define TIC_ENABLE_PIN  32
+//#define TIC_RX_PIN      16
+//#define TIC_TX_PIN      17
 
-#define RGB_LED_PIN     13
+//#define RGB_LED_PIN     13
 
 // Denky32
-#elif defined (BOARD_DENKY32)
+//#elif defined (BOARD_DENKY32)
 
 #define PUSH_BUTTON     0
 
 #define TIC_ENABLE_PIN  4
-#define TIC_RX_PIN      33
-//#define TIC_TX_PIN      17
+#define TIC_RX_PIN      16
+#define TIC_TX_PIN      17
 
-#define LORA_TX_PIN     26
-#define LORA_RX_PIN     27
-#define LORA_RESET      14
+//#define LORA_TX_PIN     26
+//#define LORA_RX_PIN     27
+//#define LORA_RESET      14
 
-#define RGB_LED_PIN     25
+#define RGB_LED_PIN     2
 
 
-#endif
+//#endif
 
-#ifdef RGB_LED_PIN
+//#ifdef RGB_LED_PIN
 //#include <NeoPixelBus.h>
 
-#define colorSaturation 128
+//#define colorSaturation 128
 // three element pixels, in different order and speeds
 //NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(1, RGB_LED_PIN);
 
@@ -81,7 +79,7 @@
 ////RgbColor white(colorSaturation);
 ////RgbColor black(0);
 
-#endif
+//#endif
 
 
 TInfo tinfo; // Teleinfo object
@@ -207,7 +205,7 @@ void NewFrame(ValueList * me)
 {
   // Start short led blink
   #ifdef LED_RED_PIN
-  digitalWrite(LED_RED_PIN, LOW);
+  //digitalWrite(LED_RED_PIN, LOW);
   #endif
   #ifdef RGB_LED_PIN
 ////  strip.SetPixelColor(0, red);
@@ -235,7 +233,7 @@ void UpdatedFrame(ValueList * me)
 {
   // Start long led blink
   #ifdef LED_BLU_PIN
-  digitalWrite(LED_BLU_PIN, LOW);
+  //digitalWrite(LED_BLU_PIN, LOW);
   #endif
   #ifdef RGB_LED_PIN
 ////  strip.SetPixelColor(0, blue);
@@ -261,12 +259,12 @@ void setup()
 {
   // Arduino LED
   #ifdef BOARD_EZSBC
-  pinMode(LED_RED_PIN, OUTPUT);     
-  pinMode(LED_GRN_PIN, OUTPUT);     
-  pinMode(LED_BLU_PIN, OUTPUT);     
-  digitalWrite(LED_RED_PIN, HIGH);
-  digitalWrite(LED_GRN_PIN, HIGH);
-  digitalWrite(LED_BLU_PIN, HIGH);
+//  pinMode(LED_RED_PIN, OUTPUT);     
+//  pinMode(LED_GRN_PIN, OUTPUT);     
+//  pinMode(LED_BLU_PIN, OUTPUT);     
+//  digitalWrite(LED_RED_PIN, HIGH);
+//  digitalWrite(LED_GRN_PIN, HIGH);
+//  digitalWrite(LED_BLU_PIN, HIGH);
   #endif
 
   // Serial, pour le debug
@@ -291,14 +289,14 @@ void setup()
 
 
   // this resets all the neopixels to an off state
-  #ifdef RGB_LED_PIN
-  Serial.printf_P(PSTR("Enable WS2812 RGB LED on GPIO=%d\r\n"), RGB_LED_PIN);
-////  strip.Begin();
-////  strip.SetPixelColor(0, green);
-////  strip.Show();
-  blinkLed = millis();
-  blinkDelay = 500; // 500ms
-  #endif
+//  #ifdef RGB_LED_PIN
+//  Serial.printf_P(PSTR("Enable WS2812 RGB LED on GPIO=%d\r\n"), RGB_LED_PIN);
+//////  strip.Begin();
+//////  strip.SetPixelColor(0, green);
+//////  strip.Show();
+//  blinkLed = millis();
+//  blinkDelay = 500; // 500ms
+//  #endif
 
   // Configure Teleinfo Soft serial 
   // La téléinfo est connectee sur D3
@@ -387,12 +385,12 @@ void loop()
     tinfo.process(c);
 
     // L'affcher dans la console
-    if (c!=TINFO_STX && c!=TINFO_ETX) {
-      Serial.print(c);
-    }
+//    if (c!=TINFO_STX && c!=TINFO_ETX) {
+//      Serial.print(c);
+//    }
   }
 
-  // Verifier si le clignotement LED doit s'arreter 
+/*  // Verifier si le clignotement LED doit s'arreter 
   if (blinkLed && ((millis()-blinkLed) >= blinkDelay))
   {
     #ifdef BOARD_EZSBC
@@ -408,7 +406,7 @@ void loop()
 
     blinkLed = 0;
   }
-
+*/
   if (currentMillis - previousMillis > 1000 ) {
     // save the last time you blinked the LED 
     previousMillis = currentMillis;   

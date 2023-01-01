@@ -34,7 +34,7 @@
 #define PUSH_BUTTON 0
 
 // Teleinfo RXD pin is connected to ESP32-PICO-V3-02 GPIO8
-#define TIC_RX_PIN  8   
+#define TIC_RX_PIN  16
 
 #define COLOR_BLACK     RgbColor(0x00, 0x00, 0x00)
 #define COLOR_RED       RgbColor(0xFF, 0x00, 0x00)
