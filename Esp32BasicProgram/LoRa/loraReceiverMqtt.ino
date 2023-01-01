@@ -43,22 +43,22 @@ PubSubClient client(mqtt_server, 1883, wifiClient);
 
 // Custom function to connet to the MQTT broker via WiFi
 void connect_MQTT(){
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+////  Serial.print("Connecting to ");
+////  Serial.println(ssid);
 
   // Connect to the WiFi
-  WiFi.begin(ssid, password);
+////  WiFi.begin(ssid, password);
 
   // Wait until the connection has been confirmed before continuing
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+////  while (WiFi.status() != WL_CONNECTED) {
+////    delay(500);
     //Serial.print(".");
-  }
+////  }
 
   // Debugging - Output the IP Address of the ESP8266
-  Serial.println("WiFi connected");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+////  Serial.println("WiFi connected");
+////  Serial.print("IP address: ");
+////  Serial.println(WiFi.localIP());
 
   // Connect to MQTT Broker
   // client.connect returns a boolean value to let us know if the connection was successful.
@@ -103,9 +103,26 @@ void setup() {
 
   // Initialise the WiFi and MQTT Client objects
   //WiFiClient wifiClient;
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
 
+  // Connect to the WiFi
+  WiFi.begin(ssid, password);
+
+  // Wait until the connection has been confirmed before continuing
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    //Serial.print(".");
+  }
+
+  // Debugging - Output the IP Address of the ESP8266
+  Serial.println("WiFi connected");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+ 
   // 1883 is the listener port for the Broker
   //PubSubClient client(mqtt_server, 1883, wifiClient);
+  connect_MQTT();
 }
 
 void loop() {
@@ -118,7 +135,6 @@ void loop() {
   if (packetSize) {
     // received a packet
     Serial.print("Received packet ");
-    connect_MQTT();
     if (!client.connected()) {
       Serial.print(" : ");
       Serial.println("mqtt_reconnect");
