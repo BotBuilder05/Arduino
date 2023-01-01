@@ -1,0 +1,17 @@
+==============                                       
+Teleinfo                                             
+Enable TIC on  GPIO4                                 
+Enable Button on GPIO=0                              
+TIC RX = GPIO=16
+{"_UPTIME":1, "ADCO":2147483647, "ISOUSC":30, "BASE":36467286, "PTEC":"TH..", "}
+{"BASE":36467288, "PAPP":4540, "OPTARIF":"BASE"}
+{"BASE":36467290, "IINST":19, "PAPP":4530}
+{"BASE":36467292, "IINST":20}
+{"BASE":36467293, "IINST":19, "PAPP":4550}
+{"BASE":36467296, "PAPP":4500}
+{"BASE":36467298, "PAPP":4520}
+{"BASE":36467300, "PAPP":4470}
+{"BASE":36467302, "PAPP":4480}
+{"BASE":36467303, "PAPP":4490}
+{"BASE":36467306, "PAPP":4480}
+

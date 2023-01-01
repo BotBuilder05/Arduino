@@ -1,0 +1,307 @@
+
+
+Welcome to minicom 2.8
+
+OPTIONS: I18n 
+Port /dev/ttyUSB0, 15:27:51
+
+Press CTRL-A Z for help on special keys
+
+AX 090 H
+PAPP 04920 0
+HHPHC A ,
+<ETX><STX>00000 B
+          ADCO 021675955130 C
+OPTARIF BASE 0
+ISOUSC 30 9
+BASE 036356628 2
+PTEC TH.. $
+IINST 021 Z
+IMAX 090 H
+PAPP 04920 0
+HHPHC A ,
+<ETX><STX>00000 B
+          ADCO 021675955130 C
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356631 ,                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04920 0                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356634 /                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04910 /                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356635 0                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04910 /                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356638 3                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04930 1                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356639 4                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04930 1                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356642 .                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04930 1                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356645 1                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04930 1                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356646 2                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04940 2                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356649 5                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04930 1                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356650 -                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04940 2                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 0363566TIC RX=GPIO16  Mode:Standard                                        
+|TIC RX=GPIO16  Mode:Historique                                                 
+ 30 9                                                                           
+BASE 036356657 4                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04920 0                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356660 .                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04920 0                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356661 /                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+ets Jun  8 2016 00:22:57                                                        
+                                                                                
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)                         
+configsip: 0, SPIWP:0xee                                                        
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00         
+mode:DIO, clock div:2                                                           
+load:0x3fff0018,len:4                                                           
+load:0x3fff001c,len:1044                                                        
+load:0x40078000,len:10044                                                       
+load:0x40080400,len:5872                                                        
+entry 0x400806ac                                                                
+                                                                                
+                                                                                
+                                                                                
+=====================================                                           
+     Teleinfo passthru Denky D4                                                 
+=====================================                                           
+  You can change teleinfo mode from                                             
+Historique to Standard with B0 button                                           
+TIC RX=GPIO16  Mode:Historique                                                  
+,# 021675955130 C                                                               
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356664 2                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04910 /                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356665 3                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04910 /                                                                    
+HHPHC A ,                                                                       
+MOTDETAT 000000TIC RX=GPIO16  Mode:Standard                                     
+ets Jun  8 2016 00:22:57                                                        
+                                                                                
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)                         
+configsip: 0, SPIWP:0xee                                                        
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00         
+mode:DIO, clock div:2                                                           
+load:0x3fff0018,len:4                                                           
+load:0x3fff001c,len:1044                                                        
+load:0x40078000,len:10044                                                       
+load:0x40080400,len:5872                                                        
+entry 0x400806ac                                                                
+                                                                                
+                                                                                
+                                                                                
+=====================================                                           
+     Teleinfo passthru Denky D4                                                 
+=====================================                                           
+  You can change teleinfo mode from                                             
+Historique to Standard with B0 button                                           
+TIC RX=GPIO16  Mode:Historique                                                  
+]|                                                                              
+  HHPHC A ,                                                                     
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356676 5                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04920 0                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356679 8                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04930 1                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356680 0                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04910 /                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 03635668TIC RX=GPIO16  Mode:Standard                                       
+<ETX>ets Jun  8 2016 00:22:57                                                   
+                                                                                
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)                         
+configsip: 0, SPIWP:0xee                                                        
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00         
+mode:DIO, clock div:2                                                           
+load:0x3fff0018,len:4                                                           
+load:0x3fff001c,len:1044                                                        
+load:0x40078000,len:10044                                                       
+load:0x40080400,len:5872                                                        
+entry 0x400806ac                                                                
+                                                                                
+                                                                                
+                                                                                
+=====================================                                           
+     Teleinfo passthru Denky D4                                                 
+=====================================                                           
+  You can change teleinfo mode from                                             
+Historique to Standard with B0 button                                           
+TIC RX=GPIO16  Mode:Historique                                                  
+3;&V                                                                            
+     HHPHC A ,                                                                  
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356691 2                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04920 0                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356694 5                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H               +-----------------------------+                        
+PAPP 04920 0             |                             |                        
+HHPHC A ,                |  Cannot open /dev/ttyUSB0!  |                        
+<ETX><STX>00000 B        |                             |                        
+          ADCO 0216759551+-----------------------------+                        
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9                                                                     
+BASE 036356697 8                                                                
+PTEC TH.. $                                                                     
+IINST 021 Z                                                                     
+IMAX 090 H                                                                      
+PAPP 04920 0                                                                    
+HHPHC A ,                                                                       
+<ETX><STX>00000 B                                                               
+          ADCO 021675955130 C                                                   
+OPTARIF BASE 0                                                                  
+ISOUSC 30 9
+
+
