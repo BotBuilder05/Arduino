@@ -6,7 +6,7 @@
 #include "BluetoothSerial.h"
 #include <SPI.h>
 #include <LoRa.h>
-#include "DHT.h"
+////#include "DHT.h"
 
 #include <LibTeleinfo.h>
 
@@ -14,9 +14,9 @@
 #define ss 5
 #define rst 14
 #define dio0 2
-#define DHTPIN 15 // Digital pin connected to the DHT sensor
+////#define DHTPIN 15 // Digital pin connected to the DHT sensor
 
-#define DHTTYPE DHT11   // DHT 11
+////#define DHTTYPE DHT11   // DHT 11
 
 // NEW TELEINFO
 #define PUSH_BUTTON     0
@@ -33,7 +33,7 @@
 BluetoothSerial SerialBT;
 //int counter = 0;
 
-DHT dht(DHTPIN, DHTTYPE);
+////DHT dht(DHTPIN, DHTTYPE);
 
 // New TeleInfo
 TInfo tinfo; // Teleinfo object
@@ -119,7 +119,7 @@ void sendJSON(ValueList * me, boolean all)
         Serial.print(F("\"")) ;
         chaine=chaine+"\"";
         Serial.print(me->name) ;
-        chaine=chaine+me->name;
+        chaine=chaine + me->name;
         Serial.print(F("\":")) ;
         chaine=chaine+"\":";
 
@@ -141,21 +141,27 @@ void sendJSON(ValueList * me, boolean all)
             Serial.print(F("\"")) ;
             chaine=chaine+"\"";
             Serial.print(me->value) ;
-            chaine=chaine+me->value;
+            chaine=chaine + me->value;
             Serial.print(F("\"")) ;
             chaine=chaine+"\"";
           }
           // this will remove leading zero on numbers
           else
             Serial.print(atol(me->value));
-            //chaine=chaine+atol(me->value);
+            chaine=chaine+atol(me->value);
         }
       }
     }
    // Json end
-   Serial.println(F("}")) ;
-   Serial.println(chaine) ;
+   Serial.println(F("}"));
+   chaine="}";
+
+   Serial.println("we are printing content of chaine");
+   Serial.println(chaine);
+   SerialBT.println(chaine);
+   LoRa.beginPacket();
    LoRa.print(chaine);
+   LoRa.endPacket();
   }
 }
 
@@ -181,6 +187,7 @@ void NewFrame(ValueList * me)
   
   // DEBUG
   Serial.println("NewFrame");
+  SerialBT.println("NewFrame");
   // Envoyer les valeurs uniquement si demandé
   if (fulldata)
     sendJSON(me, true);
@@ -224,8 +231,8 @@ SETUP
 
 ====================================================================== */
 void setup() {
-  // Init DHT Sensor
-  dht.begin();
+////  // Init DHT Sensor
+////  dht.begin();
 
   //initialize Serial Monitor
   Serial.begin(115200);
@@ -256,6 +263,8 @@ void setup() {
   // Already done above Serial.begin(115200);
   Serial.println(F("\r\n\r\n=============="));
   Serial.println(F("Teleinfo"));
+  SerialBT.println(F("\r\n\r\n=============="));
+  SerialBT.println(F("Teleinfo"));
 
 
   // Teleinfo enable pin
@@ -263,16 +272,19 @@ void setup() {
   pinMode(TIC_ENABLE_PIN, OUTPUT);
   digitalWrite(TIC_ENABLE_PIN, HIGH);
   Serial.printf_P(PSTR("Enable TIC on  GPIO%d\r\n"), TIC_ENABLE_PIN);
+  SerialBT.printf_P(PSTR("Enable TIC on  GPIO%d\r\n"), TIC_ENABLE_PIN);
   #endif
 
   // Button
   #ifdef PUSH_BUTTON
   pinMode(PUSH_BUTTON, INPUT_PULLUP);
   Serial.printf_P(PSTR("Enable Button on GPIO=%d\r\n"), PUSH_BUTTON);
+  SerialBT.printf_P(PSTR("Enable Button on GPIO=%d\r\n"), PUSH_BUTTON);
   #endif
 
 
   Serial.printf_P(PSTR("TIC RX = GPIO=%d\r\n"), TIC_RX_PIN);
+  SerialBT.printf_P(PSTR("TIC RX = GPIO=%d\r\n"), TIC_RX_PIN);
   Serial1.begin(1200, SERIAL_7E1, TIC_RX_PIN);
   pinMode(TIC_RX_PIN, INPUT_PULLUP);
 
@@ -293,29 +305,30 @@ LOOP
 ====================================================================== */
 void loop() {
 
-  // Wait a few seconds between measurements.
-  //delay(2000);
+////  // Wait a few seconds between measurements.
+////  //delay(2000);
 
-  // Reading temperature or humidity takes about 250 milliseconds!
-  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-  // Read temperature as Celsius (the default)
-  float t = dht.readTemperature();
+////  // Reading temperature or humidity takes about 250 milliseconds!
+////  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+////  // Read temperature as Celsius (the default)
+////  float t = dht.readTemperature();
 
   // NEW TELEINFO
   static char c;
   static unsigned long previousMillis = 0;
   unsigned long currentMillis = millis();
+  //SerialBT.println("On est dans la loop");
   // END - NEWTELEINFO
 
-  // Check if any reads failed and exit early (to try again).
-  if (isnan(t)) {
-    Serial.println(F("Failed to read from DHT sensor!"));
-    return;
-  }
+////  // Check if any reads failed and exit early (to try again).
+////  if (isnan(t)) {
+////    Serial.println(F("Failed to read from DHT sensor!"));
+////    return;
+////  }
 
-  //Serial.print(F("Temperature: "));
-  //Serial.print(t);
-  //Serial.println(F("°C "));
+////  Serial.print(F("Temperature: "));
+////  Serial.print(t);
+////  Serial.println(F("°C "));
 
   // NEW TELEINFO
   // Avons nous recu un ticker de seconde?
@@ -330,6 +343,7 @@ void loop() {
       fulldata = true;
   }
 
+// DEBUG
 // On a reçu un caractère ?
   if ( Serial1.available() ) {
     //  Serial.println("On a un serial1 available");
@@ -341,10 +355,14 @@ void loop() {
 
     // L'affcher dans la console
     if (c!=TINFO_STX && c!=TINFO_ETX) {
-      Serial.print(c);
+//      Serial.print(c);
+      SerialBT.print(c);
+// NOTE , JSON message is printed only every minutes, above line are there 
+// only for debuging purpose to see what we are receiveing char by char
+
     }
   }
-  //DEBUG
+  //DEBUG2
       //z=15;//z=c
       //Serial.print("Valeur de C: ");
       //Serial.print(c);
@@ -352,20 +370,39 @@ void loop() {
       //Serial.println("Envoi de C via LoRa");
       //LoRa.print("hello ");
       //LoRa.print(counter);
-      LoRa.beginPacket();
-      LoRa.println(c);
-      LoRa.endPacket();
+  // END DEBUG2
+//      LoRa.beginPacket();
+//      LoRa.print(c);
+//      LoRa.endPacket();
   //END - NEW TELEINFO
+// END DEBUG
 
-
-  //Send LoRa packet to receiver
-  LoRa.beginPacket();
-  LoRa.println(t);
-  LoRa.endPacket();
+////  //Send LoRa packet to receiver
+////  LoRa.beginPacket();
+////  LoRa.println(t);
+////  LoRa.endPacket();
 
   if (currentMillis - previousMillis > 1000 ) {
     // save the last time you blinked the LED 
     previousMillis = currentMillis;
     tick1sec = true;
   }
+/*
+  // DEBUG3
+  String machaine="";
+  String machaine2="";
+  String resul_chaine="";
+  machaine="toto";
+  machaine2="titi";
+  resul_chaine= machaine + "  " + machaine2;
+  Serial.println(machaine);
+  Serial.println(machaine2);
+  Serial.print("Concat: ");
+  Serial.println(resul_chaine);
+  SerialBT.println(machaine);
+  SerialBT.println(machaine2);
+  SerialBT.println("Concat: ");
+  SerialBT.println(resul_chaine);
+  //END DEBUG3
+  */
 }
