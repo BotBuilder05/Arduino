@@ -24,12 +24,11 @@ const char* password = "valentineaudreyxavier"; // Your personal network passwor
 // End WiFi
 
 // MQTT
-//const char* mqtt_server = "ks2g.tuxalp.com";  // IP of the MQTT broker
 const char* mqtt_server = "ks2g.tuxalp.com";  // IP of the MQTT broker
 const char* mqtt_username = "solarmon"; // MQTT username
 const char* mqtt_password = "MonSolar@2021"; // MQTT password
 const char* clientID = "solarESP1"; // MQTT client ID
-const char* humidity_topic = "test";
+const char* topic = "test";
 // End MQTT
 
 // Initialise Blustooth
@@ -43,23 +42,6 @@ PubSubClient client(mqtt_server, 1883, wifiClient);
 
 // Custom function to connet to the MQTT broker via WiFi
 void connect_MQTT(){
-////  Serial.print("Connecting to ");
-////  Serial.println(ssid);
-
-  // Connect to the WiFi
-////  WiFi.begin(ssid, password);
-
-  // Wait until the connection has been confirmed before continuing
-////  while (WiFi.status() != WL_CONNECTED) {
-////    delay(500);
-    //Serial.print(".");
-////  }
-
-  // Debugging - Output the IP Address of the ESP8266
-////  Serial.println("WiFi connected");
-////  Serial.print("IP address: ");
-////  Serial.println(WiFi.localIP());
-
   // Connect to MQTT Broker
   // client.connect returns a boolean value to let us know if the connection was successful.
   // If the connection is failing, make sure you are using the correct MQTT Username and Password (Setup Earlier in the Instructable)
@@ -71,8 +53,6 @@ void connect_MQTT(){
     Serial.println(client.state());
   }
 }
-
-
 
 void setup() {
   //initialize Serial Monitor
@@ -122,16 +102,13 @@ void setup() {
  
   // 1883 is the listener port for the Broker
   //PubSubClient client(mqtt_server, 1883, wifiClient);
-  connect_MQTT();
+  //connect_MQTT();
 }
 
 void loop() {
   // try to parse packet
   int packetSize = LoRa.parsePacket();
   String LoRaData = "";
-/*  Serial.print("Loop");
-  Serial.print(".");
-  Serial.println(packetSize);*/
   if (packetSize) {
     // received a packet
     Serial.print("Received packet ");
@@ -140,23 +117,26 @@ void loop() {
       Serial.println("mqtt_reconnect");
       connect_MQTT();
     }
-  client.loop();
+    client.loop();
 
     // read packet
     while (LoRa.available()) {
-      //String LoRaData = LoRa.readString();
       LoRaData = LoRa.readString();
-      //LoRaData = "DATA";
       Serial.print("Data: "); 
       Serial.println(LoRaData); 
+      Serial.println(LoRaData.indexOf('UPTIME'));
+
     }
     // print RSSI of packet
-    Serial.print(" with RSSI ");
-    Serial.println(LoRa.packetRssi());
+    //Serial.print(" with RSSI ");
+    //Serial.println(LoRa.packetRssi());
         //https://diyi0t.com/microcontroller-to-raspberry-pi-wifi-mqtt-communication/
         // PUBLISH to the MQTT Broker (topic = Humidity, defined at the beginning)
-        //if (client.publish(humidity_topic, "TEST1")) {
-        if (client.publish(humidity_topic, LoRaData.c_str())) {
+        //if (client.publish(topic, "TEST1")) {
+      if (LoRaData.indexOf("_UPTIME") != -1){
+        Serial.print("FOUND UPTIME: "); 
+        Serial.println(LoRaData); 
+        if (client.publish(topic, LoRaData.c_str(),true)) {
             Serial.println("Message sent to mosquitto over Wifi!");
         }
         // Again, client.publish will return a boolean value depending on whether it succeded or not.
@@ -165,14 +145,17 @@ void loop() {
             Serial.println("Message failed to send. Reconnecting to MQTT Broker and trying again");
             client.connect(clientID, mqtt_username, mqtt_password);
             delay(10); // This delay ensures that client.publish doesn't clash with the client.connect call
-            //client.publish(humidity_topic, "TEST2");
-            client.publish(humidity_topic, LoRaData.c_str());
-            //client.publish(humidity_topic, LoRaData.c_str());
+            client.publish(topic, LoRaData.c_str(),true);
         }
-        client.disconnect();  // disconnect from the MQTT broker
-        //delay(1000*60);       // print new values every 1 Minute
+      }
+      else {
+        Serial.println("UPTIME NOT FOUND!!! "); 
+      }
+      client.disconnect();  // disconnect from the MQTT broker
+      Serial.println("DISCONNECT from MQTT "); 
   }
   else {
       LoRaData = "NO_DATA";
   }
+  client.disconnect();  // disconnect from the MQTT broker
 }
