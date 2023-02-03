@@ -6,17 +6,12 @@
 #include "BluetoothSerial.h"
 #include <SPI.h>
 #include <LoRa.h>
-////#include "DHT.h"
-
 #include <LibTeleinfo.h>
 
 //define the pins used by the transceiver module
 #define ss 5
 #define rst 14
 #define dio0 2
-////#define DHTPIN 15 // Digital pin connected to the DHT sensor
-
-////#define DHTTYPE DHT11   // DHT 11
 
 // NEW TELEINFO
 #define PUSH_BUTTON     0
@@ -25,15 +20,10 @@
 #define TIC_RX_PIN      16
 #define TIC_TX_PIN      17
 
-#define RGB_LED_PIN     2
-
+#define RGB_LED_PIN     22
 // END NEW TELEINFO
 
-
 BluetoothSerial SerialBT;
-//int counter = 0;
-
-////DHT dht(DHTPIN, DHTTYPE);
 
 // New TeleInfo
 TInfo tinfo; // Teleinfo object
@@ -81,7 +71,6 @@ Comments: -
 void sendJSON(ValueList * me, boolean all)
 {
   bool firstdata = true;
-  char mqttmsg[128];
   String chaine = "";
 
   // DEBUG
@@ -107,14 +96,18 @@ void sendJSON(ValueList * me, boolean all)
 
       // uniquement sur les nouvelles valeurs ou celles modifiées
       // sauf si explicitement demandé toutes
+      // For all and modified
       if ( all || ( me->flags & (TINFO_FLAGS_UPDATED | TINFO_FLAGS_ADDED) ) )
+      // For all only
+      //if ( all )
       {
         // First elemement, no comma
         if (firstdata)
           firstdata = false;
-        else
+        else {
           Serial.print(F(", ")) ;
-          chaine=chaine+", ";
+          chaine=chaine+",";
+        }
 
         Serial.print(F("\"")) ;
         chaine=chaine+"\"";
@@ -146,15 +139,16 @@ void sendJSON(ValueList * me, boolean all)
             chaine=chaine+"\"";
           }
           // this will remove leading zero on numbers
-          else
+          else {
             Serial.print(atol(me->value));
             chaine=chaine+atol(me->value);
+          }
         }
       }
-    }
+   }
    // Json end
    Serial.println(F("}"));
-   chaine="}";
+   chaine=chaine+"}";
 
    Serial.println("we are printing content of chaine");
    Serial.println(chaine);
@@ -176,12 +170,9 @@ void NewFrame(ValueList * me)
 {
   // Start short led blink
   #ifdef LED_RED_PIN
-  //digitalWrite(LED_RED_PIN, LOW);
+    digitalWrite(LED_RED_PIN, LOW);
   #endif
-  #ifdef RGB_LED_PIN
-////  strip.SetPixelColor(0, red);
-////  strip.Show();
-  #endif
+
   blinkLed = millis();
   blinkDelay = 50; // 50ms
   
@@ -206,12 +197,8 @@ Comments: it's called only if one data in the frame is different than
 void UpdatedFrame(ValueList * me)
 {
   // Start long led blink
-  #ifdef LED_BLU_PIN
-  //digitalWrite(LED_BLU_PIN, LOW);
-  #endif
-  #ifdef RGB_LED_PIN
-////  strip.SetPixelColor(0, blue);
-////  strip.Show();
+  #ifdef LED_RED_PIN
+    digitalWrite(LED_RED_PIN, LOW);
   #endif
 
   blinkLed = millis();
@@ -308,29 +295,11 @@ void loop() {
 ////  // Wait a few seconds between measurements.
 ////  //delay(2000);
 
-////  // Reading temperature or humidity takes about 250 milliseconds!
-////  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-////  // Read temperature as Celsius (the default)
-////  float t = dht.readTemperature();
-
   // NEW TELEINFO
   static char c;
   static unsigned long previousMillis = 0;
   unsigned long currentMillis = millis();
-  //SerialBT.println("On est dans la loop");
-  // END - NEWTELEINFO
 
-////  // Check if any reads failed and exit early (to try again).
-////  if (isnan(t)) {
-////    Serial.println(F("Failed to read from DHT sensor!"));
-////    return;
-////  }
-
-////  Serial.print(F("Temperature: "));
-////  Serial.print(t);
-////  Serial.println(F("°C "));
-
-  // NEW TELEINFO
   // Avons nous recu un ticker de seconde?
   if (tick1sec)
   {
@@ -346,7 +315,6 @@ void loop() {
 // DEBUG
 // On a reçu un caractère ?
   if ( Serial1.available() ) {
-    //  Serial.println("On a un serial1 available");
     // Le lire
     c = Serial1.read();
 
@@ -357,52 +325,16 @@ void loop() {
     if (c!=TINFO_STX && c!=TINFO_ETX) {
 //      Serial.print(c);
       SerialBT.print(c);
-// NOTE , JSON message is printed only every minutes, above line are there 
-// only for debuging purpose to see what we are receiveing char by char
-
     }
   }
-  //DEBUG2
-      //z=15;//z=c
-      //Serial.print("Valeur de C: ");
-      //Serial.print(c);
-      //Serial.print();
-      //Serial.println("Envoi de C via LoRa");
-      //LoRa.print("hello ");
-      //LoRa.print(counter);
-  // END DEBUG2
 //      LoRa.beginPacket();
 //      LoRa.print(c);
 //      LoRa.endPacket();
-  //END - NEW TELEINFO
 // END DEBUG
-
-////  //Send LoRa packet to receiver
-////  LoRa.beginPacket();
-////  LoRa.println(t);
-////  LoRa.endPacket();
 
   if (currentMillis - previousMillis > 1000 ) {
     // save the last time you blinked the LED 
     previousMillis = currentMillis;
     tick1sec = true;
   }
-/*
-  // DEBUG3
-  String machaine="";
-  String machaine2="";
-  String resul_chaine="";
-  machaine="toto";
-  machaine2="titi";
-  resul_chaine= machaine + "  " + machaine2;
-  Serial.println(machaine);
-  Serial.println(machaine2);
-  Serial.print("Concat: ");
-  Serial.println(resul_chaine);
-  SerialBT.println(machaine);
-  SerialBT.println(machaine2);
-  SerialBT.println("Concat: ");
-  SerialBT.println(resul_chaine);
-  //END DEBUG3
-  */
 }
