@@ -17,17 +17,27 @@
 #define dio0 2
 
 // WiFi
-const char* ssid = "velours";                 // Your personal network SSID
-const char* password = "valentineaudreyxavier"; // Your personal network password
-//const char* ssid = "TuxAlp2";                 // Your personal network SSID
-//const char* password = "zomu6637"; // Your personal network password
+//const char* ssid = "velours";                 // Your personal network SSID
+//const char* password = "valentineaudreyxavier"; // Your personal network password
+const char* ssid = "TuxAlp2";                 // Your personal network SSID
+const char* password = "zomu6637"; // Your personal network password
 // End WiFi
+
 
 // MQTT
 const char* mqtt_server = "ks2g.tuxalp.com";  // IP of the MQTT broker
 const char* mqtt_username = "solarmon"; // MQTT username
 const char* mqtt_password = "MonSolar@2021"; // MQTT password
 const char* clientID = "solarESP1"; // MQTT client ID
+
+// See if we can get the CPTID/ADCO from LoRa data to set topic dynamically
+// TEST
+const char* myvar="{\"_UPTIME\":28739,\"ADCO\":2147483647,\"OPTARIF\":\"BASE\",\"ISOUSC\":30,\"BASE\":37619556,\"PTEC\":\"TH..\",\"IINST\":2,\"IMAX\":90,\"PAPP\":510,\"HHPHC\":\"A\",\"MOTDETAT\":0}";
+#include <iostream>
+using namespace std;
+#include<string>
+// END TEST
+
 const char* topic = "test";
 // End MQTT
 
@@ -52,6 +62,45 @@ void connect_MQTT(){
     Serial.print("Connection to MQTT Broker failed... Status code: ");
     Serial.println(client.state());
   }
+}
+
+string printString(string str, char ch, int count)
+{
+    int occ = 0, i;
+
+    // If given count is 0
+    // print the given string and return
+    if (count == 0) {
+        cout << str;
+        return str;
+    }
+
+    // Start traversing the string
+    for (i = 0; i < str.length(); i++) {
+
+        // Increment occ if current char is equal
+        // to given character
+        if (str[i] == ch)
+            occ++;
+
+        // Break the loop if given character has
+        // been occurred given no. of times
+        if (occ == count)
+            break;
+    }
+
+    // Print the string after the occurrence
+    // of given character given no. of times
+    if (i < str.length() - 1) {
+        //cout << i << endl;
+        cout << str.substr(i +3,10) << endl;
+        return str.substr(i +3,10);
+        //cout << str.substr(20,10) << endl;
+        //cout << str.substr(i + 2, str.length() - (i + 1));
+    }
+    // Otherwise string is empty
+    else
+        cout << "Empty string";
 }
 
 void setup() {
@@ -99,7 +148,30 @@ void setup() {
   Serial.println("WiFi connected");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
- 
+
+// TEST
+
+
+  Serial.print("MyVar: ");
+  Serial.println(myvar);
+  Serial.print("My ACDO: ");
+  string mystring="";
+  mystring=printString(myvar, 'O', 1);
+
+  topic=mystring.c_str();
+
+  Serial.print("Topic: ");
+  Serial.println(topic);
+
+        if (!client.connected()) {
+          Serial.println("mqtt_reconnect");
+          connect_MQTT();
+        }
+        client.loop();
+        if (client.publish(topic, myvar,true)) {
+            Serial.println("Message sent to mosquitto over Wifi!");
+        }
+// ENDTEST
   // 1883 is the listener port for the Broker
   //PubSubClient client(mqtt_server, 1883, wifiClient);
   //connect_MQTT();
@@ -109,15 +181,11 @@ void loop() {
   // try to parse packet
   int packetSize = LoRa.parsePacket();
   String LoRaData = "";
+//  Serial.print("PacketSize: ");
+//  Serial.println(packetSize);
   if (packetSize) {
     // received a packet
     Serial.print("Received packet ");
-    if (!client.connected()) {
-      Serial.print(" : ");
-      Serial.println("mqtt_reconnect");
-      connect_MQTT();
-    }
-    client.loop();
 
     // read packet
     while (LoRa.available()) {
@@ -125,7 +193,6 @@ void loop() {
       Serial.print("Data: "); 
       Serial.println(LoRaData); 
       Serial.println(LoRaData.indexOf('UPTIME'));
-
     }
     // print RSSI of packet
     //Serial.print(" with RSSI ");
@@ -136,6 +203,12 @@ void loop() {
       if (LoRaData.indexOf("_UPTIME") != -1){
         Serial.print("FOUND UPTIME: "); 
         Serial.println(LoRaData); 
+        if (!client.connected()) {
+          Serial.println("mqtt_reconnect");
+          connect_MQTT();
+        }
+        client.loop();
+
         if (client.publish(topic, LoRaData.c_str(),true)) {
             Serial.println("Message sent to mosquitto over Wifi!");
         }
@@ -143,19 +216,25 @@ void loop() {
         // If the message failed to send, we will try again, as the connection may have broken.
         else {
             Serial.println("Message failed to send. Reconnecting to MQTT Broker and trying again");
-            client.connect(clientID, mqtt_username, mqtt_password);
+            //client.connect(clientID, mqtt_username, mqtt_password);
+            connect_MQTT();
             delay(10); // This delay ensures that client.publish doesn't clash with the client.connect call
-            client.publish(topic, LoRaData.c_str(),true);
+            // We should set an infinite loop to be sure message will be sent
+            if (client.publish(topic, LoRaData.c_str(),true)) {
+                Serial.println("Message send to mosquitto over Wifi at second try!!");
+            }
+            else {
+                Serial.println("Message lost");
+            }
         }
+        client.disconnect();  // disconnect from the MQTT broker
+        Serial.println("DISCONNECT from MQTT "); 
       }
       else {
-        Serial.println("UPTIME NOT FOUND!!! "); 
+        Serial.println("UPTIME NOT FOUND!!! No MQTT connection needed"); 
       }
-      client.disconnect();  // disconnect from the MQTT broker
-      Serial.println("DISCONNECT from MQTT "); 
   }
   else {
       LoRaData = "NO_DATA";
   }
-  client.disconnect();  // disconnect from the MQTT broker
 }
